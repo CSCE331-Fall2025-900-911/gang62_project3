@@ -32,6 +32,35 @@ DB_PASSWORD=your_database_password
 DB_PORT=5432
 ```
 
+## Database Setup
+
+To populate the database with initial data:
+
+1. **Generate CSV data files:**
+   ```bash
+   python3 scripts/generate_database.py
+   ```
+   This generates data for orders, tickets, and inventory.
+
+2. **Create database tables:**
+   ```bash
+   make schema
+   ```
+   Creates all necessary tables in the database.
+
+3. **Load CSV data:**
+   ```bash
+   make seed
+   ```
+   Imports all generated data into the database.
+
+**Or run everything at once:**
+```bash
+python3 scripts/generate_database.py && make rebuild
+```
+
+The `make rebuild` command runs schema + seed automatically.
+
 ## Usage
 
 Run the example script:

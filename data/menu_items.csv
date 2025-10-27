@@ -1,0 +1,33 @@
+﻿menu_item_id,name,base_price_cents
+1,classic tea (black),465
+2,classic tea (green),465
+3,classic tea (oolong),465
+4,honey tea (black),485
+5,honey tea (green),485
+6,honey tea (oolong),485
+7,honey pearl milk tea (black),600
+8,honey pearl milk tea (green),600
+9,honey pearl milk tea (oolong),600
+10,mango green milk tea,650
+11,coffee creama,650
+12,thai pearl milk tea,625
+13,classic pearl milk tea (black),580
+14,classic pearl milk tea (green),580
+15,classic pearl milk tea (oolong),580
+16,taro pearl milk tea,625
+17,peach tea w/ honey jelly,625
+18,honey lemonade,520
+19,mango green tea,580
+20,mango & passion fruit tea,625
+21,berry lychee burst,625
+22,matcha pearl milk tea,650
+23,mango matcha fresh milk,650
+24,strawberry matcha fresh milk,650
+25,matcha fresh milk,625
+26,tiger boba,650
+27,halo halo,695
+28,straw,000
+29,napkin,000
+30,small cup,000
+31,medium cup,000
+32,bag,000
