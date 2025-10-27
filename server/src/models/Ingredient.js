@@ -19,12 +19,12 @@ class Ingredient extends DatabaseConnection {
      * 
      * @param {number} id 
      * @param {string} name 
-     * @param {number} quantityPerUnit 
      * @param {number} stock 
+     * @param {number} quantityPerUnit 
      * 
      * @author Jonah Coffelt
      */
-    constructor(id = null, name = null, quantityPerUnit = null, stock = null) {
+    constructor(id = null, name = null, stock = null, quantityPerUnit = null) {
         super();
         this.id = id;
         this.name = name;
@@ -49,7 +49,6 @@ class Ingredient extends DatabaseConnection {
             text: 'SELECT * FROM ingredients WHERE id = $1;',
             values: [id],
         };
-
         const result = await instance.runQuery(query);
 
         if (result.length === 0) {
@@ -60,8 +59,14 @@ class Ingredient extends DatabaseConnection {
 
         instance.id = id;
         instance.name = item.name;
-        instance.stock = item.stock;
         instance.quantityPerUnit = item.quantityPerUnit;
+
+        const stockQuery = {
+            text: 'SELECT stock FROM inventory WHERE ingredient_id = $1;',
+            values: [id],
+        };
+        const stockResult = await instance.runQuery(stockQuery);
+        instance.stock = stockResult[0].stock;
 
         return instance;
     }
@@ -138,4 +143,3 @@ class Ingredient extends DatabaseConnection {
 }
 
 module.exports = Ingredient;
-

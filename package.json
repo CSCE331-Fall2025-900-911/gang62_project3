@@ -7,5 +7,23 @@
     "start": "cd server && node src/app.js",
     "test": "cd server && node src/app.js",
     "install-server": "cd server && npm install"
+  },
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CSCE331-Fall2025-900-911/gang62_project3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CSCE331-Fall2025-900-911/gang62_project3/issues"
+  },
+  "homepage": "https://github.com/CSCE331-Fall2025-900-911/gang62_project3#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "pg": "^8.16.3"
   }
 }

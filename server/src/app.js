@@ -1,4 +1,6 @@
 const Menu = require('./models/Menu');
+const Inventory = require('./models/Inventory');
+
 
 (async () => {
     console.log('=== Menu ===\n');
@@ -28,6 +30,20 @@ const Menu = require('./models/Menu');
     console.log('\nUpdated Menu:');
     menu.getMenuItems().forEach(item => {
         console.log(`  - ${item.getName()}: $${item.getPrice().toFixed(2)}`);
+    });
+
+    // Create an Inventory Item
+    const inventory = new Inventory();
+
+    // Load all ingredients from database
+    console.log('Loading inventory from database...');
+    await inventory.load();
+
+    // Display all ingredients
+    console.log('\nAll Ingredients:');
+    const ingredients = inventory.getIngredients();
+    ingredients.forEach(item => {
+        console.log(`  - ${item.getName()}: (Stock: ${item.getStock()}) (ID: ${item.getID()})`);
     });
 
     // Close database connection
