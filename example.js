@@ -1,26 +1,35 @@
-const MenuItem = require('./database/menu_item');
+const Menu = require('./database/menu');
 
 (async () => {
-    console.log('=== MenuItem Usage Patterns ===\n');
+    console.log('=== Menu ===\n');
 
-    // Pattern 1: Factory Method (Recommended) - Loads from database
-    console.log('Pattern 1: Factory Method');
-    const item1 = await MenuItem.create(1);
-    console.log(`Item: ${item1.name}, Price: $${item1.price.toFixed(2)}`);
-    console.log(`ID: ${item1.getID()}\n`);
+    // Create a Menu instance
+    const menu = new Menu();
 
-    // Pattern 2: Direct Instantiation - Use when you have data
-    console.log('Pattern 2: Direct Instantiation');
-    const item2 = new MenuItem(2, 'Dust', 14.99);
-    console.log(`Item: ${item2.getName()}, Price: $${item2.getPrice().toFixed(2)}`);
-    console.log(`ID: ${item2.getID()}\n`);
+    // Load all menu items from database
+    console.log('Loading menu items from database...');
+    await menu.load();
+    
+    // Display all menu items
+    console.log('\nAll Menu Items:');
+    const menuItems = menu.getMenuItems();
+    menuItems.forEach(item => {
+        console.log(`  - ${item.getName()}: $${item.getPrice().toFixed(2)} (ID: ${item.getID()})`);
+    });
 
-    // Updating values
-    console.log('Updating Values:');
-    await item1.setName('Dustier Dust');
-    await item1.setPrice(11.99);
-    console.log(`Updated - Name: ${item1.getName()}, Price: $${item1.getPrice().toFixed(2)}\n`);
+    // Add a new menu item
+    console.log('\nAdding new menu item...');
+    const newItem = await menu.addMenuItem('Dust', 15.99);
+    if (newItem) {
+        console.log(`Added: ${newItem.getName()} for $${newItem.getPrice().toFixed(2)}`);
+    }
 
-    // Close connections
-    await item1.close();
+    // Display updated menu
+    console.log('\nUpdated Menu:');
+    menu.getMenuItems().forEach(item => {
+        console.log(`  - ${item.getName()}: $${item.getPrice().toFixed(2)}`);
+    });
+
+    // Close database connection
+    await menu.close();
 })();

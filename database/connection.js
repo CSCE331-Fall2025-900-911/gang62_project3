@@ -25,8 +25,9 @@ class DatabaseConnection {
 
     /**
      * Executes a SQL query against the database and returns the results.
+     * Supports both string queries and parameterized queries as objects.
      * 
-     * @param {string} query - The SQL query to execute
+     * @param {string|Object} query - The SQL query to execute (string) or parameterized query object {text, values}
      * @returns {Promise<Array>} Promise that resolves to an array of result rows
      * @throws {Error} Throws an error if the query execution fails
      * @author Jonah Coffelt

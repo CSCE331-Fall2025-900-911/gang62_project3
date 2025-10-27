@@ -4,23 +4,22 @@ const DatabaseConnection = require('./connection');
  * Class representing a menu item retrieved from the database.
  * Extends DatabaseConnection to provide database query functionality.
  * 
- * The MenuItem class might seem complicating so it deserves an explanation. It supports two usage patterns:
+ * MenuItem instances are typically created via the Menu class, which loads
+ * all menu items from the database. Individual items can also be created
+ * using the factory method `MenuItem.create(id)`.
  * 
- * 1. **Factory Pattern (Recommended)**: Use `MenuItem.create(id)` to load from database
- *    @example
- *    const item = await MenuItem.create(1);
- *    console.log(item.name); // Gets name from database
- * 
- * 2. **Direct Instantiation**: Create with known data
- *    @example
- *    const item = new MenuItem(1, "Burger", 9.99);
- *    console.log(item.name); // "Burger"
- * 
- * Updating values after instantiation:
  * @example
+ * // Via Menu class (recommended)
+ * const menu = new Menu();
+ * await menu.load();
+ * const items = menu.getMenuItems();
+ * 
+ * // Via factory method
  * const item = await MenuItem.create(1);
- * await item.setName("New Name"); // Updates database
- * await item.setPrice(12.99); // Updates database
+ * 
+ * // Updating values
+ * await item.setName("New Name");
+ * await item.setPrice(12.99);
  * 
  * @class MenuItem
  * @extends {DatabaseConnection}
@@ -28,15 +27,14 @@ const DatabaseConnection = require('./connection');
  */
 class MenuItem extends DatabaseConnection {
     /**
-     * Constructs a new MenuItem instance with provided data.
+     * Constructs a new MenuItem instance.
      * 
-     * @param {number} id - The unique identifier of the menu item in the database
+     * @param {number} id - The unique identifier of the menu item
      * @param {string} name - The menu item's name
      * @param {number} price - The menu item's price in dollars
-     * @throws {Error} If database connection fails
-     * @author Michael Nguyen
+     * @author Jonah Coffelt
      */
-    constructor(id, name, price) {
+    constructor(id = null, name = null, price = null) {
         super();
         this.id = id;
         this.name = name;
@@ -54,7 +52,7 @@ class MenuItem extends DatabaseConnection {
      * @author Jonah Coffelt
      */
     static async create(id) {
-        const instance = new MenuItem(null, null, null);
+        const instance = new MenuItem();
         
         const query = {
             text: 'SELECT * FROM menu_items WHERE id = $1;', // id = $1 refers to the first element in the values array
