@@ -1,11 +1,12 @@
 const Menu = require('./models/Menu');
 const Inventory = require('./models/Inventory');
+const Staff = require('./models/Staff');
 
 
 (async () => {
-    console.log('=== Menu ===\n');
-
+    
     // Create a Menu instance
+    console.log('\n\n=== Menu ===\n');
     const menu = new Menu();
 
     // Load all menu items from database
@@ -34,6 +35,7 @@ const Inventory = require('./models/Inventory');
 
 
     // Create an Inventory Item
+    console.log('\n\n=== Inventory ===\n');
     const inventory = new Inventory();
 
     // Load all ingredients from database
@@ -60,7 +62,38 @@ const Inventory = require('./models/Inventory');
         console.log(`  - ${ingredient.getName()}: (Stock: ${ingredient.getStock()}) (ID: ${ingredient.getID()})`);
     });
 
+
+    // Create a Staff object
+    console.log('\n\n=== Staff ===\n');
+    const staff = new Staff();
+
+    // Load all employees
+    console.log('Loading employees from database...');
+    await staff.load();
+
+    // Display all employees
+    console.log('\nAll Employees:');
+    const employees = staff.getEmployees();
+    employees.forEach(employee => {
+        console.log(`  - ${employee.getName()}: (ID: ${employee.getID()})`);
+    });
+
+    // Add a new employee
+    console.log('\nAdding new employee...');
+    const newEmployee = await staff.addEmployee('Jonny Long Toe')
+    if (newEmployee) {
+        console.log(`Added: ${newEmployee.getName()}: (ID: ${newEmployee.getID()})}`);
+    }
+
+    // Display updated employees
+    console.log('\nUpdated Employees:');
+    employees.forEach(employee => {
+        console.log(`  - ${employee.getName()}: (ID: ${employee.getID()})`);
+    });
+
     // Close database connection
     await menu.close();
+    await inventory.close();
+    await staff.close();
 })();
 
