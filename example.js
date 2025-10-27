@@ -1,4 +1,4 @@
-const MenuItem = require('./MenuItem');
+const MenuItem = require('./database/menu_item');
 
 (async () => {
     const menuItem = await MenuItem.create(1);

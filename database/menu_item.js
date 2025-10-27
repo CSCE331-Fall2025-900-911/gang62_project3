@@ -1,4 +1,4 @@
-const DatabaseConnection = require('./DatabaseConnection');
+const DatabaseConnection = require('./connection');
 
 class MenuItem extends DatabaseConnection {
     constructor(id, name, price) {
