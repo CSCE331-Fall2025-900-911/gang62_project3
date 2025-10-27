@@ -8,6 +8,28 @@ A Node.js application
 - PostgreSQL database
 - npm (comes with Node.js)
 
+## Project Structure
+
+```
+gang62_project3/
+├── server/                  # Backend (Node.js + PostgreSQL)
+│   ├── src/
+│   │   ├── config/          # DB configuration
+│   │   ├── models/          # Database models
+│   │   ├── routes/          # (Future) Express route handlers
+│   │   ├── controllers/     # (Future) Controller logic
+│   │   ├── middleware/      # (Future) Auth, logging, etc.
+│   │   ├── services/        # (Future) Business logic
+│   │   └── app.js           # Entry point
+│   └── package.json         # Server dependencies
+├── data/                    # CSV data files
+├── scripts/                 # Python scripts for data generation
+├── docs/                    # Documentation
+├── Makefile                 # Database setup commands
+├── .env                     # Environment variables (not in git)
+└── README.md
+```
+
 ## Installation
 
 1. Clone the repository:
@@ -18,7 +40,7 @@ cd gang62_project3
 
 2. Install dependencies:
 ```bash
-npm install
+npm run install-server
 ```
 
 3. Set up environment variables:
@@ -65,12 +87,12 @@ The `make rebuild` command runs schema + seed automatically.
 
 Run the example script:
 ```bash
-node example.js
+npm start
 ```
 
-Or use npm:
+Or directly:
 ```bash
-npm start
+cd server && node src/app.js
 ```
 
 ## Development Guidelines

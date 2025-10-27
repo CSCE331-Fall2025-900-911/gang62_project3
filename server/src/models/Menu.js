@@ -1,5 +1,5 @@
-const DatabaseConnection = require('./connection');
-const MenuItem = require('./menu_item');
+const DatabaseConnection = require('../config/db');
+const MenuItem = require('./MenuItem');
 
 /**
  * Manages the menu of items in the Point of Sale system.
@@ -88,3 +88,4 @@ class Menu extends DatabaseConnection {
 }
 
 module.exports = Menu;
+

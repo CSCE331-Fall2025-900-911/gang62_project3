@@ -1,4 +1,4 @@
-const Menu = require('./database/menu');
+const Menu = require('./models/Menu');
 
 (async () => {
     console.log('=== Menu ===\n');
@@ -33,3 +33,4 @@ const Menu = require('./database/menu');
     // Close database connection
     await menu.close();
 })();
+

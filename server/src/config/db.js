@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../../.env') });
 const { Pool } = require('pg');
 
 /**
@@ -49,3 +49,4 @@ class DatabaseConnection {
 }
 
 module.exports = DatabaseConnection;
+

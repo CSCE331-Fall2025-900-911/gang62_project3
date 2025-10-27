@@ -1,4 +1,4 @@
-const DatabaseConnection = require('./connection');
+const DatabaseConnection = require('../config/db');
 
 /**
  * Class representing a menu item retrieved from the database.
@@ -140,3 +140,4 @@ class MenuItem extends DatabaseConnection {
 }
 
 module.exports = MenuItem;
+

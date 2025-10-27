@@ -1,0 +1,15 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Backend server for CSCE 331 Project 3",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "node src/app.js"
+  },
+  "dependencies": {
+    "pg": "^8.11.0",
+    "dotenv": "^16.3.1"
+  }
+}
+
