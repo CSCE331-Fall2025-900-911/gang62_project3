@@ -1,2 +1,5 @@
 # secrets
 .env
+
+# Node.js
+node_modules/
