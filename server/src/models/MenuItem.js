@@ -52,24 +52,18 @@ class MenuItem extends DatabaseConnection {
      * @author Jonah Coffelt
      */
     static async create(id) {
-        const instance = new MenuItem();
-        
         const query = {
-            text: 'SELECT * FROM menu_items WHERE id = $1;', // id = $1 refers to the first element in the values array
+            text: 'SELECT * FROM menu_items WHERE id = $1;',
             values: [id],
         };
-
         const result = await instance.runQuery(query);
-
+        
         if (result.length === 0) {
             throw new Error(`Menu item with ID ${id} not found`);
         }
-
+        
         const item = result[0];
-
-        instance.id = id;
-        instance.name = item.name;
-        instance.price = item.base_price_cents / 100.0;
+        const instance = new MenuItem(id, item.name, item.base_price_cents / 100.0);
 
         return instance;
     }
