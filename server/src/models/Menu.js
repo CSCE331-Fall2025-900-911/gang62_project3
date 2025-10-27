@@ -88,4 +88,3 @@ class Menu extends DatabaseConnection {
 }
 
 module.exports = Menu;
-

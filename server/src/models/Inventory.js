@@ -95,4 +95,3 @@ class Inventory extends DatabaseConnection {
 }
 
 module.exports = Inventory;
-

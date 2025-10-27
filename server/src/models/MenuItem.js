@@ -140,4 +140,3 @@ class MenuItem extends DatabaseConnection {
 }
 
 module.exports = MenuItem;
-

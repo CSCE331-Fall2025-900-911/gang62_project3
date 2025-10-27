@@ -87,4 +87,3 @@ class Staff extends DatabaseConnection {
 }
 
 module.exports = Staff;
-

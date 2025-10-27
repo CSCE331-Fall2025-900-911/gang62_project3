@@ -110,4 +110,3 @@ class Employee extends DatabaseConnection {
 }
 
 module.exports = Employee;
-
