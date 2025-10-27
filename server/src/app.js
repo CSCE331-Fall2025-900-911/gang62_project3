@@ -32,6 +32,7 @@ const Inventory = require('./models/Inventory');
         console.log(`  - ${item.getName()}: $${item.getPrice().toFixed(2)}`);
     });
 
+
     // Create an Inventory Item
     const inventory = new Inventory();
 
@@ -42,8 +43,21 @@ const Inventory = require('./models/Inventory');
     // Display all ingredients
     console.log('\nAll Ingredients:');
     const ingredients = inventory.getIngredients();
-    ingredients.forEach(item => {
-        console.log(`  - ${item.getName()}: (Stock: ${item.getStock()}) (ID: ${item.getID()})`);
+    ingredients.forEach(ingredient => {
+        console.log(`  - ${ingredient.getName()}: (Stock: ${ingredient.getStock()}) (ID: ${ingredient.getID()})`);
+    });
+
+    // Add a new ingredient
+    console.log('\nAdding new menu item...');
+    const newIngredient = await inventory.addIngredient('Cobweb', 4242, 1.5);
+    if (newIngredient) {
+        console.log(`Added: ${newIngredient.getName()}: (Stock: ${newIngredient.getStock()}) (ID: ${newIngredient.getID()})}`);
+    }
+
+    // Display all ingredients
+    console.log('\nUpdated Inventory:');
+    ingredients.forEach(ingredient => {
+        console.log(`  - ${ingredient.getName()}: (Stock: ${ingredient.getStock()}) (ID: ${ingredient.getID()})`);
     });
 
     // Close database connection
