@@ -11,13 +11,13 @@ const MenuItem = require('./database/menu_item');
 
     // Pattern 2: Direct Instantiation - Use when you have data
     console.log('Pattern 2: Direct Instantiation');
-    const item2 = new MenuItem(2, 'Pizza', 14.99);
+    const item2 = new MenuItem(2, 'Dust', 14.99);
     console.log(`Item: ${item2.getName()}, Price: $${item2.getPrice().toFixed(2)}`);
     console.log(`ID: ${item2.getID()}\n`);
 
     // Updating values
     console.log('Updating Values:');
-    await item1.setName('Updated Burger');
+    await item1.setName('Dustier Dust');
     await item1.setPrice(11.99);
     console.log(`Updated - Name: ${item1.getName()}, Price: $${item1.getPrice().toFixed(2)}\n`);
 
