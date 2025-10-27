@@ -1,0 +1,14 @@
+{
+  "name": "gang62_project3",
+  "version": "1.0.0",
+  "description": "Project 3 for CSCE 331",
+  "main": "example.js",
+  "scripts": {
+    "start": "node example.js",
+    "test": "node example.js"
+  },
+  "dependencies": {
+    "pg": "^8.11.0",
+    "dotenv": "^16.3.1"
+  }
+}
