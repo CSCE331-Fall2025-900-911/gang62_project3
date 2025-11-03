@@ -164,7 +164,10 @@ Brief description of what this PR accomplishes.
 
 # Vercel Deployment
 
-## Deployed using vercel and check the vercel.json for more information
+## Deployed using vercel 
+
+Check the vercel.json for build command 
+- this should be updated for more commands if need be
 
 
 ## Authors
