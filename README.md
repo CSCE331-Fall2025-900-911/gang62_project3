@@ -162,6 +162,14 @@ Brief description of what this PR accomplishes.
 - [ ] Database connections use manual input
 ```
 
+# Vercel Deployment
+
+## Deployed using vercel 
+
+Check the vercel.json for build command 
+- this should be updated for more commands if need be
+
+
 ## Authors
 
 - Jonah Coffelt

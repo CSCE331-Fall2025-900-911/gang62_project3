@@ -23,6 +23,10 @@
   },
   "homepage": "https://github.com/CSCE331-Fall2025-900-911/gang62_project3#readme",
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.4",
+    "@mui/material": "^7.3.4",
     "dotenv": "^17.2.3",
     "pg": "^8.16.3"
   }
