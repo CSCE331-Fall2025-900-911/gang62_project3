@@ -1,10 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Grid, Typography, CssBaseline, Button } from '@mui/material';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AppTheme from '../shared-theme/AppTheme';
 import MenuItem from './MenuItem';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
+const languages = [
+  { code: 'EN', name: 'English' },
+  { code: 'ES', name: 'Español' },
+  { code: 'FR', name: 'Français' },
+  { code: 'DE', name: 'Deutsch' },
+  { code: 'IT', name: 'Italiano' },
+  { code: 'PT', name: 'Português' },
+  { code: 'JA', name: 'Japanese' },
+  { code: 'ZH', name: 'Chinese' }
+];
 
 /**
  * Kiosk component for displaying menu items in a touchscreen-friendly interface.
@@ -19,6 +30,75 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [language, setLanguage] = useState('EN');
+  const translationsRef = useRef({});
+
+  useEffect(() => {
+    translationsRef.current = {};
+  }, [language]);
+
+  const translate = useCallback(async (text) => {
+    if (language === 'EN' || !text) return text;
+    if (translationsRef.current[text]) return translationsRef.current[text];
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/translate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, targetLang: language })
+      });
+      const data = await response.json();
+      const translated = data.translatedText || text;
+      translationsRef.current[text] = translated;
+      return translated;
+    } catch (err) {
+      return text;
+    }
+  }, [language]);
+
+  const [translatedTexts, setTranslatedTexts] = useState({
+    menu: 'Menu',
+    orderTotal: 'Order Total',
+    item: 'item',
+    items: 'items',
+    checkout: 'Checkout',
+    loading: 'Loading menu...',
+    error: 'Error:'
+  });
+
+  useEffect(() => {
+    const updateTranslations = async () => {
+      if (language === 'EN') {
+        setTranslatedTexts({
+          menu: 'Menu',
+          orderTotal: 'Order Total',
+          item: 'item',
+          items: 'items',
+          checkout: 'Checkout',
+          loading: 'Loading menu...',
+          error: 'Error:'
+        });
+        return;
+      }
+      
+      const texts = {
+        menu: 'Menu',
+        orderTotal: 'Order Total',
+        item: 'item',
+        items: 'items',
+        checkout: 'Checkout',
+        loading: 'Loading menu...',
+        error: 'Error:'
+      };
+      
+      const translated = {};
+      for (const [key, value] of Object.entries(texts)) {
+        translated[key] = await translate(value);
+      }
+      setTranslatedTexts(translated);
+    };
+    updateTranslations();
+  }, [language, translate]);
 
   useEffect(() => {
     fetchMenuItems();
@@ -69,7 +149,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
       <AppTheme>
         <CssBaseline />
         <Box sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h4">Loading menu...</Typography>
+          <Typography variant="h4">{translatedTexts.loading}</Typography>
         </Box>
       </AppTheme>
     );
@@ -80,7 +160,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
       <AppTheme>
         <CssBaseline />
         <Box sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h4" color="error">Error: {error}</Typography>
+          <Typography variant="h4" color="error">{translatedTexts.error} {error}</Typography>
         </Box>
       </AppTheme>
     );
@@ -96,18 +176,32 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
           component="h1" 
           sx={{ fontWeight: 'bold' }}
         >
-          Menu
+          {translatedTexts.menu}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>Language</InputLabel>
+            <Select
+              value={language}
+              label="Language"
+              onChange={(e) => setLanguage(e.target.value)}
+            >
+              {languages.map((lang) => (
+                <MuiMenuItem key={lang.code} value={lang.code}>
+                  {lang.name}
+                </MuiMenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <Box sx={{ textAlign: 'right' }}>
             <Typography variant="body2" color="text.secondary">
-              Order Total
+              {translatedTexts.orderTotal}
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
               ${orderTotal.toFixed(2)}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {orderItems.length} {orderItems.length === 1 ? 'item' : 'items'}
+              {orderItems.length} {orderItems.length === 1 ? translatedTexts.item : translatedTexts.items}
             </Typography>
           </Box>
           <Button 
@@ -117,7 +211,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
             onClick={() => navigate('/checkout')}
             sx={{ px: 4 }}
           >
-            Checkout
+            {translatedTexts.checkout}
           </Button>
         </Box>
       </Box>
@@ -125,7 +219,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
       <Grid container spacing={3}>
         {menuItems.map((item) => (
           <Grid item key={item.id} sx={{ width: 'calc(20% - 24px)', minWidth: '200px' }}>
-            <MenuItem item={item} onItemClick={handleAddToOrder} />
+            <MenuItem item={item} onItemClick={handleAddToOrder} language={language} translate={translate} />
           </Grid>
         ))}
       </Grid>
