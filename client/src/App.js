@@ -7,7 +7,7 @@ import SignIn from './components/SignIn/SignIn';
 import Kiosk from './components/Kiosk/Kiosk';
 import Checkout from './components/CheckoutPage/Checkout';
 import { useState } from 'react';
-// import Dashboard from './components/ManagerDashboard/Dashboard';
+import Dashboard from './components/ManagerDashboard/Dashboard';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -52,7 +52,7 @@ function App() {
               )
             } 
           />
-          {/* <Route 
+          <Route 
             path="/manager" 
             element={
               isAuthenticated ? (
@@ -63,7 +63,7 @@ function App() {
                 <Navigate to="/" />
               )
             } 
-          /> */}
+          />
         </Routes>
       </div>
     </BrowserRouter>
