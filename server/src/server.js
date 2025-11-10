@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const axios = require('axios');
 const Menu = require('./models/Menu');
 
 /**
@@ -14,6 +15,9 @@ const PORT = process.env.PORT || 3001;
 // Enable CORS for client requests
 app.use(cors());
 app.use(express.json());
+
+const DEEPL_API_KEY = 'ca69df7b-643d-475c-9b81-4a71e5078261:fx';
+const DEEPL_API_URL = 'https://api-free.deepl.com/v2/translate';
 
 /**
  * API endpoint to retrieve all menu items from the database.
@@ -41,6 +45,37 @@ app.get('/api/menu-items', async (req, res) => {
     } catch (error) {
         console.error('Error fetching menu items:', error);
         res.status(500).json({ error: 'Failed to fetch menu items' });
+    }
+});
+
+/**
+ * API endpoint to translate text using DeepL API.
+ * 
+ * @route POST /api/translate
+ * @param {string} text - Text to translate
+ * @param {string} targetLang - Target language code (e.g., 'ES', 'FR', 'DE')
+ * @returns {Promise<void>} Sends JSON response with translated text
+ * @author Michael Nguyen
+ */
+app.post('/api/translate', async (req, res) => {
+    try {
+        const { text, targetLang } = req.body;
+        if (!text || !targetLang) {
+            return res.status(400).json({ error: 'Text and targetLang are required' });
+        }
+
+        const formData = `auth_key=${encodeURIComponent(DEEPL_API_KEY)}&text=${encodeURIComponent(text)}&target_lang=${encodeURIComponent(targetLang)}`;
+
+        const response = await axios.post(DEEPL_API_URL, formData, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+
+        res.json({ translatedText: response.data.translations[0].text });
+    } catch (error) {
+        console.error('Error translating text:', error);
+        res.status(500).json({ error: 'Failed to translate text' });
     }
 });
 

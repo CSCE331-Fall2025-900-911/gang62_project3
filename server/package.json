@@ -9,10 +9,10 @@
     "test": "node src/app.js"
   },
   "dependencies": {
-    "pg": "^8.11.0",
+    "axios": "^1.13.2",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "pg": "^8.11.0"
   }
 }
-
