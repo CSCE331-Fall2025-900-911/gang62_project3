@@ -42,7 +42,9 @@ function App() {
               isAuthenticated ? (
                 <Checkout 
                   orderItems={orderItems}
+                  setOrderItems={setOrderItems}
                   orderTotal={orderTotal}
+                  setOrderTotal={setOrderTotal}
                 />
               ) : (
                 <Navigate to="/" />

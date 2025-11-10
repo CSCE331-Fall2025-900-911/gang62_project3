@@ -35,7 +35,7 @@ function getStepContent(step) {
       throw new Error('Unknown step');
   }
 }
-export default function Checkout({ orderItems = [], orderTotal = 0, ...props }) {
+export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 0, setOrderTotal, ...props }) {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = React.useState(0);
   const handleNext = () => {
@@ -44,6 +44,23 @@ export default function Checkout({ orderItems = [], orderTotal = 0, ...props }) 
   const handleBack = () => {
     setActiveStep(activeStep - 1);
   };
+  
+  const handleDeleteItem = (index) => {
+    const newOrderItems = orderItems.filter((_, i) => i !== index);
+    setOrderItems(newOrderItems);
+  };
+
+  const handleEditItem = (index, updatedItem) => {
+    const newOrderItems = [...orderItems];
+    newOrderItems[index] = updatedItem;
+    setOrderItems(newOrderItems);
+  };
+
+  React.useEffect(() => {
+    // Recalculate total when orderItems changes
+    const total = orderItems.reduce((sum, item) => sum + item.price, 0);
+    setOrderTotal(total);
+  }, [orderItems, setOrderTotal]);
   
   const formattedTotal = `$${orderTotal.toFixed(2)}`;
   
@@ -100,7 +117,12 @@ export default function Checkout({ orderItems = [], orderTotal = 0, ...props }) 
               maxWidth: 500,
             }}
           >
-            <Info totalPrice={formattedTotal} orderItems={orderItems} />
+            <Info 
+              totalPrice={formattedTotal} 
+              orderItems={orderItems}
+              onDelete={handleDeleteItem}
+              onEdit={handleEditItem}
+            />
           </Box>
         </Grid>
         <Grid
@@ -168,7 +190,12 @@ export default function Checkout({ orderItems = [], orderTotal = 0, ...props }) 
                   {formattedTotal}
                 </Typography>
               </div>
-              <InfoMobile totalPrice={formattedTotal} orderItems={orderItems} />
+              <InfoMobile 
+                totalPrice={formattedTotal} 
+                orderItems={orderItems}
+                onDelete={handleDeleteItem}
+                onEdit={handleEditItem}
+              />
             </CardContent>
           </Card>
           <Box

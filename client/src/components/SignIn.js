@@ -90,13 +90,20 @@ export default function SignIn({ onLogin, ...props }) {
     const password = data.get('password');
     
     // Check for admin credentials
-    if (username === 'admin' && password === 'admin') {
+    if (username === 'customer' && password === 'customer') {
       console.log('Login successful');
       if (onLogin) {
         onLogin();
       }
       navigate('/kiosk');
-    } else {
+    } else if (username === 'admin' && password === 'admin') {
+      console.log('Login successful');
+      if (onLogin) {
+        onLogin();
+      }
+      navigate('/manager');
+    }
+    else {
       setUsernameError(true);
       setUsernameErrorMessage('Invalid username or password');
       setPasswordError(true);
