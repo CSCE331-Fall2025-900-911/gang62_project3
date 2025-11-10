@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Grid, Typography, CssBaseline } from '@mui/material';
+import { Box, Grid, Typography, CssBaseline, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import AppTheme from '../shared-theme/AppTheme';
 import MenuItem from './MenuItem';
 
@@ -13,7 +14,8 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
  * @component
  * @author Michael Nguyen
  */
-function Kiosk() {
+function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
+  const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,6 +23,12 @@ function Kiosk() {
   useEffect(() => {
     fetchMenuItems();
   }, []);
+
+  useEffect(() => {
+    // Calculate total whenever orderItems changes
+    const total = orderItems.reduce((sum, item) => sum + item.price, 0);
+    setOrderTotal(total);
+  }, [orderItems, setOrderTotal]);
 
   /**
    * Fetches all menu items from the API endpoint.
@@ -43,6 +51,17 @@ function Kiosk() {
       setError(err.message);
       setLoading(false);
     }
+  };
+
+  /**
+   * Handles adding an item to the order
+   * 
+   * @param {Object} item - The menu item to add to the order
+   */
+  const handleAddToOrder = (item) => {
+    setOrderItems([...orderItems, item]);
+    console.log('Item added to order:', item);
+    console.log('Current order:', [...orderItems, item]);
   };
 
   if (loading) {
@@ -71,19 +90,42 @@ function Kiosk() {
     <AppTheme>
       <CssBaseline />
       <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: 'background.default' }}>
-      <Typography 
-        variant="h3" 
-        component="h1" 
-        gutterBottom 
-        sx={{ mb: 4, textAlign: 'center', fontWeight: 'bold' }}
-      >
-        Menu
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography 
+          variant="h3" 
+          component="h1" 
+          sx={{ fontWeight: 'bold' }}
+        >
+          Menu
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography variant="body2" color="text.secondary">
+              Order Total
+            </Typography>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+              ${orderTotal.toFixed(2)}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {orderItems.length} {orderItems.length === 1 ? 'item' : 'items'}
+            </Typography>
+          </Box>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            size="large"
+            onClick={() => navigate('/checkout')}
+            sx={{ px: 4 }}
+          >
+            Checkout
+          </Button>
+        </Box>
+      </Box>
       
       <Grid container spacing={3}>
         {menuItems.map((item) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
-            <MenuItem item={item} />
+          <Grid item key={item.id} sx={{ width: 'calc(20% - 24px)', minWidth: '200px' }}>
+            <MenuItem item={item} onItemClick={handleAddToOrder} />
           </Grid>
         ))}
       </Grid>
