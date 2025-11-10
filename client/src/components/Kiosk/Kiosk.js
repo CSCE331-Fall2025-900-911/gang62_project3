@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Grid, Typography, CssBaseline, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import AppTheme from '../shared-theme/AppTheme';
+import AppTheme from '../../shared-theme/AppTheme';
 import MenuItem from './MenuItem';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
