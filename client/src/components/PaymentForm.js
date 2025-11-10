@@ -13,10 +13,10 @@ import RadioGroup from '@mui/material/RadioGroup';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
-import AccountBalanceRoundedIcon from '@mui/icons-material/AccountBalanceRounded';
 import CreditCardRoundedIcon from '@mui/icons-material/CreditCardRounded';
 import SimCardRoundedIcon from '@mui/icons-material/SimCardRounded';
 import WarningRoundedIcon from '@mui/icons-material/WarningRounded';
+import AccountBalanceWalletRoundedIcon from '@mui/icons-material/AccountBalanceWalletRounded';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   border: '1px solid',
@@ -173,7 +173,7 @@ export default function PaymentForm() {
               }}
             >
               <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <AccountBalanceRoundedIcon
+                <AccountBalanceWalletRoundedIcon
                   fontSize="small"
                   sx={[
                     (theme) => ({
@@ -187,7 +187,7 @@ export default function PaymentForm() {
                     },
                   ]}
                 />
-                <Typography sx={{ fontWeight: 'medium' }}>Bank account</Typography>
+                <Typography sx={{ fontWeight: 'medium' }}>Crypto wallet</Typography>
               </CardContent>
             </CardActionArea>
           </Card>
@@ -282,36 +282,48 @@ export default function PaymentForm() {
       {paymentType === 'bankTransfer' && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Alert severity="warning" icon={<WarningRoundedIcon />}>
-            Your order will be processed once we receive the funds.
+            Your order will be processed once we receive the crypto payment.
           </Alert>
           <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
-            Bank account
+            Crypto wallet
           </Typography>
           <Typography variant="body1" gutterBottom>
-            Please transfer the payment to the bank account details shown below.
+            Please send the payment to the crypto wallet address shown below.
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-              Bank:
+              Network:
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-              Mastercredit
+              Ethereum (ERC-20)
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+              Wallet address:
+            </Typography>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                fontWeight: 'medium', 
+                fontFamily: 'monospace',
+                wordBreak: 'break-all',
+                bgcolor: 'background.paper',
+                p: 1,
+                borderRadius: 1,
+                border: '1px solid',
+                borderColor: 'divider'
+              }}
+            >
+              0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb8
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-              Account number:
+              Accepted tokens:
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-              123456789
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-              Routing number:
-            </Typography>
-            <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-              987654321
+              ETH, USDT, USDC
             </Typography>
           </Box>
         </Box>

@@ -5,30 +5,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 
-const products = [
-  {
-    name: 'Professional plan',
-    desc: 'Monthly subscription',
-    price: '$15.00',
-  },
-  {
-    name: 'Dedicated support',
-    desc: 'Included in the Professional plan',
-    price: 'Free',
-  },
-  {
-    name: 'Hardware',
-    desc: 'Devices needed for development',
-    price: '$69.99',
-  },
-  {
-    name: 'Landing page template',
-    desc: 'License',
-    price: '$49.99',
-  },
-];
-
-function Info({ totalPrice }) {
+function Info({ totalPrice, orderItems = [] }) {
   return (
     <React.Fragment>
       <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
@@ -38,18 +15,27 @@ function Info({ totalPrice }) {
         {totalPrice}
       </Typography>
       <List disablePadding>
-        {products.map((product) => (
-          <ListItem key={product.name} sx={{ py: 1, px: 0 }}>
+        {orderItems.length > 0 ? (
+          orderItems.map((item, index) => (
+            <ListItem key={`${item.id}-${index}`} sx={{ py: 1, px: 0 }}>
+              <ListItemText
+                sx={{ mr: 2 }}
+                primary={item.name}
+                secondary={`Sugar: ${item.sugarLevel || 'N/A'} | Ice: ${item.iceLevel || 'N/A'}`}
+              />
+              <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                ${item.price.toFixed(2)}
+              </Typography>
+            </ListItem>
+          ))
+        ) : (
+          <ListItem sx={{ py: 1, px: 0 }}>
             <ListItemText
-              sx={{ mr: 2 }}
-              primary={product.name}
-              secondary={product.desc}
+              primary="No items in order"
+              secondary="Add items from the kiosk"
             />
-            <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-              {product.price}
-            </Typography>
           </ListItem>
-        ))}
+        )}
       </List>
     </React.Fragment>
   );
@@ -57,6 +43,7 @@ function Info({ totalPrice }) {
 
 Info.propTypes = {
   totalPrice: PropTypes.string.isRequired,
+  orderItems: PropTypes.array,
 };
 
 export default Info;

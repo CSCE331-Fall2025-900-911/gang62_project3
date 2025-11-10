@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -12,6 +13,7 @@ import Stepper from '@mui/material/Stepper';
 import Typography from '@mui/material/Typography';
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import AddressForm from './AddressForm';
 import Info from './Info';
 import InfoMobile from './InfoMobile';
@@ -20,7 +22,7 @@ import Review from './Review';
 import AppTheme from '../shared-theme/AppTheme';
 import ColorModeIconDropdown from '../shared-theme/ColorModeIconDropdown';
 
-const steps = ['Shipping address', 'Payment details', 'Review your order'];
+const steps = ['Name', 'Payment details', 'Review your order'];
 function getStepContent(step) {
   switch (step) {
     case 0:
@@ -33,7 +35,8 @@ function getStepContent(step) {
       throw new Error('Unknown step');
   }
 }
-export default function Checkout(props) {
+export default function Checkout({ orderItems = [], orderTotal = 0, ...props }) {
+  const navigate = useNavigate();
   const [activeStep, setActiveStep] = React.useState(0);
   const handleNext = () => {
     setActiveStep(activeStep + 1);
@@ -41,11 +44,24 @@ export default function Checkout(props) {
   const handleBack = () => {
     setActiveStep(activeStep - 1);
   };
+  
+  const formattedTotal = `$${orderTotal.toFixed(2)}`;
+  
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
       <Box sx={{ position: 'fixed', top: '1rem', right: '1rem' }}>
         <ColorModeIconDropdown />
+      </Box>
+      <Box sx={{ position: 'fixed', top: '1rem', left: '1rem' }}>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackRoundedIcon />}
+          onClick={() => navigate('/kiosk')}
+          sx={{ fontWeight: 'medium' }}
+        >
+          Back to Kiosk
+        </Button>
       </Box>
 
       <Grid
@@ -84,7 +100,7 @@ export default function Checkout(props) {
               maxWidth: 500,
             }}
           >
-            <Info totalPrice={activeStep >= 2 ? '$144.97' : '$134.98'} />
+            <Info totalPrice={formattedTotal} orderItems={orderItems} />
           </Box>
         </Grid>
         <Grid
@@ -149,10 +165,10 @@ export default function Checkout(props) {
                   Selected products
                 </Typography>
                 <Typography variant="body1">
-                  {activeStep >= 2 ? '$144.97' : '$134.98'}
+                  {formattedTotal}
                 </Typography>
               </div>
-              <InfoMobile totalPrice={activeStep >= 2 ? '$144.97' : '$134.98'} />
+              <InfoMobile totalPrice={formattedTotal} orderItems={orderItems} />
             </CardContent>
           </Card>
           <Box
