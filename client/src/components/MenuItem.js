@@ -88,6 +88,14 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
     setOpen(true);
   };
 
+  const handleKeyDown = (e) => {
+    // Activate card on Enter or Space
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      setOpen(true);
+    }
+  };
+
   const handleClose = () => {
     setOpen(false);
   };
@@ -132,8 +140,23 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
           '&:active': {
             transform: 'scale(0.98)'
           }
+          ,
+          // Visible focus styles for keyboard users
+          '&:focus': {
+            outline: 'none',
+            borderColor: 'primary.main',
+            boxShadow: (theme) => `0 0 0 4px ${theme.palette.action.focus || 'rgba(25,118,210,0.16)'}`,
+            transform: 'scale(1.02)'
+          },
+          '&:focus-visible': {
+            outline: 'none'
+          }
         }}
         onClick={handleCardClick}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-label={`Customize ${translatedName}`}
       >
         <CardContent sx={{ flexGrow: 1, p: 3 }}>
           <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
