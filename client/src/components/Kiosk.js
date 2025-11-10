@@ -3,6 +3,7 @@ import { Box, Grid, Typography, CssBaseline, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AppTheme from '../shared-theme/AppTheme';
 import MenuItem from './MenuItem';
+import { useWeather } from "./weather";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -19,6 +20,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { temp, weather_error } = useWeather();
 
   useEffect(() => {
     fetchMenuItems();
@@ -29,6 +31,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
     const total = orderItems.reduce((sum, item) => sum + item.price, 0);
     setOrderTotal(total);
   }, [orderItems, setOrderTotal]);
+
 
   /**
    * Fetches all menu items from the API endpoint.
@@ -98,6 +101,23 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
         >
           Menu
         </Typography>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {weather_error ? (
+            <Typography variant="body2" color="error">
+              Weather unavailable
+            </Typography>
+          ) : temp === null ? (
+            <Typography variant="body2" color="text.secondary">
+              Loading weather...
+            </Typography>
+          ) : (
+            <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+              🌤 {temp.toFixed(0)}°F
+            </Typography>
+          )}
+        </Box>
+
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           <Box sx={{ textAlign: 'right' }}>
             <Typography variant="body2" color="text.secondary">
