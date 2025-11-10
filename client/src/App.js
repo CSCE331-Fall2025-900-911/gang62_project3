@@ -1,10 +1,13 @@
+import React from 'react';
+
+
 import './App.css';
-import Kiosk from './components/Kiosk';
+import SignIn from './components/SignIn';
 
 function App() {
   return (
     <div className="App">
-      <Kiosk />
+      <SignIn></SignIn>
     </div>
   );
 }

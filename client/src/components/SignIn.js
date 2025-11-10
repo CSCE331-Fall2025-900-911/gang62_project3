@@ -16,7 +16,7 @@ import { styled } from '@mui/material/styles';
 import ForgotPassword from './ForgotPassword';
 import AppTheme from '../shared-theme/AppTheme';
 import ColorModeSelect from '../shared-theme/ColorModeSelect';
-import { GoogleIcon, FacebookIcon, SitemarkIcon } from './CustomIcons';
+import { GoogleIcon, FacebookIcon } from './CustomIcons';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -25,6 +25,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   width: '100%',
   padding: theme.spacing(4),
   gap: theme.spacing(2),
+  overflowY: 'auto',
   margin: 'auto',
   [theme.breakpoints.up('sm')]: {
     maxWidth: '450px',
@@ -120,7 +121,6 @@ export default function SignIn(props) {
       <SignInContainer direction="column" justifyContent="space-between">
         <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
         <Card variant="outlined">
-          <SitemarkIcon />
           <Typography
             component="h1"
             variant="h4"
@@ -217,7 +217,7 @@ export default function SignIn(props) {
             <Typography sx={{ textAlign: 'center' }}>
               Don&apos;t have an account?{' '}
               <Link
-                href="/material-ui/getting-started/templates/sign-in/"
+                href="/signup"
                 variant="body2"
                 sx={{ alignSelf: 'center' }}
               >
