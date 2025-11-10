@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Grid, Typography, Card, CardContent } from '@mui/material';
+import { Box, Grid, Typography, CssBaseline } from '@mui/material';
+import AppTheme from '../shared-theme/AppTheme';
+import MenuItem from './MenuItem';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -45,22 +47,30 @@ function Kiosk() {
 
   if (loading) {
     return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <Typography variant="h4">Loading menu...</Typography>
-      </Box>
+      <AppTheme>
+        <CssBaseline />
+        <Box sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h4">Loading menu...</Typography>
+        </Box>
+      </AppTheme>
     );
   }
 
   if (error) {
     return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <Typography variant="h4" color="error">Error: {error}</Typography>
-      </Box>
+      <AppTheme>
+        <CssBaseline />
+        <Box sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h4" color="error">Error: {error}</Typography>
+        </Box>
+      </AppTheme>
     );
   }
 
   return (
-    <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+    <AppTheme>
+      <CssBaseline />
+      <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: 'background.default' }}>
       <Typography 
         variant="h3" 
         component="h1" 
@@ -73,39 +83,12 @@ function Kiosk() {
       <Grid container spacing={3}>
         {menuItems.map((item) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
-            <Card 
-              sx={{ 
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                cursor: 'pointer',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                '&:hover': {
-                  transform: 'scale(1.02)',
-                  boxShadow: 4
-                },
-                '&:active': {
-                  transform: 'scale(0.98)'
-                }
-              }}
-              onClick={() => {
-                // Handle item selection - placeholder for future functionality
-                console.log('Selected item:', item);
-              }}
-            >
-              <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
-                  {item.name}
-                </Typography>
-                <Typography variant="h6" color="text.secondary" sx={{ mt: 2 }}>
-                  ${item.price.toFixed(2)}
-                </Typography>
-              </CardContent>
-            </Card>
+            <MenuItem item={item} />
           </Grid>
         ))}
       </Grid>
     </Box>
+    </AppTheme>
   );
 }
 
