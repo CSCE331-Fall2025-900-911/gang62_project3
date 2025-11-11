@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -24,15 +24,76 @@ import {
  * @param {string} props.item.name - Display name of the menu item
  * @param {number} props.item.price - Price of the menu item
  * @param {Function} [props.onItemClick] - Optional callback function when item is added to order
+ * @param {string} [props.language] - Language code for translation
+ * @param {Function} [props.translate] - Translation function
  * @author Michael Nguyen
  */
-function MenuItem({ item, onItemClick }) {
+function MenuItem({ item, onItemClick, language = 'EN', translate }) {
   const [open, setOpen] = useState(false);
   const [sugarLevel, setSugarLevel] = useState('medium');
   const [iceLevel, setIceLevel] = useState('medium');
+  const [translatedName, setTranslatedName] = useState(item.name);
+  const [translatedTexts, setTranslatedTexts] = useState({
+    customize: 'Customize',
+    sugarLevel: 'Sugar Level',
+    iceLevel: 'Ice Level',
+    low: 'Low',
+    medium: 'Medium',
+    high: 'High',
+    cancel: 'Cancel',
+    addToOrder: 'Add to Order'
+  });
+
+  useEffect(() => {
+    const updateTranslations = async () => {
+      if (language === 'EN' || !translate) {
+        setTranslatedName(item.name);
+        setTranslatedTexts({
+          customize: 'Customize',
+          sugarLevel: 'Sugar Level',
+          iceLevel: 'Ice Level',
+          low: 'Low',
+          medium: 'Medium',
+          high: 'High',
+          cancel: 'Cancel',
+          addToOrder: 'Add to Order'
+        });
+        return;
+      }
+      
+      const name = await translate(item.name);
+      setTranslatedName(name);
+      
+      const texts = {
+        customize: 'Customize',
+        sugarLevel: 'Sugar Level',
+        iceLevel: 'Ice Level',
+        low: 'Low',
+        medium: 'Medium',
+        high: 'High',
+        cancel: 'Cancel',
+        addToOrder: 'Add to Order'
+      };
+      
+      const translated = {};
+      for (const [key, value] of Object.entries(texts)) {
+        translated[key] = await translate(value);
+      }
+      setTranslatedTexts(translated);
+    };
+    updateTranslations();
+  }, [language, item.name, translate]);
 
   const handleCardClick = () => {
     setOpen(true);
+  };
+
+  const handleKeyDown = (e) => {
+    // Activate card on Enter or Space
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+      e.preventDefault();
+      setOpen(true);
+    }
   };
 
   const handleClose = () => {
@@ -79,12 +140,27 @@ function MenuItem({ item, onItemClick }) {
           '&:active': {
             transform: 'scale(0.98)'
           }
+          ,
+          // Visible focus styles for keyboard users
+          '&:focus': {
+            outline: 'none',
+            borderColor: 'primary.main',
+            boxShadow: (theme) => `0 0 0 4px ${theme.palette.action.focus || 'rgba(25,118,210,0.16)'}`,
+            transform: 'scale(1.02)'
+          },
+          '&:focus-visible': {
+            outline: 'none'
+          }
         }}
         onClick={handleCardClick}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-label={`Customize ${translatedName}`}
       >
         <CardContent sx={{ flexGrow: 1, p: 3 }}>
           <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-            {item.name}
+            {translatedName}
           </Typography>
           <Typography variant="h6" color="text.secondary" sx={{ mt: 2 }}>
             ${item.price.toFixed(2)}
@@ -105,13 +181,13 @@ function MenuItem({ item, onItemClick }) {
         }}
       >
         <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem', color: 'text.primary' }}>
-          Customize {item.name}
+          {translatedTexts.customize} {translatedName}
         </DialogTitle>
         <DialogContent>
           <Box sx={{ py: 2 }}>
             {/* Sugar Level Selection */}
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
-              Sugar Level
+              {translatedTexts.sugarLevel}
             </Typography>
             <ButtonGroup 
               fullWidth 
@@ -128,7 +204,7 @@ function MenuItem({ item, onItemClick }) {
                   fontWeight: 600
                 }}
               >
-                Low
+                {translatedTexts.low}
               </Button>
               <Button
                 variant={sugarLevel === 'medium' ? 'contained' : 'outlined'}
@@ -140,7 +216,7 @@ function MenuItem({ item, onItemClick }) {
                   fontWeight: 600
                 }}
               >
-                Medium
+                {translatedTexts.medium}
               </Button>
               <Button
                 variant={sugarLevel === 'high' ? 'contained' : 'outlined'}
@@ -152,13 +228,13 @@ function MenuItem({ item, onItemClick }) {
                   fontWeight: 600
                 }}
               >
-                High
+                {translatedTexts.high}
               </Button>
             </ButtonGroup>
 
             {/* Ice Level Selection */}
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
-              Ice Level
+              {translatedTexts.iceLevel}
             </Typography>
             <ButtonGroup 
               fullWidth 
@@ -174,7 +250,7 @@ function MenuItem({ item, onItemClick }) {
                   fontWeight: 600
                 }}
               >
-                Low
+                {translatedTexts.low}
               </Button>
               <Button
                 variant={iceLevel === 'medium' ? 'contained' : 'outlined'}
@@ -186,7 +262,7 @@ function MenuItem({ item, onItemClick }) {
                   fontWeight: 600
                 }}
               >
-                Medium
+                {translatedTexts.medium}
               </Button>
               <Button
                 variant={iceLevel === 'high' ? 'contained' : 'outlined'}
@@ -198,7 +274,7 @@ function MenuItem({ item, onItemClick }) {
                   fontWeight: 600
                 }}
               >
-                High
+                {translatedTexts.high}
               </Button>
             </ButtonGroup>
           </Box>
@@ -211,7 +287,7 @@ function MenuItem({ item, onItemClick }) {
             size="large"
             sx={{ minWidth: 120 }}
           >
-            Cancel
+            {translatedTexts.cancel}
           </Button>
           <Button 
             onClick={handleAddToOrder}
@@ -220,7 +296,7 @@ function MenuItem({ item, onItemClick }) {
             size="large"
             sx={{ minWidth: 120 }}
           >
-            Add to Order
+            {translatedTexts.addToOrder}
           </Button>
         </DialogActions>
       </Dialog>
