@@ -315,6 +315,27 @@ export const colorSchemes = {
         'hsla(220, 30%, 5%, 0.7) 0px 4px 16px 0px, hsla(220, 25%, 10%, 0.8) 0px 8px 16px -5px',
     },
   },
+  highContrast: {
+    palette: {
+      primary: {
+        main: '#FFFFFF',
+        contrastText: '#000000',
+      },
+      background: {
+        default: '#000000',
+        paper: '#000000',
+      },
+      text: {
+        primary: '#FFFFFF',
+        secondary: '#FFFFFF',
+      },
+      divider: '#FFFFFF',
+      action: {
+        hover: 'rgba(255,255,255,0.15)',
+        selected: 'rgba(255,255,255,0.25)',
+      },
+    },
+  },
 };
 
 export const typography = {
