@@ -3,10 +3,11 @@ import React from 'react';
 
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import SignIn from './components/SignIn';
-import Kiosk from './components/Kiosk';
-import Checkout from './components/Checkout';
+import SignIn from './components/SignIn/SignIn';
+import Kiosk from './components/Kiosk/Kiosk';
+import Checkout from './components/CheckoutPage/Checkout';
 import { useState } from 'react';
+import Dashboard from './components/ManagerDashboard/Dashboard';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -45,6 +46,18 @@ function App() {
                   setOrderItems={setOrderItems}
                   orderTotal={orderTotal}
                   setOrderTotal={setOrderTotal}
+                />
+              ) : (
+                <Navigate to="/" />
+              )
+            } 
+          />
+          <Route 
+            path="/manager" 
+            element={
+              isAuthenticated ? (
+                <Dashboard 
+                    
                 />
               ) : (
                 <Navigate to="/" />

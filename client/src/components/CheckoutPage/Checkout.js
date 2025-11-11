@@ -15,12 +15,12 @@ import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import AddressForm from './AddressForm';
-import Info from './Info';
-import InfoMobile from './InfoMobile';
+import Info from '../Kiosk/Info';
+import InfoMobile from '../Kiosk/InfoMobile';
 import PaymentForm from './PaymentForm';
 import Review from './Review';
-import AppTheme from '../shared-theme/AppTheme';
-import ColorModeIconDropdown from '../shared-theme/ColorModeIconDropdown';
+import AppTheme from '../../shared-theme/AppTheme';
+import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 
 const steps = ['Name', 'Payment details', 'Review your order'];
 function getStepContent(step) {

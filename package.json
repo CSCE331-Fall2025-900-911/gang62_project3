@@ -27,6 +27,12 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
+    "@mui/x-charts": "^8.17.0",
+    "@mui/x-data-grid": "^8.17.0",
+    "@mui/x-date-pickers-pro": "^8.17.0",
+    "@mui/x-tree-view": "^8.17.0",
+    "@react-spring/web": "^10.0.3",
+    "dayjs": "^1.11.19",
     "dotenv": "^17.2.3",
     "node-fetch": "^3.3.2",
     "pg": "^8.16.3"
