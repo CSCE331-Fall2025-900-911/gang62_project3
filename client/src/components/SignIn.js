@@ -18,6 +18,8 @@ import ForgotPassword from './ForgotPassword';
 import AppTheme from '../shared-theme/AppTheme';
 import ColorModeSelect from '../shared-theme/ColorModeSelect';
 import { GoogleIcon, FacebookIcon } from './CustomIcons';
+// base URL for backend OAuth endpoints
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -224,7 +226,7 @@ export default function SignIn({ onLogin, ...props }) {
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign in with Google')}
+              onClick={() => { window.location.href = `${API_BASE_URL}/api/auth/google`; }}
               startIcon={<GoogleIcon />}
             >
               Sign in with Google
