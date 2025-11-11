@@ -18,6 +18,7 @@ import ForgotPassword from './ForgotPassword';
 import AppTheme from '../../shared-theme/AppTheme';
 import ColorModeSelect from '../../shared-theme/ColorModeSelect';
 import { GoogleIcon, FacebookIcon } from './CustomIcons';
+import OnScreenKeyboard from '../OnScreenKeyboard';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -69,6 +70,7 @@ export default function SignIn({ onLogin, ...props }) {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
+  const [showKeyboard, setShowKeyboard] = React.useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -162,6 +164,9 @@ export default function SignIn({ onLogin, ...props }) {
               gap: 2,
             }}
           >
+            <Button variant={showKeyboard ? 'contained' : 'outlined'} size="small" onClick={() => setShowKeyboard((v) => !v)} aria-pressed={showKeyboard} aria-label="Toggle on-screen keyboard">
+              {showKeyboard ? 'Hide on-screen keyboard' : 'Show on-screen keyboard'}
+            </Button>
             <FormControl>
               <FormLabel htmlFor="username">Username</FormLabel>
               <TextField
@@ -219,6 +224,11 @@ export default function SignIn({ onLogin, ...props }) {
               Forgot your password?
             </Link>
           </Box>
+          {showKeyboard && (
+            <Box sx={{ position: 'sticky', bottom: 0, mt: 2 }}>
+              <OnScreenKeyboard />
+            </Box>
+          )}
           <Divider>or</Divider>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Button
