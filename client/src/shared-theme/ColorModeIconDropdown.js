@@ -1,6 +1,7 @@
 import * as React from 'react';
 import DarkModeIcon from '@mui/icons-material/DarkModeRounded';
 import LightModeIcon from '@mui/icons-material/LightModeRounded';
+import ContrastIcon from '@mui/icons-material/ContrastRounded';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
@@ -41,6 +42,7 @@ export default function ColorModeIconDropdown(props) {
   const icon = {
     light: <LightModeIcon />,
     dark: <DarkModeIcon />,
+    highContrast: <ContrastIcon />,
   }[resolvedMode];
   return (
     <React.Fragment>
@@ -82,6 +84,9 @@ export default function ColorModeIconDropdown(props) {
         </MenuItem>
         <MenuItem selected={mode === 'dark'} onClick={handleMode('dark')}>
           Dark
+        </MenuItem>
+        <MenuItem selected={mode === 'highContrast'} onClick={handleMode('highContrast')}>
+          High Contrast
         </MenuItem>
       </Menu>
     </React.Fragment>

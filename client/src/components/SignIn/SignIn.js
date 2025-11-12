@@ -18,7 +18,7 @@ import ForgotPassword from './ForgotPassword';
 import AppTheme from '../../shared-theme/AppTheme';
 import ColorModeSelect from '../../shared-theme/ColorModeSelect';
 import { GoogleIcon, FacebookIcon } from './CustomIcons';
-import OnScreenKeyboard from '../OnScreenKeyboard';
+import OnScreenKeyboard from './OnScreenKeyboard';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
