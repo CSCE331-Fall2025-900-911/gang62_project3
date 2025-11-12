@@ -86,18 +86,6 @@ const createHighContrastTheme = (components) => createTheme({
   components,
 });
 
-function InnerAppTheme({ children, theme }) {
-  const { mode } = useColorScheme() || {};
-  
-  // If mode is highContrast and we have a theme, render children directly
-  // The outer ThemeProvider will handle the theme
-  if (mode === 'highContrast') {
-    return <React.Fragment>{children}</React.Fragment>;
-  }
-  
-  return <React.Fragment>{children}</React.Fragment>;
-}
-
 function AppTheme(props) {
   const { children, disableCustomTheme, themeComponents } = props;
   
