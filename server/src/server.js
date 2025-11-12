@@ -20,6 +20,18 @@ const DEEPL_API_KEY = 'ca69df7b-643d-475c-9b81-4a71e5078261:fx';
 const DEEPL_API_URL = 'https://api-free.deepl.com/v2/translate';
 
 /**
+ * Root endpoint - health check
+ * @route GET /
+ */
+app.get('/', (req, res) => {
+    res.json({ 
+        status: 'ok', 
+        message: 'Server is running',
+        endpoints: ['/api/menu-items', '/api/translate']
+    });
+});
+
+/**
  * API endpoint to retrieve all menu items from the database.
  * Returns a JSON array of menu items with id, name, and price.
  * 
@@ -85,9 +97,13 @@ app.post('/api/translate', async (req, res) => {
  * @param {number} PORT - The port number to listen on (defaults to 3001)
  * @author Michael Nguyen
  */
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+if (process.env.VERCEL !== '1') {
+    // For Vercel deployment, export the app instead of starting the server
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
 
 module.exports = app;
 
+// export default app;
