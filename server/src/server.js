@@ -85,9 +85,13 @@ app.post('/api/translate', async (req, res) => {
  * @param {number} PORT - The port number to listen on (defaults to 3001)
  * @author Michael Nguyen
  */
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+if (process.env.VERCEL !== '1') {
+    // For Vercel deployment, export the app instead of starting the server
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
 
 module.exports = app;
 
+// export default app;
