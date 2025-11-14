@@ -1,0 +1,33 @@
+## SCRUM Meeting 11/5 Notes:
+Meeting Location: Zachry
+Time: 9:44 a.m. - 10 a.m.
+
+Leading Questions: What have you done since Monday? What will you do today? and Are there any impediments or blockers?
+
+Jonah: Working on Weather API. Update database as needed and continue weather api integration. No roadblocks
+Michael: Translate + Helping David with Frontend. Will help out on frontend before implementing translate No roadblocks
+Zane: Accessibility + frontend, plan user testing. No roadblocks.
+David: Finished login page, checkout page. Noted he will apply central theme across pages. Will continue working on kiosk interface. No roadblocks.
+
+
+## SCRUM Meeting 11/7 Notes:
+Meeting Location: Zoom
+Time: 5:00 - 5:10 pm
+
+Leading Questions: What have you done since Wednesday? What will you do today? and Are there any impediments or blockers?
+
+Jonah: Finished setting up the OpenWeather API key and started integrating it into the backend. Plans to connect it to the database and log weather data. No blockers.
+Michael: Implemented some translation logic and working on main menu screen. No blockers.
+Zane: Worked on designing and applying accessibility features, including high-contrast mode and keyboard navigation. Plans to test color contrast and begin preparing user testing for accessibility compliance. No blockers.
+David: Continued developing the kiosk interface and added base page routing for customer flow. Plans to polish the layout and assist with connecting the order system to the checkout flow. No blockers.
+
+## SCRUM Meeting 11/10 Notes:
+ Meeting Location: Zachry
+ Time: 12:30 – 12:45 p.m.
+ 
+Leading Questions: What have you done since Thursday? What will you do today for the MVP Demo? and Are there any impediments or blockers?
+
+Jonah: Completed weather logging integration and verified the backend API calls. Plans to finalize database updates and confirm weather data is being stored correctly. No blockers.
+Michael: Finished translation and language toggle features. . No blockers.
+Zane: Completed accessibility enhancements (high contrast + keyboard nav) and began testing user flow for the kiosk UI. Plans to work on Written Elements and Github Release. No blockers.
+David: Finalized the order flow. Plans to connect checkout to the database and refine layout consistency across pages. No blockers.
