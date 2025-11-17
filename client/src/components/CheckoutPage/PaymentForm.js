@@ -82,12 +82,7 @@ const FormGrid = styled('div')(() => ({
   flexDirection: 'column',
 }));
 
-export default function PaymentForm() {
-  const [paymentType, setPaymentType] = React.useState('creditCard');
-  const [cardNumber, setCardNumber] = React.useState('');
-  const [cvv, setCvv] = React.useState('');
-  const [expirationDate, setExpirationDate] = React.useState('');
-
+export default function PaymentForm({ paymentType, setPaymentType, cardNumber, setCardNumber, cvv, setCvv, expirationDate, setExpirationDate, cardName, setCardName }) {
   const handlePaymentTypeChange = (event) => {
     setPaymentType(event.target.value);
   };
@@ -255,6 +250,8 @@ export default function PaymentForm() {
                   placeholder="John Smith"
                   required
                   size="small"
+                  value={cardName}
+                  onChange={(e) => setCardName(e.target.value)}
                 />
               </FormGrid>
               <FormGrid sx={{ flexGrow: 1 }}>

@@ -23,14 +23,42 @@ import AppTheme from '../../shared-theme/AppTheme';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 
 const steps = ['Name', 'Payment details', 'Review your order'];
-function getStepContent(step) {
+function getStepContent(step, orderItems, orderTotal, formData) {
   switch (step) {
     case 0:
-      return <AddressForm />;
+      return <AddressForm 
+        firstName={formData.firstName}
+        setFirstName={formData.setFirstName}
+        lastName={formData.lastName}
+        setLastName={formData.setLastName}
+        phoneNumber={formData.phoneNumber}
+        setPhoneNumber={formData.setPhoneNumber}
+      />;
     case 1:
-      return <PaymentForm />;
+      return <PaymentForm 
+        paymentType={formData.paymentType}
+        setPaymentType={formData.setPaymentType}
+        cardNumber={formData.cardNumber}
+        setCardNumber={formData.setCardNumber}
+        cvv={formData.cvv}
+        setCvv={formData.setCvv}
+        expirationDate={formData.expirationDate}
+        setExpirationDate={formData.setExpirationDate}
+        cardName={formData.cardName}
+        setCardName={formData.setCardName}
+      />;
     case 2:
-      return <Review />;
+      return <Review 
+        orderItems={orderItems} 
+        orderTotal={orderTotal}
+        firstName={formData.firstName}
+        lastName={formData.lastName}
+        phoneNumber={formData.phoneNumber}
+        paymentType={formData.paymentType}
+        cardNumber={formData.cardNumber}
+        cardName={formData.cardName}
+        expirationDate={formData.expirationDate}
+      />;
     default:
       throw new Error('Unknown step');
   }
@@ -38,6 +66,18 @@ function getStepContent(step) {
 export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 0, setOrderTotal, ...props }) {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = React.useState(0);
+  
+  // Address form state
+  const [firstName, setFirstName] = React.useState('');
+  const [lastName, setLastName] = React.useState('');
+  const [phoneNumber, setPhoneNumber] = React.useState('');
+  
+  // Payment form state
+  const [paymentType, setPaymentType] = React.useState('creditCard');
+  const [cardNumber, setCardNumber] = React.useState('');
+  const [cvv, setCvv] = React.useState('');
+  const [expirationDate, setExpirationDate] = React.useState('');
+  const [cardName, setCardName] = React.useState('');
   const handleNext = () => {
     setActiveStep(activeStep + 1);
   };
@@ -250,7 +290,16 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
               </Stack>
             ) : (
               <React.Fragment>
-                {getStepContent(activeStep)}
+                {getStepContent(activeStep, orderItems, orderTotal, {
+                  firstName, setFirstName,
+                  lastName, setLastName,
+                  phoneNumber, setPhoneNumber,
+                  paymentType, setPaymentType,
+                  cardNumber, setCardNumber,
+                  cvv, setCvv,
+                  expirationDate, setExpirationDate,
+                  cardName, setCardName
+                })}
                 <Box
                   sx={[
                     {

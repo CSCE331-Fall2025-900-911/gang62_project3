@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel } from '@mui/material';
-import { useColorScheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import AppTheme from '../../shared-theme/AppTheme';
+import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 import MenuItem from './MenuItem';
 import { useWeather } from "./weather";
 
@@ -29,7 +29,6 @@ const languages = [
  */
 function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
   const navigate = useNavigate();
-  const { mode, setMode } = useColorScheme();
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -202,15 +201,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <Button
-            variant={mode === 'highContrast' ? 'contained' : 'outlined'}
-            size="small"
-            aria-pressed={mode === 'highContrast'}
-            aria-label="Toggle high contrast mode"
-            onClick={() => setMode(mode === 'highContrast' ? 'system' : 'highContrast')}
-          >
-            {mode === 'highContrast' ? 'High Contrast: On' : 'High Contrast: Off'}
-          </Button>
+          <ColorModeIconDropdown />
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Language</InputLabel>
             <Select

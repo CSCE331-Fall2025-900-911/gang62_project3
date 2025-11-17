@@ -8,7 +8,7 @@ const FormGrid = styled(Grid)(() => ({
   flexDirection: 'column',
 }));
 
-export default function AddressForm() {
+export default function AddressForm({ firstName, setFirstName, lastName, setLastName, phoneNumber, setPhoneNumber }) {
   return (
     <Grid container spacing={3}>
       <FormGrid size={{ xs: 12, md: 6 }}>
@@ -23,6 +23,8 @@ export default function AddressForm() {
           autoComplete="first name"
           required
           size="small"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
         />
       </FormGrid>
       <FormGrid size={{ xs: 12, md: 6 }}>
@@ -37,6 +39,8 @@ export default function AddressForm() {
           autoComplete="last name"
           required
           size="small"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
         />
       </FormGrid>
       <FormGrid size={{ xs: 12 }}>
@@ -50,6 +54,8 @@ export default function AddressForm() {
           placeholder="(123) 456-7890"
           autoComplete="tel"
           size="small"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value)}
         />
       </FormGrid>
     

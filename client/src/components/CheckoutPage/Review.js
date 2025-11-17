@@ -7,30 +7,56 @@ import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-const addresses = ['1 MUI Drive', 'Reactville', 'Anytown', '99999', 'USA'];
-const payments = [
-  { name: 'Card type:', detail: 'Visa' },
-  { name: 'Card holder:', detail: 'Mr. John Smith' },
-  { name: 'Card number:', detail: 'xxxx-xxxx-xxxx-1234' },
-  { name: 'Expiry date:', detail: '04/2024' },
-];
+export default function Review({ 
+  orderItems = [], 
+  orderTotal = 0,
+  firstName = '',
+  lastName = '',
+  phoneNumber = '',
+  paymentType = 'creditCard',
+  cardNumber = '',
+  cardName = '',
+  expirationDate = ''
+}) {
+  const TAX_RATE = 0.0825; // 8.25% tax rate
+  const subtotal = orderTotal;
+  const tax = subtotal * TAX_RATE;
+  const total = subtotal + tax;
+  
+  // Format card number to show last 4 digits
+  const maskedCardNumber = cardNumber ? `xxxx-xxxx-xxxx-${cardNumber.replace(/\s/g, '').slice(-4)}` : 'Not provided';
+  const fullName = `${firstName} ${lastName}`.trim() || 'Not provided';
+  
+  const payments = [
+    { name: 'Payment type:', detail: paymentType === 'creditCard' ? 'Credit Card' : 'Crypto Wallet' },
+    ...(paymentType === 'creditCard' ? [
+      { name: 'Card holder:', detail: cardName || 'Not provided' },
+      { name: 'Card number:', detail: maskedCardNumber },
+      { name: 'Expiry date:', detail: expirationDate || 'Not provided' },
+    ] : [
+      { name: 'Wallet:', detail: '0x742d...0bEb8' },
+      { name: 'Network:', detail: 'Ethereum (ERC-20)' },
+    ])
+  ];
 
-export default function Review() {
   return (
     <Stack spacing={2}>
       <List disablePadding>
         <ListItem sx={{ py: 1, px: 0 }}>
-          <ListItemText primary="Products" secondary="4 selected" />
-          <Typography variant="body2">$134.98</Typography>
+          <ListItemText 
+            primary="Products" 
+            secondary={`${orderItems.length} ${orderItems.length === 1 ? 'item' : 'items'} selected`} 
+          />
+          <Typography variant="body2">${subtotal.toFixed(2)}</Typography>
         </ListItem>
         <ListItem sx={{ py: 1, px: 0 }}>
-          <ListItemText primary="Shipping" secondary="Plus taxes" />
-          <Typography variant="body2">$9.99</Typography>
+          <ListItemText primary="Tax" secondary={`${(TAX_RATE * 100).toFixed(2)}%`} />
+          <Typography variant="body2">${tax.toFixed(2)}</Typography>
         </ListItem>
         <ListItem sx={{ py: 1, px: 0 }}>
           <ListItemText primary="Total" />
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-            $144.97
+            ${total.toFixed(2)}
           </Typography>
         </ListItem>
       </List>
@@ -43,12 +69,14 @@ export default function Review() {
       >
         <div>
           <Typography variant="subtitle2" gutterBottom>
-            Shipment details
+            Customer details
           </Typography>
-          <Typography gutterBottom>John Smith</Typography>
-          <Typography gutterBottom sx={{ color: 'text.secondary' }}>
-            {addresses.join(', ')}
-          </Typography>
+          <Typography gutterBottom>{fullName}</Typography>
+          {phoneNumber && (
+            <Typography gutterBottom sx={{ color: 'text.secondary' }}>
+              Phone: {phoneNumber}
+            </Typography>
+          )}
         </div>
         <div>
           <Typography variant="subtitle2" gutterBottom>
