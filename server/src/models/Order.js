@@ -35,7 +35,7 @@ class Order extends DatabaseConnection {
      * @author Jonah Coffelt
      */
     addItem(item) {
-        orderItems.add(item);
+        this.orderItems.push(item);
     }
 
     /**
@@ -45,7 +45,7 @@ class Order extends DatabaseConnection {
      * @author Jonah Coffelt
      */
     removeItem(item) {
-        let index = orderItems.indexOf(item);
+        let index = this.orderItems.indexOf(item);
         if (index !== -1) {
             orderItems.splice(index, 1);
         }
@@ -69,13 +69,13 @@ class Order extends DatabaseConnection {
     async submit() {
 
         // Get subtotal from all menu items
-        subtotal = 0.0;
+        let subtotal = 0.0;
         this.orderItems.forEach(item => {
             subtotal += item.getPrice();
         });
 
         // Calculate tax
-        tax = subtotal * TAX;
+        let tax = subtotal * TAX;
 
         // Get current timestamp
         const now = new Date();
@@ -95,23 +95,49 @@ class Order extends DatabaseConnection {
         }
 
         // Get the id for the ticket
-        const getTicketIdQuery = 'SELECT MAX(id) as max_id FROM orders;';
+        const getTicketIdQuery = 'SELECT MAX(id) as max_id FROM tickets;';
         const ticketIdResult = await this.runQuery(getTicketIdQuery);
         let ticketID = 1;
         if (ticketIdResult && ticketIdResult.length > 0 && ticketIdResult[0].max_id !== null) {
             ticketID = parseInt(ticketIdResult[0].max_id) + 1;
         }
 
+        const subtotalCents = Math.round(subtotal * 100);
+        const taxCents = Math.round(tax * 100);
+        const totalCents = Math.round((subtotal + tax) * 100);
+
         let orderQuery = {
-            text: "INSERT INTO orders (id, employee_id, customer_id, status, subtotal_cents, tax_cents, total_cents, created_at) VALUES ($1, $2, $3, 1, $4, $5, $6, '$7');",
-            value: [orderID, this.employeeID, this.customerID, subtotal * 100, tax * 100]
-        }
+            text: "INSERT INTO orders (id, employee_id, customer_id, status, subtotal_cents, tax_cents, total_cents, created_at) \
+                VALUES ($1, $2, $3, 1, $4, $5, $6, $7);",
+            values: [
+                orderID,
+                this.employeeID,
+                this.customerID,
+                subtotalCents,
+                taxCents,
+                totalCents,
+                timestamp
+            ]
+        };
+        this.runQuery(orderQuery);
 
-        let ticketQuery = {
-            text: 'INSERT INTO tickets (id, order_id, menu_item_id, qty, line_total_cents) VALUES ($1, $2, $3, $4, $5);',
-            values: [ticketID, orderID, ]
-        }
+        for (const item of this.orderItems) {
+            const ticketQuery = {
+                text: `INSERT INTO tickets
+                    (id, order_id, menu_item_id, qty, line_total_cents)
+                    VALUES ($1, $2, $3, $4, $5);`,
+                values: [
+                    ticketID,
+                    orderID,
+                    item.getID(),
+                    1,
+                    Math.round(item.getPrice() * 100)
+                ]
+            };
 
+            await this.runQuery(ticketQuery);
+            ticketID++;
+        }
     }
 }
 
