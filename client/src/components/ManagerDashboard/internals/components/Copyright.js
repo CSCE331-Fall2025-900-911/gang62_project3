@@ -15,9 +15,7 @@ export default function Copyright(props) {
       ]}
     >
       {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Sitemark
-      </Link>{' '}
+      Gang_62 of CSCE 331
       {new Date().getFullYear()}
       {'.'}
     </Typography>

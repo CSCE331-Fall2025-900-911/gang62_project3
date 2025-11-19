@@ -1,3 +1,5 @@
+Sprint 1 --
+
 ## SCRUM Meeting 11/5 Notes:
 Meeting Location: Zachry
 Time: 9:44 a.m. - 10 a.m.
@@ -31,3 +33,26 @@ Jonah: Completed weather logging integration and verified the backend API calls.
 Michael: Finished translation and language toggle features. . No blockers.
 Zane: Completed accessibility enhancements (high contrast + keyboard nav) and began testing user flow for the kiosk UI. Plans to work on Written Elements and Github Release. No blockers.
 David: Finalized the order flow. Plans to connect checkout to the database and refine layout consistency across pages. No blockers.
+
+Sprint 2 --
+
+## SCRUM Meeting 11/17 Notes:
+- Leading Questions: What are we planning on completing this sprint? What will you work on in the next couple days? and Are there any impediments or blockers?
+
+Planning to Complete Project 2 Migration, Google OAuth, and order processing on backend. At the end of this sprint we will have the fully completed project MVP.
+
+Jonah: Order backend stuff
+David: Carousel
+Michael: Cashier Page
+Zane: Google OAuth, fix accessibility
+
+Blockers: Getting OAuth connected not as intuitive.
+
+## SCRUM Meeting 11/19 Notes:
+- - Leading Questions: What have you gotten done since Monday? What will you work on in the next couple days? and Are there any impediments or blockers?
+- As a group we did not get a lot since Monday, however we are still on pace to complete everything for Sprint 2
+
+- Michael: Continue working on UI Migrations
+- Jonah: Continue fixing order backend 
+- David: Recommendations Carousel
+- Zane: Finish Google OAuth

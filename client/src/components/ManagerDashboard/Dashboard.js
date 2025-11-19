@@ -2,11 +2,19 @@ import { alpha } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import { useState } from 'react';
 import AppNavbar from './components/AppNavbar';
 import Header from './components/Header';
 import MainGrid from './components/MainGrid';
 import SideMenu from './components/SideMenu';
 import AppTheme from '../../shared-theme/AppTheme';
+import InventoryPage from './pages/InventoryPage';
+import CashierViewPage from './pages/CashierViewPage';
+import EmployeesPage from './pages/EmployeesPage';
+import XReportPage from './pages/XReportPage';
+import ZReportPage from './pages/ZReportPage';
+import SalesReportPage from './pages/SalesReportPage';
+import ProductChartPage from './pages/ProductChartPage';
 import {
   chartsCustomizations,
   dataGridCustomizations,
@@ -22,11 +30,36 @@ const xThemeComponents = {
 };
 
 export default function Dashboard(props) {
+  const [activePage, setActivePage] = useState('Home');
+
+  const renderPage = () => {
+    switch (activePage) {
+      case 'Home':
+        return <MainGrid />;
+      case 'Inventory':
+        return <InventoryPage />;
+      case 'Cashier View':
+        return <CashierViewPage />;
+      case 'Employees':
+        return <EmployeesPage />;
+      case 'X Report':
+        return <XReportPage />;
+      case 'Z Report':
+        return <ZReportPage />;
+      case 'Sales Report':
+        return <SalesReportPage />;
+      case 'Product Chart':
+        return <ProductChartPage />;
+      default:
+        return <MainGrid />;
+    }
+  };
+
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
-        <SideMenu />
+        <SideMenu activePage={activePage} setActivePage={setActivePage} />
         <AppNavbar />
         {/* Main content */}
         <Box
@@ -49,7 +82,7 @@ export default function Dashboard(props) {
             }}
           >
             <Header />
-            <MainGrid />
+            {renderPage()}
           </Stack>
         </Box>
       </Box>
