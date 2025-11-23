@@ -14,8 +14,8 @@ export default function Copyright(props) {
         ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
       ]}
     >
-      {'Copyright © '}
-      Gang_62 of CSCE 331
+      {'Copyright © Gang_62 of CSCE 331 '}
+      
       {new Date().getFullYear()}
       {'.'}
     </Typography>
