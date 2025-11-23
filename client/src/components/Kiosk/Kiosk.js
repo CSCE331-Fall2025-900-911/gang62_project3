@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel } from '@mui/material';
+import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel, IconButton, Card, CardMedia } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AppTheme from '../../shared-theme/AppTheme';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 import MenuItem from './MenuItem';
@@ -19,6 +21,22 @@ const languages = [
   { code: 'ZH', name: 'Chinese' }
 ];
 
+// Carousel promotional items
+const carouselItems = [
+  {
+    id: 1,
+    title: 'Festive Green Tea Boba',
+    image: 'https://www.kerryfoodservice.com/cdn/shop/files/Kerry_WinterSeasonal_Photoshoot_GermanChocolateBoba_014_2024_1000x.jpg?v=1729524670',
+    description: 'Try our seasonal beverages'
+  },
+  {
+    id: 2,
+    title: 'Fruit collection',
+    image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fbiyopos.com%2Fwp-content%2Fuploads%2F2025%2F08%2Fboba-flavors-collection.png&f=1&nofb=1&ipt=06f3d63629bc2383e39a4189637bc2397016b4eed438e199ec072b78fa2f8994',
+    description: '3-6 PM - Special pricing'
+  }
+];
+
 /**
  * Kiosk component for displaying menu items in a touchscreen-friendly interface.
  * Fetches menu items from the API and displays them in a responsive grid layout.
@@ -34,6 +52,8 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
   const [error, setError] = useState(null);
   const [language, setLanguage] = useState('EN');
   const translationsRef = useRef({});
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const carouselRef = useRef(null);
 
   useEffect(() => {
     translationsRef.current = {};
@@ -149,6 +169,16 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
     console.log('Current order:', [...orderItems, item]);
   };
 
+  /**
+   * Handles carousel navigation
+   */
+  const handlePrevSlide = () => {
+    setCurrentSlide((prev) => (prev === 0 ? carouselItems.length - 1 : prev - 1));
+  };
+
+  const handleNextSlide = () => {
+    setCurrentSlide((prev) => (prev === carouselItems.length - 1 ? 0 : prev + 1));
+  };
   if (loading) {
     return (
       <AppTheme>
@@ -236,6 +266,116 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
           >
             {translatedTexts.checkout}
           </Button>
+        </Box>
+      </Box>
+
+      {/* Carousel Section */}
+      <Box sx={{ position: 'relative', mb: 4, width: '100%' }}>
+        <Box
+          ref={carouselRef}
+          sx={{
+            display: 'flex',
+            overflow: 'hidden',
+            borderRadius: 2,
+            position: 'relative',
+            width: '100%',
+            aspectRatio: '3/1',
+          }}
+        >
+          {carouselItems.map((item, index) => (
+            <Box
+              key={item.id}
+              sx={{
+                minWidth: '100%',
+                transition: 'transform 0.5s ease-in-out',
+                transform: `translateX(-${currentSlide * 100}%)`,
+                height: '100%',
+              }}
+            >
+              <Card sx={{ height: '100%', position: 'relative', p: 0, overflow: 'hidden' }}>
+                <CardMedia
+                  component="img"
+                  image={item.image}
+                  alt={item.title}
+                  sx={{ objectFit: 'cover', display: 'block', height: '100%', width: '100%' }}
+                />
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
+                    color: 'white',
+                    p: 2,
+                  }}
+                >
+                  <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {item.title}
+                  </Typography>
+                  <Typography variant="body1">
+                    {item.description}
+                  </Typography>
+                </Box>
+              </Card>
+            </Box>
+          ))}
+        </Box>
+
+        {/* Navigation Buttons */}
+        <IconButton
+          onClick={handlePrevSlide}
+          sx={{
+            position: 'absolute',
+            left: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          }}
+        >
+          <ChevronLeftIcon />
+        </IconButton>
+        <IconButton
+          onClick={handleNextSlide}
+          sx={{
+            position: 'absolute',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          }}
+        >
+          <ChevronRightIcon />
+        </IconButton>
+
+        {/* Indicator Dots */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 16,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            gap: 1,
+          }}
+        >
+          {carouselItems.map((_, index) => (
+            <Box
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              sx={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                backgroundColor: currentSlide === index ? 'white' : 'rgba(255, 255, 255, 0.5)',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  backgroundColor: 'white',
+                },
+              }}
+            />
+          ))}
         </Box>
       </Box>
       
