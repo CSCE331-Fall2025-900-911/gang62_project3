@@ -48,8 +48,7 @@ export default function Dashboard(props) {
         return <ZReportPage />;
       case 'Sales Report':
         return <SalesReportPage />;
-      case 'Product Chart':
-        return <ProductChartPage />;
+
       default:
         return <MainGrid />;
     }
