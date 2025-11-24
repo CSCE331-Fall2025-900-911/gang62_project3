@@ -4,6 +4,7 @@ const axios = require('axios');
 const Menu = require('./models/Menu');
 const Order = require('./models/Order');
 const MenuItem = require('./models/MenuItem');
+const Staff = require('./models/Staff');
 
 /**
  * Express server for the Point of Sale system.
@@ -29,7 +30,7 @@ app.get('/', (req, res) => {
     res.json({ 
         status: 'ok', 
         message: 'Server is running',
-        endpoints: ['/api/menu-items', '/api/translate', '/api/submit-order']
+        endpoints: ['/api/menu-items', '/api/translate', '/api/submit-order', '/api/employees']
     });
 });
 
@@ -135,6 +136,52 @@ app.post('/api/submit-order', async (req, res) => {
     } catch (error) {
         console.error('Error submitting order:', error);
         res.status(500).json({ error: 'Failed to submit order: ' + error.message });
+    }
+});
+
+/**
+ * API endpoint to retrieve all employees from the database.
+ * Returns a JSON array of employees with id, name, role (status), and tips (calculated from sales).
+ * 
+ * @route GET /api/employees
+ * @returns {Promise<void>} Sends JSON response with employees array
+ * @throws {Error} If database query fails, returns 500 status with error message
+ * @author Michael Nguyen
+ */
+app.get('/api/employees', async (req, res) => {
+    try {
+        const staff = new Staff();
+        await staff.load();
+        const employees = staff.getEmployees();
+        
+        // Query database directly to get status field (not stored in Employee model)
+        const statusQuery = await staff.runQuery('SELECT id, status FROM employees');
+        const statusMap = {};
+        statusQuery.forEach(row => {
+            statusMap[row.id] = row.status || 'Employee'; // Default to 'Employee' if status is null
+        });
+        
+        // Convert Employee objects to plain JSON with sales/tips data
+        const employeesData = await Promise.all(
+            employees.map(async (employee) => {
+                const salesCents = await employee.getSales();
+                // Convert sales from cents to dollars, then calculate tips as 10% of sales
+                const salesDollars = salesCents ? salesCents / 100 : 0;
+                const tips = salesDollars * 0.10;
+                
+                return {
+                    id: employee.getID(),
+                    name: employee.getName(),
+                    role: statusMap[employee.getID()] || 'Employee',
+                    tips: tips,
+                };
+            })
+        );
+        
+        res.json(employeesData);
+    } catch (error) {
+        console.error('Error fetching employees:', error);
+        res.status(500).json({ error: 'Failed to fetch employees' });
     }
 });
 

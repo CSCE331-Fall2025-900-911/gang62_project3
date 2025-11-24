@@ -1,7 +1,9 @@
-import React from 'react';
-import { Box, Typography, Paper } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Paper, CircularProgress, Alert } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+
+const API_BASE_URL = process.env.REACT_APP_API || 'http://localhost:3001';
 
 const columns = [
   { field: 'id', headerName: 'ID', width: 90 },
@@ -23,20 +25,62 @@ const columns = [
   },
 ];
 
-const rows = [
-  { id: 1, name: 'Jonah Coffelt', role: 'Manager', tips: 150.50 },
-  { id: 2, name: 'Michael Nguyen', role: 'Barista', tips: 85.20 },
-  { id: 3, name: 'Zane', role: 'Cashier', tips: 45.00 },
-  { id: 4, name: 'Alice Smith', role: 'Barista', tips: 92.75 },
-  { id: 5, name: 'Bob Jones', role: 'Kitchen Staff', tips: 30.00 },
-  { id: 6, name: 'Charlie Brown', role: 'Cashier', tips: 55.50 },
-  { id: 7, name: 'David Wilson', role: 'Barista', tips: 110.25 },
-  { id: 8, name: 'Eva Davis', role: 'Manager', tips: 175.00 },
-  { id: 9, name: 'Frank Miller', role: 'Kitchen Staff', tips: 25.50 },
-  { id: 10, name: 'Grace Lee', role: 'Cashier', tips: 60.00 },
-];
-
+/**
+ * Employees page component for displaying and managing employee information.
+ * Fetches employees from the database and displays them in a data grid with
+ * their ID, name, role, and calculated tips.
+ * 
+ * @component
+ * @author Michael Nguyen
+ */
 export default function EmployeesPage() {
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  /**
+   * Fetches all employees from the API endpoint.
+   * Updates the component state with the retrieved employees.
+   * 
+   * @returns {Promise<void>} Promise that resolves when employees are fetched
+   * @throws {Error} If API request fails, sets error state
+   * @author Michael Nguyen
+   */
+  const fetchEmployees = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/employees`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch employees');
+      }
+      const data = await response.json();
+      setEmployees(data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Alert severity="error">Error: {error}</Alert>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
@@ -51,7 +95,7 @@ export default function EmployeesPage() {
       
       <Paper sx={{ height: 600, width: '100%' }}>
         <DataGrid
-          rows={rows}
+          rows={employees}
           columns={columns}
           initialState={{
             pagination: {
