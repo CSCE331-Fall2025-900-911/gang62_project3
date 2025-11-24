@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const Menu = require('./models/Menu');
-const Inventory = require('./models/Inventory');
-const Ingredient = require('./models/Ingredient');
+const Order = require('./models/Order');
+const MenuItem = require('./models/MenuItem');
 
 /**
  * Express server for the Point of Sale system.
@@ -12,7 +12,7 @@ const Ingredient = require('./models/Ingredient');
  * @author Michael Nguyen
  */
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Enable CORS for client requests
 app.use(cors());
@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
     res.json({ 
         status: 'ok', 
         message: 'Server is running',
-        endpoints: ['/api/menu-items', '/api/translate', '/api/inventory']
+        endpoints: ['/api/menu-items', '/api/translate', '/api/submit-order']
     });
 });
 
@@ -62,84 +62,6 @@ app.get('/api/menu-items', async (req, res) => {
     }
 });
 
-app.get('/api/inventory/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        const ingredient = await Ingredient.create(id);
-        if (!ingredient) {
-            return res.status(404).json({ error: 'Ingredient not found' });
-        }
-
-        res.json({
-            id: ingredient.getID(),
-            name: ingredient.getName(),
-            stock: ingredient.getStock(),
-            quantityPerUnit: ingredient.getQuantityPerUnit()
-        });
-    } catch (error) {
-        console.error('Error fetching ingredient:', error);
-        res.status(500).json({ error: 'Failed to fetch ingredient' });
-    }
-});
-
-
-/**
- * API endpoint to retrieve all inventory items from the database.
- * Returns a JSON array of ingredients with id, name, stock, and quantityPerUnit.
- * 
- * @route GET /api/inventory
- * @returns {Promise<void>} Sends JSON response with inventory items array
- * @throws {Error} If database query fails, returns 500 status with error message
- */
-app.get('/api/inventory', async (req, res) => {
-    try {
-        const inventory = new Inventory();
-        await inventory.load();
-        const ingredients = inventory.getIngredients();
-        
-        // Convert Ingredient objects to plain JSON
-        const items = ingredients.map(item => ({
-            id: item.getID(),
-            name: item.getName(),
-            stock: item.getStock(),
-            quantityPerUnit: item.getQuantityPerUnit()
-        }));
-        
-        res.json(items);
-    } catch (error) {
-        console.error('Error fetching inventory items:', error);
-        res.status(500).json({ error: 'Failed to fetch inventory items' });
-    }
-});
-
-/**
- * API endpoint to update inventory stock.
- * 
- * @route PUT /api/inventory/:id
- * @param {number} id - The ID of the ingredient to update
- * @param {number} stock - The new stock value
- * @returns {Promise<void>} Sends JSON response with success status
- */
-app.put('/api/inventory/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { stock } = req.body;
-        
-        if (stock === undefined) {
-            return res.status(400).json({ error: 'Stock value is required' });
-        }
-
-        const ingredient = await Ingredient.create(id);
-        await ingredient.setStock(stock);
-        
-        res.json({ success: true, message: 'Stock updated successfully', stock: ingredient.getStock() });
-    } catch (error) {
-        console.error('Error updating inventory:', error);
-        res.status(500).json({ error: 'Failed to update inventory' });
-    }
-});
-
 /**
  * API endpoint to translate text using DeepL API.
  * 
@@ -168,6 +90,50 @@ app.post('/api/translate', async (req, res) => {
     } catch (error) {
         console.error('Error translating text:', error);
         res.status(500).json({ error: 'Failed to translate text' });
+    }
+});
+
+/**
+ * API endpoint to submit an order to the database.
+ * Creates an Order instance, adds menu items, and submits it.
+ * 
+ * @route POST /api/submit-order
+ * @param {number} employeeID - The employee ID processing the order
+ * @param {number} customerID - The customer ID (defaults to 1)
+ * @param {Array} items - Array of objects with id and quantity, or array of menu item IDs
+ * @returns {Promise<void>} Sends JSON response with success status
+ * @throws {Error} If order submission fails, returns 500 status with error message
+ */
+app.post('/api/submit-order', async (req, res) => {
+    try {
+        const { employeeID, customerID, items } = req.body;
+        
+        if (!employeeID || !items || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ error: 'employeeID and items array are required' });
+        }
+        
+        const order = new Order(employeeID, customerID || 1);
+        
+        // Add each menu item to the order (handle both formats: array of IDs or array of objects)
+        for (const item of items) {
+            const itemId = typeof item === 'object' ? item.id : item;
+            const quantity = typeof item === 'object' && item.quantity ? item.quantity : 1;
+            
+            const menuItem = await MenuItem.create(itemId);
+            
+            // Add the item the specified number of times (matching Java behavior)
+            for (let i = 0; i < quantity; i++) {
+                order.addItem(menuItem);
+            }
+        }
+        
+        // Submit the order
+        await order.submit();
+        
+        res.json({ success: true, message: 'Order submitted successfully' });
+    } catch (error) {
+        console.error('Error submitting order:', error);
+        res.status(500).json({ error: 'Failed to submit order: ' + error.message });
     }
 });
 
