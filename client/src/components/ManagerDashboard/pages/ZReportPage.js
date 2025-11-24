@@ -20,17 +20,16 @@ export default function ZReportPage() {
     lowStockItem: "Napkins (Pack)"
   });
 
-  const zeroData = {
-    revenue: 0,
-    taxes: 0,
-    profit: 0,
-    orderCount: 0,
-    topEmployee: "N/A",
-    mostPopularItem: "N/A",
-    lowStockItem: "N/A"
-  };
-
   useEffect(() => {
+    const zeroData = {
+      revenue: 0,
+      taxes: 0,
+      profit: 0,
+      orderCount: 0,
+      topEmployee: "N/A",
+      mostPopularItem: "N/A",
+      lowStockItem: "N/A"
+    };
     if (window.isZReportGenerated) {
       // Already generated
       setReportData(zeroData);

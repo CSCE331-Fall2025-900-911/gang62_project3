@@ -10,8 +10,6 @@ import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import SummarizeRoundedIcon from '@mui/icons-material/SummarizeRounded';
-import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded';
-import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 
 const mainListItems = [
   { text: 'Home', icon: <HomeRoundedIcon /> },

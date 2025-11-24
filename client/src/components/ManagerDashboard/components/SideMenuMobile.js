@@ -10,7 +10,6 @@ import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import { useNavigate } from 'react-router-dom';
 import MenuButton from './MenuButton';
 import MenuContent from './MenuContent';
-import CardAlert from './CardAlert';
 
 function SideMenuMobile({ open, toggleDrawer, activePage, setActivePage }) {
   const navigate = useNavigate();
