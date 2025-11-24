@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import SignIn from './components/SignIn/SignIn';
 import Kiosk from './components/Kiosk/Kiosk';
 import Checkout from './components/CheckoutPage/Checkout';
+import Dashboard from './components/ManagerDashboard/Dashboard';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -91,6 +92,18 @@ function App() {
                 <Navigate to="/" />
               )
             } 
+          />
+          <Route
+            path="/manager"
+            element={
+              !authChecked ? (
+                <div />
+              ) : isAuthenticated ? (
+                <Dashboard user={user} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
           />
         </Routes>
       </div>
