@@ -56,3 +56,11 @@ Blockers: Getting OAuth connected not as intuitive.
 - Jonah: Continue fixing order backend 
 - David: Recommendations Carousel
 - Zane: Finish Google OAuth
+
+## SCRUM Meeting 11/23 Notes:
+- - Leading Questions: What have you gotten done since Wednesday? What will you work on today - end of sprint? and Are there any impediments or blockers?
+
+- Michael: I've been working on feature migrations. Will work on UI/API enhancements. No blockers
+- Jonah: Finished order class for submitting to the database. Planning to implement recommendation. Roadblock of getting recommendations working with front end, but should be fine.
+- David: Been working on X and Z report UI for a bit. Planning on finishing that and then adding the other charts and making sure everything is the same from project 2. Roadbloacks include timing & exams.
+- Zane: Was working on Google OAuth, but not completed yet. Planning to Finish Google OAuth, revise accessibility features, and completing slides/written materials. Only roadblock is Google Oauth but should be done for tmrw.
