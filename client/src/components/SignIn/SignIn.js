@@ -20,6 +20,8 @@ import ColorModeSelect from '../../shared-theme/ColorModeSelect';
 import { GoogleIcon, FacebookIcon } from './CustomIcons';
 import OnScreenKeyboard from './OnScreenKeyboard';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -95,13 +97,21 @@ export default function SignIn({ onLogin, ...props }) {
     if (username === 'customer' && password === 'customer') {
       console.log('Login successful');
       if (onLogin) {
-        onLogin();
+        onLogin({
+          displayName: 'Customer Account',
+          email: 'customer@example.com',
+          photo: null,
+        });
       }
       navigate('/kiosk');
     } else if (username === 'admin' && password === 'admin') {
       console.log('Login successful');
       if (onLogin) {
-        onLogin();
+        onLogin({
+          displayName: 'Admin Account',
+          email: 'admin@example.com',
+          photo: null,
+        });
       }
       navigate('/manager');
     }
@@ -111,6 +121,10 @@ export default function SignIn({ onLogin, ...props }) {
       setPasswordError(true);
       setPasswordErrorMessage('Invalid username or password');
     }
+  };
+
+  const handleGoogleSignIn = () => {
+    window.location.href = `${API_BASE_URL}/api/auth/google`;
   };
 
   const validateInputs = () => {
@@ -234,7 +248,7 @@ export default function SignIn({ onLogin, ...props }) {
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign in with Google')}
+              onClick={handleGoogleSignIn}
               startIcon={<GoogleIcon />}
             >
               Sign in with Google

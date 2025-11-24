@@ -3,7 +3,7 @@ import { Box, Typography, Paper, CircularProgress, Alert } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 
-const API_BASE_URL = process.env.REACT_APP_API || 'http://localhost:3001';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 const columns = [
   { field: 'id', headerName: 'ID', width: 90 },

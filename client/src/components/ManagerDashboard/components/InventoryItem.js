@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 
-const API_BASE_URL = process.env.REACT_APP_API || 'http://localhost:3001';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 export default function InventoryItem({ item }) {
   const [stock, setStock] = useState(item.stock);

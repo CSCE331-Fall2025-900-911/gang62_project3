@@ -1,4 +1,3 @@
-import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 
 export default function Copyright(props) {
