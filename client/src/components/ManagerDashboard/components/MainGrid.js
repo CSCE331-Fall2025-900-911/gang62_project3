@@ -3,6 +3,8 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
 import Copyright from '../internals/components/Copyright';
 import ChartUserByCountry from './ChartUserByCountry';
 import CustomizedTreeView from './CustomizedTreeView';
@@ -13,45 +15,167 @@ import SessionsChart from './SessionsChart';
 import StatCard from './StatCard';
 import { rows as initialRows } from '../internals/data/gridData';
 
-const data = [
-  {
-    title: 'Total Sales',
-    value: '$14k',
-    interval: 'Last 30 days',
-    trend: 'up',
-    data: [
-      200, 24, 220, 260, 240, 380, 100, 240, 280, 240, 300, 340, 320, 360, 340, 380,
-      360, 400, 380, 420, 400, 640, 340, 460, 440, 480, 460, 600, 880, 920,
-    ],
-  },
-  {
-    title: 'Orders',
-    value: '325',
-    interval: 'Last 30 days',
-    trend: 'down',
-    data: [
-      1640, 1250, 970, 1130, 1050, 900, 720, 1080, 900, 450, 920, 820, 840, 600, 820,
-      780, 800, 760, 380, 740, 660, 620, 840, 500, 520, 480, 400, 360, 300, 220,
-    ],
-  },
-  {
-    title: 'Avg. Order Value',
-    value: '$12.50',
-    interval: 'Last 30 days',
-    trend: 'neutral',
-    data: [
-      500, 400, 510, 530, 520, 600, 530, 520, 510, 730, 520, 510, 530, 620, 510, 530,
-      520, 410, 530, 520, 610, 530, 520, 610, 530, 420, 510, 430, 520, 510,
-    ],
-  },
-];
+const API_BASE_URL = process.env.REACT_APP_API || 'http://localhost:3001';
 
+/**
+ * Manager dashboard home grid component.
+ * Fetches analytics data (summary metrics and top items) from the API and
+ * renders overview statistic cards, charts, and a detailed data grid.
+ *
+ * Falls back to local demo data if the API is unavailable.
+ *
+ * @component
+ * @author Michael Nguyen
+ */
 export default function MainGrid() {
+  const [allRows, setAllRows] = React.useState(initialRows);
   const [filteredRows, setFilteredRows] = React.useState(initialRows);
+  const [summary, setSummary] = React.useState(null);
+  const [topItems, setTopItems] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
 
+  React.useEffect(() => {
+    /**
+     * Fetches dashboard summary statistics and top-selling items from the backend.
+     * Populates local state used to render the overview cards, charts, and data grid.
+     *
+     * Falls back to static demo rows if the API request fails.
+     *
+     * @returns {Promise<void>} Promise that resolves when dashboard data is loaded
+     * @throws {Error} Logged and stored in state if the API request fails
+     * @author Michael Nguyen
+     */
+    const fetchDashboardData = async () => {
+      try {
+        const [summaryRes, topItemsRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/dashboard/summary`),
+          fetch(`${API_BASE_URL}/api/dashboard/top-items`),
+        ]);
+
+        if (!summaryRes.ok) {
+          throw new Error('Failed to fetch dashboard summary');
+        }
+        if (!topItemsRes.ok) {
+          throw new Error('Failed to fetch top items');
+        }
+
+        const summaryData = await summaryRes.json();
+        const topItemsData = await topItemsRes.json();
+
+        setSummary(summaryData);
+        setTopItems(topItemsData.items || []);
+
+        const rowsFromApi = (topItemsData.items || []).map((item) => {
+          let category = 'Other';
+          if (item.name.includes('Milk Tea')) category = 'Milk Tea';
+          else if (item.name.includes('Fruit Tea')) category = 'Fruit Tea';
+          else if (item.name.includes('Smoothie')) category = 'Smoothie';
+
+          return {
+            id: item.id,
+            itemName: item.name,
+            status: 'Online',
+            sales: item.totalRevenue,
+            stockCount: item.quantitySold,
+            price: item.basePrice,
+            category,
+          };
+        });
+
+        const effectiveRows = rowsFromApi.length > 0 ? rowsFromApi : initialRows;
+        setAllRows(effectiveRows);
+        setFilteredRows(effectiveRows);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error loading dashboard data:', err);
+        setError(err.message);
+        setAllRows(initialRows);
+        setFilteredRows(initialRows);
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  /**
+   * Builds configuration objects for the overview `StatCard` components
+   * derived from the loaded dashboard summary data.
+   *
+   * If no summary is available yet, returns neutral, zero-valued cards.
+   *
+   * @returns {Array<Object>} Array of card configuration objects for `StatCard`
+   * @author Michael Nguyen
+   */
+  const buildCardsData = () => {
+    if (!summary) {
+      return [
+        {
+          title: 'Total Sales',
+          value: '$0.00',
+          interval: 'Last 30 days',
+          trend: 'neutral',
+          data: [],
+        },
+        {
+          title: 'Orders',
+          value: '0',
+          interval: 'Last 30 days',
+          trend: 'neutral',
+          data: [],
+        },
+        {
+          title: 'Avg. Order Value',
+          value: '$0.00',
+          interval: 'Last 30 days',
+          trend: 'neutral',
+          data: [],
+        },
+      ];
+    }
+
+    const currencyFormatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 2,
+    });
+
+    return [
+      {
+        title: 'Total Sales',
+        value: currencyFormatter.format(summary.totalSales || 0),
+        interval: 'Last 30 days',
+        trend: 'neutral',
+        data: summary.dailyRevenue || [],
+      },
+      {
+        title: 'Orders',
+        value: String(summary.orderCount || 0),
+        interval: 'Last 30 days',
+        trend: 'neutral',
+        data: summary.dailyOrders || [],
+      },
+      {
+        title: 'Avg. Order Value',
+        value: currencyFormatter.format(summary.avgOrderValue || 0),
+        interval: 'Last 30 days',
+        trend: 'neutral',
+        data: summary.dailyAvgOrderValue || [],
+      },
+    ];
+  };
+
+  /**
+   * Handles selection changes from the side tree view and filters the
+   * data grid rows by the corresponding mapped category group.
+   *
+   * @param {string} selectedLabel - The label of the selected tree node
+   * @author Michael Nguyen
+   */
   const handleTreeSelection = (selectedLabel) => {
     if (!selectedLabel) {
-      setFilteredRows(initialRows);
+      setFilteredRows(allRows);
       return;
     }
 
@@ -71,22 +195,42 @@ export default function MainGrid() {
     const mappedCategory = categoryMap[selectedLabel];
 
     if (mappedCategory) {
-      const newRows = initialRows.filter((row) => row.category === mappedCategory);
+      const newRows = allRows.filter((row) => row.category === mappedCategory);
       setFilteredRows(newRows);
     } else if (selectedLabel === 'Menu') {
-       const menuCategories = ['Milk Tea', 'Fruit Tea', 'Smoothie'];
-       const newRows = initialRows.filter((row) => menuCategories.includes(row.category));
-       setFilteredRows(newRows);
+      const menuCategories = ['Milk Tea', 'Fruit Tea', 'Smoothie'];
+      const newRows = allRows.filter((row) => menuCategories.includes(row.category));
+      setFilteredRows(newRows);
     } else if (selectedLabel === 'Inventory') {
-       const inventoryCategories = ['Tea Leaves', 'Syrups', 'Milk', 'Cups & Lids'];
-       const newRows = initialRows.filter((row) => inventoryCategories.includes(row.category));
-       setFilteredRows(newRows);
+      const inventoryCategories = ['Tea Leaves', 'Syrups', 'Milk', 'Cups & Lids'];
+      const newRows = allRows.filter((row) => inventoryCategories.includes(row.category));
+      setFilteredRows(newRows);
     } else if (selectedLabel === 'All Items') {
-      setFilteredRows(initialRows);
+      setFilteredRows(allRows);
     } else {
-      setFilteredRows(initialRows);
+      setFilteredRows(allRows);
     }
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Failed to load dashboard data: {error}
+        </Alert>
+      </Box>
+    );
+  }
+
+  const cardsData = buildCardsData();
 
   return (
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
@@ -100,7 +244,7 @@ export default function MainGrid() {
         columns={12}
         sx={{ mb: (theme) => theme.spacing(2) }}
       >
-        {data.map((card, index) => (
+        {cardsData.map((card, index) => (
           <Grid key={index} size={{ xs: 12, sm: 6, lg: 3 }}>
             <StatCard {...card} />
           </Grid>
@@ -109,10 +253,10 @@ export default function MainGrid() {
           <HighlightedCard />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <SessionsChart />
+          <SessionsChart summary={summary} />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <PageViewsBarChart />
+          <PageViewsBarChart topItems={topItems} />
         </Grid>
       </Grid>
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>

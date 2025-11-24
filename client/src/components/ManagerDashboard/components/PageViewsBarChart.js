@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
@@ -6,19 +7,39 @@ import Stack from '@mui/material/Stack';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { useTheme } from '@mui/material/styles';
 
-export default function PageViewsBarChart() {
+/**
+ * PageViewsBarChart component that displays the top products by revenue
+ * for the last 30 days using real dashboard analytics data when available.
+ * Falls back to sample data so the chart still renders without an API.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {Array<Object>} [props.topItems] - Top-selling menu items with revenue and names
+ * @author Michael Nguyen
+ */
+export default function PageViewsBarChart({ topItems }) {
   const theme = useTheme();
-  const colorPalette = [
-    (theme.vars || theme).palette.primary.dark,
-    (theme.vars || theme).palette.primary.main,
-    (theme.vars || theme).palette.primary.light,
-  ];
+  const colorPalette = [(theme.vars || theme).palette.primary.main];
+
+  const hasData = topItems && topItems.length > 0;
+
+  const labels = hasData
+    ? topItems.map((item) => item.name)
+    : ['Milk Tea', 'Fruit Tea', 'Smoothies'];
+
+  const values = hasData
+    ? topItems.map((item) => item.totalRevenue)
+    : [5000, 3500, 3000];
+
+  const totalSales = hasData
+    ? values.reduce((sum, v) => sum + v, 0)
+    : 13500;
 
   return (
     <Card variant="outlined" sx={{ width: '100%' }}>
       <CardContent>
         <Typography component="h2" variant="subtitle2" gutterBottom>
-          Product Sales
+          Top Products by Revenue
         </Typography>
         <Stack sx={{ justifyContent: 'space-between' }}>
           <Stack
@@ -30,12 +51,16 @@ export default function PageViewsBarChart() {
             }}
           >
             <Typography variant="h4" component="p">
-              13,500
+              {new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumFractionDigits: 0,
+              }).format(totalSales)}
             </Typography>
-            <Chip size="small" color="error" label="-8%" />
+            <Chip size="small" color="default" label={hasData ? 'Live data' : 'Sample'} />
           </Stack>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Sales by category for the last 6 months
+            Revenue by menu item for the last 30 days
           </Typography>
         </Stack>
         <BarChart
@@ -45,29 +70,16 @@ export default function PageViewsBarChart() {
             {
               scaleType: 'band',
               categoryGapRatio: 0.5,
-              data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+              data: labels,
               height: 24,
             },
           ]}
           yAxis={[{ width: 50 }]}
           series={[
             {
-              id: 'milktea',
-              label: 'Milk Tea',
-              data: [2234, 3872, 2998, 4125, 3357, 2789, 2998],
-              stack: 'A',
-            },
-            {
-              id: 'fruittea',
-              label: 'Fruit Tea',
-              data: [3098, 4215, 2384, 2101, 4752, 3593, 2384],
-              stack: 'A',
-            },
-            {
-              id: 'smoothies',
-              label: 'Smoothies',
-              data: [4051, 2275, 3129, 4693, 3904, 2038, 2275],
-              stack: 'A',
+              id: 'revenue',
+              label: 'Revenue',
+              data: values,
             },
           ]}
           height={250}
@@ -79,3 +91,12 @@ export default function PageViewsBarChart() {
     </Card>
   );
 }
+
+PageViewsBarChart.propTypes = {
+  topItems: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      totalRevenue: PropTypes.number.isRequired,
+    })
+  ),
+};

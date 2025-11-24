@@ -7,6 +7,7 @@ const MenuItem = require('./models/MenuItem');
 const Staff = require('./models/Staff');
 const Inventory = require('./models/Inventory');
 const Ingredient = require('./models/Ingredient');
+const DatabaseConnection = require('./config/db');
 
 /**
  * Express server for the Point of Sale system.
@@ -65,6 +66,96 @@ app.get('/api/menu-items', async (req, res) => {
     }
 });
 
+/**
+ * Dashboard summary endpoint.
+ * Returns aggregate metrics and daily time-series data for the last 30 days.
+ *
+ * - totalSales: total revenue in dollars
+ * - orderCount: total number of orders
+ * - avgOrderValue: average order value in dollars
+ * - days: array of ISO date strings for the last 30 days
+ * - dailyRevenue: revenue per day in dollars (aligned with days)
+ * - dailyOrders: order count per day (aligned with days)
+ * - dailyAvgOrderValue: average order value per day in dollars (aligned with days)
+ *
+ * @route GET /api/dashboard/summary
+ * @returns {Promise<void>} Sends JSON response with dashboard summary metrics
+ * @throws {Error} If database query fails, returns 500 status with error message
+ * @author Michael Nguyen
+ */
+app.get('/api/dashboard/summary', async (req, res) => {
+    try {
+        const db = new DatabaseConnection();
+
+        const rows = await db.runQuery({
+            text: `
+                SELECT
+                    DATE(created_at) AS day,
+                    SUM(total_cents) AS total_cents,
+                    COUNT(*) AS order_count
+                FROM orders
+                WHERE created_at >= NOW() - INTERVAL '30 days'
+                GROUP BY DATE(created_at)
+                ORDER BY day;
+            `,
+        });
+
+        const today = new Date();
+        const days = [];
+        const dailyRevenue = [];
+        const dailyOrders = [];
+        const dailyAvgOrderValue = [];
+
+        let totalSalesCents = 0;
+        let totalOrders = 0;
+
+        // Build a map for quick lookup by date string
+        const byDate = {};
+        for (const row of rows) {
+            const dayKey = row.day.toISOString().slice(0, 10);
+            byDate[dayKey] = {
+                total_cents: Number(row.total_cents) || 0,
+                order_count: Number(row.order_count) || 0,
+            };
+        }
+
+        // Generate last 30 days (oldest -> newest)
+        for (let offset = 29; offset >= 0; offset -= 1) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - offset);
+            const key = d.toISOString().slice(0, 10);
+
+            const row = byDate[key] || { total_cents: 0, order_count: 0 };
+            const dayRevenueCents = row.total_cents;
+            const dayOrders = row.order_count;
+
+            days.push(key);
+            dailyRevenue.push(dayRevenueCents / 100.0);
+            dailyOrders.push(dayOrders);
+            dailyAvgOrderValue.push(dayOrders > 0 ? (dayRevenueCents / 100.0) / dayOrders : 0);
+
+            totalSalesCents += dayRevenueCents;
+            totalOrders += dayOrders;
+        }
+
+        const totalSales = totalSalesCents / 100.0;
+        const avgOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
+
+        res.json({
+            totalSales,
+            orderCount: totalOrders,
+            avgOrderValue,
+            days,
+            dailyRevenue,
+            dailyOrders,
+            dailyAvgOrderValue,
+        });
+    } catch (error) {
+        console.error('Error fetching dashboard summary:', error);
+        res.status(500).json({ error: 'Failed to fetch dashboard summary' });
+    }
+});
+
 app.get('/api/inventory/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -110,6 +201,71 @@ app.get('/api/inventory', async (req, res) => {
     } catch (error) {
         console.error('Error fetching inventory items:', error);
         res.status(500).json({ error: 'Failed to fetch inventory items' });
+    }
+});
+
+/**
+ * Dashboard top-items endpoint.
+ * Returns top-selling menu items for the last 30 days using real ticket/order data.
+ *
+ * Response shape:
+ * {
+ *   items: [
+ *     {
+ *       id: number,
+ *       name: string,
+ *       basePrice: number,        // in dollars
+ *       quantitySold: number,
+ *       totalRevenue: number      // in dollars
+ *     },
+ *     ...
+ *   ],
+ *   totalSales: number            // total revenue across returned items, in dollars
+ * }
+ *
+ * @route GET /api/dashboard/top-items
+ * @returns {Promise<void>} Sends JSON response with top-selling menu items
+ * @throws {Error} If database query fails, returns 500 status with error message
+ * @author Michael Nguyen
+ */
+app.get('/api/dashboard/top-items', async (req, res) => {
+    try {
+        const db = new DatabaseConnection();
+
+        const rows = await db.runQuery({
+            text: `
+                SELECT
+                    mi.id,
+                    mi.name,
+                    mi.base_price_cents,
+                    COALESCE(SUM(t.qty), 0) AS quantity_sold,
+                    COALESCE(SUM(t.qty * mi.base_price_cents), 0) AS total_cents
+                FROM menu_items mi
+                LEFT JOIN tickets t
+                    ON t.menu_item_id = mi.id
+                LEFT JOIN orders o
+                    ON o.id = t.order_id
+                    AND o.created_at >= NOW() - INTERVAL '30 days'
+                GROUP BY mi.id, mi.name, mi.base_price_cents
+                ORDER BY total_cents DESC
+                LIMIT 20;
+            `,
+        });
+
+        const items = rows.map((row) => ({
+            id: row.id,
+            name: row.name,
+            basePrice: (Number(row.base_price_cents) || 0) / 100.0,
+            quantitySold: Number(row.quantity_sold) || 0,
+            totalRevenue: (Number(row.total_cents) || 0) / 100.0,
+        }));
+
+        const totalSales = items.reduce((sum, item) => sum + item.totalRevenue, 0);
+
+        res.json({ items, totalSales });
+    } catch (error) {
+        console.error('Error fetching top items:', error);
+        res.status(500).json({ error: 'Failed to fetch top items' });
     }
 });
 

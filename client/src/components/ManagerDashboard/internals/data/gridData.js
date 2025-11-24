@@ -1,50 +1,13 @@
 import Avatar from '@mui/material/Avatar';
 import Chip from '@mui/material/Chip';
 
-import { SparkLineChart } from '@mui/x-charts/SparkLineChart';
-
-function getDaysInMonth(month, year) {
-  const date = new Date(year, month, 0);
-  const monthName = date.toLocaleDateString('en-US', {
-    month: 'short',
-  });
-  const daysInMonth = date.getDate();
-  const days = [];
-  let i = 1;
-  while (days.length < daysInMonth) {
-    days.push(`${monthName} ${i}`);
-    i += 1;
-  }
-  return days;
-}
-
-function renderSparklineCell(params) {
-  const data = getDaysInMonth(4, 2024);
-  const { value, colDef } = params;
-
-  if (!value || value.length === 0) {
-    return null;
-  }
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-      <SparkLineChart
-        data={value}
-        width={colDef.computedWidth || 100}
-        height={32}
-        plotType="bar"
-        showHighlight
-        showTooltip
-        color="hsl(210, 98%, 42%)"
-        xAxis={{
-          scaleType: 'band',
-          data,
-        }}
-      />
-    </div>
-  );
-}
-
+/**
+ * Renders a small status chip for an item's stock/online status.
+ *
+ * @param {'Online' | 'Offline'} status - Current status of the item
+ * @returns {JSX.Element} MUI Chip component colored by status
+ * @author Michael Nguyen
+ */
 function renderStatus(status) {
   const colors = {
     Online: 'success',
@@ -54,6 +17,14 @@ function renderStatus(status) {
   return <Chip label={status} color={colors[status]} size="small" />;
 }
 
+/**
+ * Renders an avatar cell for the data grid using the first letter of the item name.
+ *
+ * @param {Object} params - Data grid render parameters
+ * @param {{ name: string, color: string }} params.value - Value containing display name and background color
+ * @returns {JSX.Element | string} Avatar element or empty string when no value is provided
+ * @author Michael Nguyen
+ */
 export function renderAvatar(params) {
   if (params.value == null) {
     return '';
@@ -73,6 +44,13 @@ export function renderAvatar(params) {
   );
 }
 
+/**
+ * Column definitions for the manager dashboard data grid showing
+ * top-selling items, their revenue, quantity sold, and base price.
+ *
+ * @type {Array<Object>}
+ * @author Michael Nguyen
+ */
 export const columns = [
   { field: 'itemName', headerName: 'Item Name', flex: 1.5, minWidth: 200 },
   {
@@ -84,7 +62,7 @@ export const columns = [
   },
   {
     field: 'sales',
-    headerName: 'Sales',
+    headerName: 'Revenue',
     headerAlign: 'right',
     align: 'right',
     flex: 1,
@@ -92,7 +70,7 @@ export const columns = [
   },
   {
     field: 'stockCount',
-    headerName: 'Stock Count',
+    headerName: 'Quantity Sold',
     headerAlign: 'right',
     align: 'right',
     flex: 1,
@@ -100,7 +78,7 @@ export const columns = [
   },
   {
     field: 'price',
-    headerName: 'Price',
+    headerName: 'Base Price',
     headerAlign: 'right',
     align: 'right',
     flex: 1,
@@ -120,15 +98,15 @@ export const columns = [
     flex: 1,
     minWidth: 100,
   },
-  {
-    field: 'trend',
-    headerName: 'Sales Trend',
-    flex: 1,
-    minWidth: 150,
-    renderCell: renderSparklineCell,
-  },
 ];
 
+/**
+ * Default/demo rows for the manager dashboard data grid.
+ * These are used as fallback data when live analytics are unavailable.
+ *
+ * @type {Array<Object>}
+ * @author Michael Nguyen
+ */
 export const rows = [
   {
     id: 1,

@@ -7,6 +7,14 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import { LineChart } from '@mui/x-charts/LineChart';
 
+/**
+ * SVG gradient definition used to render the filled area under
+ * the revenue line in the sessions chart.
+ *
+ * @param {{ color: string, id: string }} props - Gradient color and unique id
+ * @returns {JSX.Element} Defs element containing a linearGradient
+ * @author Michael Nguyen
+ */
 function AreaGradient({ color, id }) {
   return (
     <defs>
@@ -23,30 +31,51 @@ AreaGradient.propTypes = {
   id: PropTypes.string.isRequired,
 };
 
-function getDaysInMonth(month, year) {
-  const date = new Date(year, month, 0);
-  const monthName = date.toLocaleDateString('en-US', {
-    month: 'short',
-  });
-  const daysInMonth = date.getDate();
-  const days = [];
-  let i = 1;
-  while (days.length < daysInMonth) {
-    days.push(`${monthName} ${i}`);
-    i += 1;
-  }
-  return days;
-}
-
-export default function SessionsChart() {
+/**
+ * SessionsChart component for visualizing daily revenue over the last 30 days.
+ * Uses real dashboard summary data when available and gracefully falls back
+ * to sample data so the chart always renders.
+ *
+ * @component
+ * @param {Object} props - Component props
+ * @param {Object} [props.summary] - Dashboard summary data from the backend
+ * @param {number} [props.summary.totalSales] - Total sales across the period
+ * @param {string[]} [props.summary.days] - ISO date strings for each day
+ * @param {number[]} [props.summary.dailyRevenue] - Revenue per day in dollars
+ * @author Michael Nguyen
+ */
+export default function SessionsChart({ summary }) {
   const theme = useTheme();
-  const data = getDaysInMonth(4, 2024);
 
-  const colorPalette = [
-    theme.palette.primary.light,
-    theme.palette.primary.main,
-    theme.palette.primary.dark,
-  ];
+  const fallbackData = Array.from({ length: 30 }, (_, i) => (i + 1) * 100);
+  const days =
+    summary && summary.days && summary.days.length > 0
+      ? summary.days.map((d) => d.slice(5)) // show MM-DD
+      : Array.from({ length: 30 }, (_, i) => `${i + 1}`);
+
+  const revenueSeries =
+    summary && summary.dailyRevenue && summary.dailyRevenue.length > 0
+      ? summary.dailyRevenue
+      : fallbackData;
+
+  const totalRevenue =
+    summary && typeof summary.totalSales === 'number'
+      ? summary.totalSales
+      : revenueSeries.reduce((sum, v) => sum + v, 0);
+
+  const first = revenueSeries[0] || 0;
+  const last = revenueSeries[revenueSeries.length - 1] || 0;
+  const changePercent =
+    first > 0 ? (((last - first) / first) * 100).toFixed(0) : '0';
+
+  const chipColor =
+    Number(changePercent) > 0
+      ? 'success'
+      : Number(changePercent) < 0
+      ? 'error'
+      : 'default';
+
+  const colorPalette = [theme.palette.primary.main];
 
   return (
     <Card variant="outlined" sx={{ width: '100%' }}>
@@ -64,9 +93,17 @@ export default function SessionsChart() {
             }}
           >
             <Typography variant="h4" component="p">
-              $13,277
+              {new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumFractionDigits: 2,
+              }).format(totalRevenue || 0)}
             </Typography>
-            <Chip size="small" color="success" label="+35%" />
+            <Chip
+              size="small"
+              color={chipColor}
+              label={`${Number(changePercent) >= 0 ? '+' : ''}${changePercent}%`}
+            />
           </Stack>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
             Revenue per day for the last 30 days
@@ -77,7 +114,7 @@ export default function SessionsChart() {
           xAxis={[
             {
               scaleType: 'point',
-              data,
+              data: days,
               tickInterval: (index, i) => (i + 1) % 5 === 0,
               height: 24,
             },
@@ -85,69 +122,35 @@ export default function SessionsChart() {
           yAxis={[{ width: 50 }]}
           series={[
             {
-              id: 'instore',
-              label: 'In-Store',
+              id: 'revenue',
+              label: 'Revenue',
               showMark: false,
               curve: 'linear',
-              stack: 'total',
               area: true,
-              stackOrder: 'ascending',
-              data: [
-                300, 900, 600, 1200, 1500, 1800, 2400, 2100, 2700, 3000, 1800, 3300,
-                3600, 3900, 4200, 4500, 3900, 4800, 5100, 5400, 4800, 5700, 6000,
-                6300, 6600, 6900, 7200, 7500, 7800, 8100,
-              ],
-            },
-            {
-              id: 'online',
-              label: 'Online',
-              showMark: false,
-              curve: 'linear',
-              stack: 'total',
-              area: true,
-              stackOrder: 'ascending',
-              data: [
-                500, 900, 700, 1400, 1100, 1700, 2300, 2000, 2600, 2900, 2300, 3200,
-                3500, 3800, 4100, 4400, 2900, 4700, 5000, 5300, 5600, 5900, 6200,
-                6500, 5600, 6800, 7100, 7400, 7700, 8000,
-              ],
-            },
-            {
-              id: 'delivery',
-              label: 'Delivery',
-              showMark: false,
-              curve: 'linear',
-              stack: 'total',
-              stackOrder: 'ascending',
-              data: [
-                1000, 1500, 1200, 1700, 1300, 2000, 2400, 2200, 2600, 2800, 2500,
-                3000, 3400, 3700, 3200, 3900, 4100, 3500, 4300, 4500, 4000, 4700,
-                5000, 5200, 4800, 5400, 5600, 5900, 6100, 6300,
-              ],
-              area: true,
+              data: revenueSeries,
             },
           ]}
           height={250}
           margin={{ left: 0, right: 20, top: 20, bottom: 0 }}
           grid={{ horizontal: true }}
           sx={{
-            '& .MuiAreaElement-series-delivery': {
-              fill: "url('#delivery')",
-            },
-            '& .MuiAreaElement-series-online': {
-              fill: "url('#online')",
-            },
-            '& .MuiAreaElement-series-instore': {
-              fill: "url('#instore')",
+            '& .MuiAreaElement-series-revenue': {
+              fill: "url('#revenue-gradient')",
             },
           }}
           hideLegend
         >
-          <AreaGradient color={theme.palette.primary.dark} id="delivery" />
-          <AreaGradient color={theme.palette.primary.main} id="online" />
-          <AreaGradient color={theme.palette.primary.light} id="instore" />
+          <AreaGradient color={theme.palette.primary.main} id="revenue-gradient" />
         </LineChart>
       </CardContent>
     </Card>
   );
 }
+
+SessionsChart.propTypes = {
+  summary: PropTypes.shape({
+    totalSales: PropTypes.number,
+    days: PropTypes.arrayOf(PropTypes.string),
+    dailyRevenue: PropTypes.arrayOf(PropTypes.number),
+  }),
+};
