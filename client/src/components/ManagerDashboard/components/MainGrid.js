@@ -45,7 +45,7 @@ const data = [
   },
 ];
 
-export default function MainGrid() {
+export default function MainGrid({ setActivePage }) {
   const [filteredRows, setFilteredRows] = React.useState(initialRows);
 
   const handleTreeSelection = (selectedLabel) => {
@@ -105,7 +105,7 @@ export default function MainGrid() {
           </Grid>
         ))}
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <HighlightedCard />
+          <HighlightedCard setActivePage={setActivePage} />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <SessionsChart />

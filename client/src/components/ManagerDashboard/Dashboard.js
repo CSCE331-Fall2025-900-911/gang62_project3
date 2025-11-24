@@ -33,7 +33,7 @@ export default function Dashboard(props) {
   const renderPage = () => {
     switch (activePage) {
       case 'Home':
-        return <MainGrid />;
+        return <MainGrid setActivePage={setActivePage} />;
       case 'Inventory':
         return <InventoryPage />;
       case 'Cashier View':
