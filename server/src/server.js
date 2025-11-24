@@ -103,6 +103,7 @@ app.post('/api/translate', async (req, res) => {
  * @param {Array} items - Array of objects with id and quantity, or array of menu item IDs
  * @returns {Promise<void>} Sends JSON response with success status
  * @throws {Error} If order submission fails, returns 500 status with error message
+ * @author Michael Nguyen
  */
 app.post('/api/submit-order', async (req, res) => {
     try {

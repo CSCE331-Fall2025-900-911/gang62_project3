@@ -34,6 +34,12 @@ import EditIcon from '@mui/icons-material/Edit';
 
 const API_BASE_URL = process.env.REACT_APP_API || 'http://localhost:3001';
 
+/**
+ * Cashier interface for processing customer orders and managing the point of sale.
+ * 
+ * @component
+ * @author Michael Nguyen
+ */
 export default function CashierViewPage() {
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -65,6 +71,14 @@ export default function CashierViewPage() {
     updateTotal();
   }, [cartItems]);
 
+  /**
+   * Fetches all menu items from the API endpoint.
+   * Updates the component state with the retrieved menu items.
+   * 
+   * @returns {Promise<void>} Promise that resolves when menu items are fetched
+   * @throws {Error} If API request fails, sets error state
+   * @author Michael Nguyen
+   */
   const fetchMenuItems = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/menu-items`);
@@ -80,6 +94,11 @@ export default function CashierViewPage() {
     }
   };
 
+  /**
+   * Updates the total amount by summing all item subtotals in the cart.
+   * 
+   * @author Michael Nguyen
+   */
   const updateTotal = () => {
     let total = 0.0;
     cartItems.forEach((item) => {
@@ -88,10 +107,32 @@ export default function CashierViewPage() {
     setTotalAmount(total);
   };
 
+  /**
+   * Formats a price value as a currency string.
+   * 
+   * @param {number} price - The price value to format
+   * @returns {string} Formatted price string (e.g., "$5.99")
+   * @author Michael Nguyen
+   */
   const formatPrice = (price) => {
     return `$${price.toFixed(2)}`;
   };
 
+  /**
+   * Calculates the total price of a menu item with customizations applied.
+   * Adds additional charges for extra sugar, extra ice, and toppings.
+   * 
+   * @param {number} basePrice - The base price of the menu item
+   * @param {Object} customizations - Customization options object
+   * @param {string} customizations.sugarLevel - Sugar level ('no', 'normal', 'extra')
+   * @param {string} customizations.iceLevel - Ice level ('no', 'normal', 'extra')
+   * @param {boolean} customizations.pearls - Whether boba pearls are selected
+   * @param {boolean} customizations.jelly - Whether coconut jelly is selected
+   * @param {boolean} customizations.pudding - Whether pudding is selected
+   * @param {boolean} customizations.whippedCream - Whether whipped cream is selected
+   * @returns {number} The calculated total price with customizations
+   * @author Michael Nguyen
+   */
   const calculateCustomizedPrice = (basePrice, customizations) => {
     let price = basePrice;
     if (customizations.sugarLevel === 'extra') price += 0.50;
@@ -103,6 +144,14 @@ export default function CashierViewPage() {
     return price;
   };
 
+  /**
+   * Generates a customized item name by appending customization modifiers.
+   * 
+   * @param {string} itemName - The base name of the menu item
+   * @param {Object} customizations - Customization options object
+   * @returns {string} The customized item name with modifiers (e.g., "Green Tea +Extra Sugar +Boba")
+   * @author Michael Nguyen
+   */
   const getCustomizedName = (itemName, customizations) => {
     let name = itemName;
     const parts = [];
@@ -120,6 +169,16 @@ export default function CashierViewPage() {
     return name;
   };
 
+  /**
+   * Handles left-click on a menu item button.
+   * Opens the customization dialog for the selected menu item.
+   * 
+   * @param {Object} item - The menu item that was clicked
+   * @param {number} item.id - The menu item ID
+   * @param {string} item.name - The menu item name
+   * @param {number} item.price - The menu item base price
+   * @author Michael Nguyen
+   */
   const handleMenuItemClick = (item) => {
     setCurrentMenuItem(item);
     setCustomizationData({
@@ -133,6 +192,17 @@ export default function CashierViewPage() {
     setCustomizationDialogOpen(true);
   };
 
+  /**
+   * Handles right-click on a menu item button.
+   * Opens the edit menu item dialog for the selected menu item.
+   * 
+   * @param {Event} e - The mouse event
+   * @param {Object} item - The menu item that was right-clicked
+   * @param {number} item.id - The menu item ID
+   * @param {string} item.name - The menu item name
+   * @param {number} item.price - The menu item base price
+   * @author Michael Nguyen
+   */
   const handleMenuItemRightClick = (e, item) => {
     e.preventDefault();
     setEditingMenuItem(item);
@@ -141,6 +211,13 @@ export default function CashierViewPage() {
     setEditMenuItemDialogOpen(true);
   };
 
+  /**
+   * Adds the current menu item with customizations to the shopping cart.
+   * If an identical item (same name and price) already exists, increments its quantity.
+   * Otherwise, adds a new item to the cart.
+   * 
+   * @author Michael Nguyen
+   */
   const handleAddToCart = () => {
     if (!currentMenuItem) return;
 
@@ -185,15 +262,32 @@ export default function CashierViewPage() {
     setCurrentMenuItem(null);
   };
 
+  /**
+   * Removes the selected item from the shopping cart at the specified index.
+   * 
+   * @param {number} index - The index of the item to remove from the cart
+   * @author Michael Nguyen
+   */
   const removeSelectedItem = (index) => {
     const updatedItems = cartItems.filter((_, i) => i !== index);
     setCartItems(updatedItems);
   };
 
+  /**
+   * Clears all items from the shopping cart.
+   * 
+   * @author Michael Nguyen
+   */
   const clearCart = () => {
     setCartItems([]);
   };
 
+  /**
+   * Opens the payment dialog if the cart is not empty.
+   * Shows an alert if the cart is empty.
+   * 
+   * @author Michael Nguyen
+   */
   const processPayment = () => {
     if (cartItems.length === 0) {
       alert('Cart is empty!');
@@ -202,6 +296,16 @@ export default function CashierViewPage() {
     setPaymentDialogOpen(true);
   };
 
+  /**
+   * Submits the order to the database and processes the payment.
+   * Sends order items with quantities to the API endpoint, which uses the Order class
+   * to persist the order and tickets to the database.
+   * 
+   * @param {string} paymentMethod - The payment method used ('Cash' or 'Card')
+   * @returns {Promise<void>} Promise that resolves when order is submitted
+   * @throws {Error} If order submission fails, shows error alert
+   * @author Michael Nguyen
+   */
   const handlePaymentSubmit = async (paymentMethod) => {
     try {
       // Prepare order items - send items with quantities (matching Java behavior)
@@ -240,11 +344,26 @@ export default function CashierViewPage() {
     }
   };
 
+  /**
+   * Clears the cart and prepares for a new sale.
+   * Shows a confirmation message to the user.
+   * 
+   * @author Michael Nguyen
+   */
   const newSale = () => {
     clearCart();
     alert('Ready for new sale!');
   };
 
+  /**
+   * Handles adding a new menu item to the database.
+   * Validates input and calls the API endpoint to create the menu item.
+   * Currently shows a placeholder alert as the API endpoint is not yet implemented.
+   * 
+   * @returns {Promise<void>} Promise that resolves when menu item is added
+   * @throws {Error} If validation fails or API call fails, shows error alert
+   * @author Michael Nguyen
+   */
   const handleAddMenuItem = async () => {
     try {
       const name = newMenuItemName.trim();
@@ -271,6 +390,15 @@ export default function CashierViewPage() {
     }
   };
 
+  /**
+   * Handles editing an existing menu item in the database.
+   * Validates input and calls the API endpoint to update the menu item.
+   * Currently shows a placeholder alert as the API endpoint is not yet implemented.
+   * 
+   * @returns {Promise<void>} Promise that resolves when menu item is updated
+   * @throws {Error} If validation fails or API call fails, shows error alert
+   * @author Michael Nguyen
+   */
   const handleEditMenuItem = async () => {
     try {
       const name = newMenuItemName.trim();
