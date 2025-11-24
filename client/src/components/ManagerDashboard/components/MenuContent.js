@@ -10,8 +10,6 @@ import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import SummarizeRoundedIcon from '@mui/icons-material/SummarizeRounded';
-import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded';
-import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 
 const mainListItems = [
   { text: 'Home', icon: <HomeRoundedIcon /> },
@@ -20,8 +18,6 @@ const mainListItems = [
   { text: 'Employees', icon: <PeopleRoundedIcon /> },
   { text: 'X Report', icon: <DescriptionRoundedIcon /> },
   { text: 'Z Report', icon: <SummarizeRoundedIcon /> },
-  { text: 'Sales Report', icon: <AssessmentRoundedIcon /> },
-  { text: 'Product Chart', icon: <BarChartRoundedIcon /> },
 ];
 
 export default function MenuContent({ activePage, setActivePage }) {

@@ -13,8 +13,6 @@ import CashierViewPage from './pages/CashierViewPage';
 import EmployeesPage from './pages/EmployeesPage';
 import XReportPage from './pages/XReportPage';
 import ZReportPage from './pages/ZReportPage';
-import SalesReportPage from './pages/SalesReportPage';
-import ProductChartPage from './pages/ProductChartPage';
 import {
   chartsCustomizations,
   dataGridCustomizations,
@@ -46,10 +44,7 @@ export default function Dashboard(props) {
         return <XReportPage />;
       case 'Z Report':
         return <ZReportPage />;
-      case 'Sales Report':
-        return <SalesReportPage />;
-      case 'Product Chart':
-        return <ProductChartPage />;
+
       default:
         return <MainGrid />;
     }
@@ -60,7 +55,7 @@ export default function Dashboard(props) {
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
         <SideMenu activePage={activePage} setActivePage={setActivePage} />
-        <AppNavbar />
+        <AppNavbar activePage={activePage} setActivePage={setActivePage} />
         {/* Main content */}
         <Box
           component="main"

@@ -6,7 +6,6 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import MenuContent from './MenuContent';
-import CardAlert from './CardAlert';
 import OptionsMenu from './OptionsMenu';
 
 const drawerWidth = 240;
@@ -43,7 +42,6 @@ export default function SideMenu({ activePage, setActivePage }) {
         }}
       >
         <MenuContent activePage={activePage} setActivePage={setActivePage} />
-        <CardAlert />
       </Box>
       <Stack
         direction="row"
@@ -57,16 +55,16 @@ export default function SideMenu({ activePage, setActivePage }) {
       >
         <Avatar
           sizes="small"
-          alt="Riley Carter"
+          alt="Administrator"
           src="/static/images/avatar/7.jpg"
           sx={{ width: 36, height: 36 }}
         />
         <Box sx={{ mr: 'auto' }}>
           <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: '16px' }}>
-            Riley Carter
+            Administrator
           </Typography>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            riley@email.com
+            admin@email.com
           </Typography>
         </Box>
         <OptionsMenu />
