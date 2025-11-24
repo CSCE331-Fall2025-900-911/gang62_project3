@@ -118,7 +118,7 @@ class Ingredient extends DatabaseConnection {
      * @author Jonah Coffelt
      */
     async setName(name) {
-        query = {
+        const query = {
             text: "UPDATE ingredients SET name = $1 WHERE id = $2;",
             values: [name, this.id]
         } 
@@ -133,7 +133,7 @@ class Ingredient extends DatabaseConnection {
      * @author Jonah Coffelt
      */
     async setStock(stock) {
-        query = {
+        const query = {
             text: "UPDATE inventory SET stock = $1 WHERE ingredient_id = $2;",
             values: [stock, this.id]
         } 
