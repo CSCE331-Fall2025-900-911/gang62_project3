@@ -18,7 +18,8 @@ import ForgotPassword from './ForgotPassword';
 import AppTheme from '../shared-theme/AppTheme';
 import ColorModeSelect from '../shared-theme/ColorModeSelect';
 import { GoogleIcon, FacebookIcon } from './CustomIcons';
-// base URL for backend OAuth endpoints
+
+// Base URL for backend OAuth endpoints
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -95,13 +96,21 @@ export default function SignIn({ onLogin, ...props }) {
     if (username === 'customer' && password === 'customer') {
       console.log('Login successful');
       if (onLogin) {
-        onLogin();
+        onLogin({
+          displayName: 'Customer Account',
+          email: 'customer@example.com',
+          photo: null,
+        });
       }
       navigate('/kiosk');
     } else if (username === 'admin' && password === 'admin') {
       console.log('Login successful');
       if (onLogin) {
-        onLogin();
+        onLogin({
+          displayName: 'Admin Account',
+          email: 'admin@example.com',
+          photo: null,
+        });
       }
       navigate('/manager');
     }
@@ -213,7 +222,6 @@ export default function SignIn({ onLogin, ...props }) {
             </Button>
             <Link
               component="button"
-              type="button"
               onClick={handleClickOpen}
               variant="body2"
               sx={{ alignSelf: 'center' }}

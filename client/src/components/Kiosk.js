@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel } from '@mui/material';
+import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel, Avatar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AppTheme from '../shared-theme/AppTheme';
 import MenuItem from './MenuItem';
@@ -26,7 +26,7 @@ const languages = [
  * @component
  * @author Michael Nguyen
  */
-function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
+function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
   const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -174,7 +174,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
     <AppTheme>
       <CssBaseline />
       <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: 'background.default' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography 
           variant="h3" 
           component="h1" 
@@ -234,6 +234,24 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
           >
             {translatedTexts.checkout}
           </Button>
+          {user && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Avatar
+                alt={user.displayName || 'Account'}
+                src={user.photo || undefined}
+                sx={{ width: 48, height: 48 }}
+              >
+                {(user.displayName || 'A')
+                  .split(' ')
+                  .map((part) => part.charAt(0))
+                  .join('')
+                  .slice(0, 2)}
+              </Avatar>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {user.displayName || 'Signed in'}
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Box>
       

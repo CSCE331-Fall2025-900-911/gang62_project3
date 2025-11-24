@@ -1,5 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const session = require('express-session');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const axios = require('axios');
 const Menu = require('./models/Menu');
 
@@ -11,10 +15,57 @@ const Menu = require('./models/Menu');
  */
 const app = express();
 const PORT = process.env.PORT || 3001;
+const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
+const SERVER_BASE_URL = process.env.SERVER_BASE_URL || `http://localhost:${PORT}`;
 
-// Enable CORS for client requests
-app.use(cors());
+// Enable CORS for client requests (allow credentials for session cookies)
+app.use(
+    cors({
+        origin: CLIENT_URL,
+        credentials: true,
+    })
+);
 app.use(express.json());
+
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET || 'dev-session-secret',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            secure: process.env.NODE_ENV === 'production',
+        },
+    })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(
+    new GoogleStrategy(
+        {
+            clientID: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            callbackURL: `${SERVER_BASE_URL}/api/auth/google/callback`,
+        },
+        (accessToken, refreshToken, profile, done) => {
+            const user = {
+                id: profile.id,
+                displayName: profile.displayName,
+                email: profile.emails && profile.emails[0] ? profile.emails[0].value : null,
+                photo: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
+            };
+            done(null, user);
+        }
+    )
+);
+
+passport.serializeUser((user, done) => {
+    done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+    done(null, user);
+});
 
 const DEEPL_API_KEY = 'ca69df7b-643d-475c-9b81-4a71e5078261:fx';
 const DEEPL_API_URL = 'https://api-free.deepl.com/v2/translate';
@@ -77,6 +128,41 @@ app.post('/api/translate', async (req, res) => {
         console.error('Error translating text:', error);
         res.status(500).json({ error: 'Failed to translate text' });
     }
+});
+
+// --- Google OAuth routes ---
+app.get(
+    '/api/auth/google',
+    passport.authenticate('google', {
+        scope: ['profile', 'email'],
+    })
+);
+
+app.get(
+    '/api/auth/google/callback',
+    passport.authenticate('google', {
+        failureRedirect: `${CLIENT_URL}/signin?error=google`,
+        keepSessionInfo: true,
+    }),
+    (req, res) => {
+        res.redirect(`${CLIENT_URL}/kiosk`);
+    }
+);
+
+app.get('/api/auth/user', (req, res) => {
+    res.json({ user: req.user || null });
+});
+
+app.post('/api/auth/logout', (req, res, next) => {
+    req.logout((err) => {
+        if (err) {
+            return next(err);
+        }
+        req.session.destroy(() => {
+            res.clearCookie('connect.sid');
+            res.status(200).json({ success: true });
+        });
+    });
 });
 
 /**
