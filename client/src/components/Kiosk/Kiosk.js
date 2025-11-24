@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel, IconButton, Card, CardMedia } from '@mui/material';
+import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel, IconButton, Card, CardMedia, Avatar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -45,7 +45,7 @@ const carouselItems = [
  * @component
  * @author Michael Nguyen
  */
-function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
+function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
   const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -266,6 +266,25 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
           >
             {translatedTexts.checkout}
           </Button>
+          {user && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Avatar
+                alt={user.displayName || user.email || 'Account'}
+                src={user.photo || undefined}
+                sx={{ width: 48, height: 48 }}
+              >
+                {(user.displayName || user.email || 'A')
+                  .split(' ')
+                  .map((segment) => segment.charAt(0))
+                  .join('')
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </Avatar>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {user.displayName || user.email || 'Signed in'}
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Box>
 
@@ -392,5 +411,4 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal }) {
 }
 
 export default Kiosk;
-
 

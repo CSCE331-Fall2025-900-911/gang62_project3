@@ -1,18 +1,52 @@
-import React from 'react';
-
+import React, { useEffect, useState } from 'react';
 
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import SignIn from './components/SignIn/SignIn';
 import Kiosk from './components/Kiosk/Kiosk';
 import Checkout from './components/CheckoutPage/Checkout';
-import { useState } from 'react';
-import Dashboard from './components/ManagerDashboard/Dashboard';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [user, setUser] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [orderTotal, setOrderTotal] = useState(0);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsAuthenticated(Boolean(data.user));
+          setUser(data.user || null);
+        } else {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Failed to verify session', error);
+        setIsAuthenticated(false);
+        setUser(null);
+      } finally {
+        setAuthChecked(true);
+      }
+    };
+
+    checkSession();
+  }, []);
+
+  const handleLocalLogin = (localUser = null) => {
+    setIsAuthenticated(true);
+    setAuthChecked(true);
+    setUser(localUser);
+  };
 
   return (
     <BrowserRouter>
@@ -20,17 +54,20 @@ function App() {
         <Routes>
           <Route 
             path="/" 
-            element={<SignIn onLogin={() => setIsAuthenticated(true)} />} 
+            element={<SignIn onLogin={handleLocalLogin} />} 
           />
           <Route 
             path="/kiosk" 
             element={
-              isAuthenticated ? (
+              !authChecked ? (
+                <div />
+              ) : isAuthenticated ? (
                 <Kiosk 
                   orderItems={orderItems}
                   setOrderItems={setOrderItems}
                   orderTotal={orderTotal}
                   setOrderTotal={setOrderTotal}
+                  user={user}
                 />
               ) : (
                 <Navigate to="/" />
@@ -40,24 +77,15 @@ function App() {
           <Route 
             path="/checkout" 
             element={
-              isAuthenticated ? (
+              !authChecked ? (
+                <div />
+              ) : isAuthenticated ? (
                 <Checkout 
                   orderItems={orderItems}
                   setOrderItems={setOrderItems}
                   orderTotal={orderTotal}
                   setOrderTotal={setOrderTotal}
-                />
-              ) : (
-                <Navigate to="/" />
-              )
-            } 
-          />
-          <Route 
-            path="/manager" 
-            element={
-              isAuthenticated ? (
-                <Dashboard 
-                    
+                  user={user}
                 />
               ) : (
                 <Navigate to="/" />
