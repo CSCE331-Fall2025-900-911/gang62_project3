@@ -20,13 +20,42 @@ const DatabaseConnection = require('./config/db');
  */
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Frontend origins allowed to call this API.
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
-const SERVER_BASE_URL = process.env.SERVER_BASE_URL || `http://localhost:${PORT}`;
+const EXTRA_ORIGINS = process.env.EXTRA_ORIGINS
+    ? process.env.EXTRA_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+    : [];
+const ALLOWED_ORIGINS = [CLIENT_URL, ...EXTRA_ORIGINS];
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// Base URL for this server (used for OAuth callback URLs).
+// In production on Vercel, prefer the deployed URL if SERVER_BASE_URL is not explicitly set.
+const SERVER_BASE_URL =
+    process.env.SERVER_BASE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${PORT}`);
 
 // Enable CORS for client requests (allow credentials for session cookies)
 app.use(
     cors({
-        origin: CLIENT_URL,
+        origin(origin, callback) {
+            // In development, allow all origins to simplify local/network testing.
+            if (!IS_PRODUCTION) {
+                return callback(null, true);
+            }
+
+            // In production, restrict to the configured allow-list.
+            // Allow non-browser clients or same-origin server-to-server calls (no Origin header)
+            if (!origin) {
+                return callback(null, true);
+            }
+
+            if (ALLOWED_ORIGINS.includes(origin)) {
+                return callback(null, true);
+            }
+
+            return callback(new Error(`Not allowed by CORS: ${origin}`));
+        },
         credentials: true,
     })
 );
