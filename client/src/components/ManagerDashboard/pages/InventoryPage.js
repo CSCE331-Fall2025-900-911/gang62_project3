@@ -3,7 +3,7 @@ import { Box, Typography, Grid, CircularProgress, Alert } from '@mui/material';
 import InventoryRoundedIcon from '@mui/icons-material/InventoryRounded';
 import InventoryItem from '../components/InventoryItem';
 
-const API_BASE_URL = process.env.REACT_APP_API || 'http://localhost:3001';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 export default function InventoryPage() {
   const [inventoryItems, setInventoryItems] = useState([]);

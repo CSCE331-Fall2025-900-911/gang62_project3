@@ -30,9 +30,8 @@ import {
 } from '@mui/material';
 import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 
-const API_BASE_URL = process.env.REACT_APP_API || 'http://localhost:3001';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 /**
  * Cashier interface for processing customer orders and managing the point of sale.
@@ -68,7 +67,11 @@ export default function CashierViewPage() {
   }, []);
 
   useEffect(() => {
-    updateTotal();
+    let total = 0.0;
+    cartItems.forEach((item) => {
+      total += item.subtotal;
+    });
+    setTotalAmount(total);
   }, [cartItems]);
 
   /**
@@ -92,19 +95,6 @@ export default function CashierViewPage() {
       setError(err.message);
       setLoading(false);
     }
-  };
-
-  /**
-   * Updates the total amount by summing all item subtotals in the cart.
-   * 
-   * @author Michael Nguyen
-   */
-  const updateTotal = () => {
-    let total = 0.0;
-    cartItems.forEach((item) => {
-      total += item.subtotal;
-    });
-    setTotalAmount(total);
   };
 
   /**
@@ -415,6 +405,7 @@ export default function CashierViewPage() {
       }
 
       // TODO: Implement API endpoint for editing menu items
+      console.log('Editing item:', editingMenuItem);
       alert('Menu item editing not yet implemented via API');
       setEditMenuItemDialogOpen(false);
       setEditingMenuItem(null);
