@@ -22,12 +22,12 @@ const languages = [
 ];
 
 // Carousel promotional items
-const carouselItems = [
+let carouselItems = [
   {
     id: 1,
-    title: 'Festive Green Tea Boba',
-    image: 'https://www.kerryfoodservice.com/cdn/shop/files/Kerry_WinterSeasonal_Photoshoot_GermanChocolateBoba_014_2024_1000x.jpg?v=1729524670',
-    description: 'Try our seasonal beverages'
+    title: 'None',
+    image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fbiyopos.com%2Fwp-content%2Fuploads%2F2025%2F08%2Fboba-flavors-collection.png&f=1&nofb=1&ipt=06f3d63629bc2383e39a4189637bc2397016b4eed438e199ec072b78fa2f8994',
+    description: 'None'
   },
   {
     id: 2,
@@ -123,6 +123,23 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
   }, [language, translate]);
   
   const { temp, weather_error } = useWeather();
+
+  if (temp < 60) {
+    carouselItems[0] = {
+      id: 1,
+      title: 'Hot Boba Bubble Tea',
+      image: 'https://www.hungryhuy.com/wp-content/uploads/adding-boba-to-milk-tea.jpg',
+      description: 'Warm up with our hot boba special'
+    };  
+  }
+  else {
+    carouselItems[0] = {
+      id: 1,
+      title: 'Boba Fruit Smoothie',
+      image: 'https://foodsocial.io/wp-content/uploads/2022/07/Bubble-Tea-2-1080x720.jpg',
+      description: 'Cool off with our special Boba Fruit Smoothie'
+    }
+  }
 
   useEffect(() => {
     fetchMenuItems();
