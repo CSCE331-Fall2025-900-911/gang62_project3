@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
 import Copyright from '../internals/components/Copyright';
+import ChartUserByCountry from './ChartUserByCountry';
 import CustomizedTreeView from './CustomizedTreeView';
 import CustomizedDataGrid from './CustomizedDataGrid';
 import HighlightedCard from './HighlightedCard';
@@ -16,16 +17,6 @@ import { rows as initialRows } from '../internals/data/gridData';
 
 const API_BASE_URL = process.env.REACT_APP_API || 'http://localhost:3001';
 
-/**
- * Manager dashboard home grid component.
- * Fetches analytics data (summary metrics and top items) from the API and
- * renders overview statistic cards, charts, and a detailed data grid.
- *
- * Falls back to local demo data if the API is unavailable.
- *
- * @component
- * @author Michael Nguyen
- */
 export default function MainGrid() {
   const [allRows, setAllRows] = React.useState(initialRows);
   const [filteredRows, setFilteredRows] = React.useState(initialRows);
@@ -35,16 +26,6 @@ export default function MainGrid() {
   const [error, setError] = React.useState(null);
 
   React.useEffect(() => {
-    /**
-     * Fetches dashboard summary statistics and top-selling items from the backend.
-     * Populates local state used to render the overview cards, charts, and data grid.
-     *
-     * Falls back to static demo rows if the API request fails.
-     *
-     * @returns {Promise<void>} Promise that resolves when dashboard data is loaded
-     * @throws {Error} Logged and stored in state if the API request fails
-     * @author Michael Nguyen
-     */
     const fetchDashboardData = async () => {
       try {
         const [summaryRes, topItemsRes] = await Promise.all([
@@ -98,15 +79,6 @@ export default function MainGrid() {
     fetchDashboardData();
   }, []);
 
-  /**
-   * Builds configuration objects for the overview `StatCard` components
-   * derived from the loaded dashboard summary data.
-   *
-   * If no summary is available yet, returns neutral, zero-valued cards.
-   *
-   * @returns {Array<Object>} Array of card configuration objects for `StatCard`
-   * @author Michael Nguyen
-   */
   const buildCardsData = () => {
     if (!summary) {
       return [
@@ -165,13 +137,6 @@ export default function MainGrid() {
     ];
   };
 
-  /**
-   * Handles selection changes from the side tree view and filters the
-   * data grid rows by the corresponding mapped category group.
-   *
-   * @param {string} selectedLabel - The label of the selected tree node
-   * @author Michael Nguyen
-   */
   const handleTreeSelection = (selectedLabel) => {
     if (!selectedLabel) {
       setFilteredRows(allRows);

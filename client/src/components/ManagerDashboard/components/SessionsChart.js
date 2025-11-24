@@ -7,14 +7,6 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import { LineChart } from '@mui/x-charts/LineChart';
 
-/**
- * SVG gradient definition used to render the filled area under
- * the revenue line in the sessions chart.
- *
- * @param {{ color: string, id: string }} props - Gradient color and unique id
- * @returns {JSX.Element} Defs element containing a linearGradient
- * @author Michael Nguyen
- */
 function AreaGradient({ color, id }) {
   return (
     <defs>
@@ -31,19 +23,6 @@ AreaGradient.propTypes = {
   id: PropTypes.string.isRequired,
 };
 
-/**
- * SessionsChart component for visualizing daily revenue over the last 30 days.
- * Uses real dashboard summary data when available and gracefully falls back
- * to sample data so the chart always renders.
- *
- * @component
- * @param {Object} props - Component props
- * @param {Object} [props.summary] - Dashboard summary data from the backend
- * @param {number} [props.summary.totalSales] - Total sales across the period
- * @param {string[]} [props.summary.days] - ISO date strings for each day
- * @param {number[]} [props.summary.dailyRevenue] - Revenue per day in dollars
- * @author Michael Nguyen
- */
 export default function SessionsChart({ summary }) {
   const theme = useTheme();
 

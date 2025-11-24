@@ -7,16 +7,6 @@ import Stack from '@mui/material/Stack';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { useTheme } from '@mui/material/styles';
 
-/**
- * PageViewsBarChart component that displays the top products by revenue
- * for the last 30 days using real dashboard analytics data when available.
- * Falls back to sample data so the chart still renders without an API.
- *
- * @component
- * @param {Object} props - Component props
- * @param {Array<Object>} [props.topItems] - Top-selling menu items with revenue and names
- * @author Michael Nguyen
- */
 export default function PageViewsBarChart({ topItems }) {
   const theme = useTheme();
   const colorPalette = [(theme.vars || theme).palette.primary.main];

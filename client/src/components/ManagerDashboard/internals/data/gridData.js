@@ -1,13 +1,8 @@
 import Avatar from '@mui/material/Avatar';
 import Chip from '@mui/material/Chip';
 
-/**
- * Renders a small status chip for an item's stock/online status.
- *
- * @param {'Online' | 'Offline'} status - Current status of the item
- * @returns {JSX.Element} MUI Chip component colored by status
- * @author Michael Nguyen
- */
+import { SparkLineChart } from '@mui/x-charts/SparkLineChart';
+
 function renderStatus(status) {
   const colors = {
     Online: 'success',
@@ -17,14 +12,6 @@ function renderStatus(status) {
   return <Chip label={status} color={colors[status]} size="small" />;
 }
 
-/**
- * Renders an avatar cell for the data grid using the first letter of the item name.
- *
- * @param {Object} params - Data grid render parameters
- * @param {{ name: string, color: string }} params.value - Value containing display name and background color
- * @returns {JSX.Element | string} Avatar element or empty string when no value is provided
- * @author Michael Nguyen
- */
 export function renderAvatar(params) {
   if (params.value == null) {
     return '';
@@ -44,13 +31,6 @@ export function renderAvatar(params) {
   );
 }
 
-/**
- * Column definitions for the manager dashboard data grid showing
- * top-selling items, their revenue, quantity sold, and base price.
- *
- * @type {Array<Object>}
- * @author Michael Nguyen
- */
 export const columns = [
   { field: 'itemName', headerName: 'Item Name', flex: 1.5, minWidth: 200 },
   {
@@ -100,13 +80,6 @@ export const columns = [
   },
 ];
 
-/**
- * Default/demo rows for the manager dashboard data grid.
- * These are used as fallback data when live analytics are unavailable.
- *
- * @type {Array<Object>}
- * @author Michael Nguyen
- */
 export const rows = [
   {
     id: 1,
