@@ -20,7 +20,6 @@ const mainListItems = [
   { text: 'Employees', icon: <PeopleRoundedIcon /> },
   { text: 'X Report', icon: <DescriptionRoundedIcon /> },
   { text: 'Z Report', icon: <SummarizeRoundedIcon /> },
-  { text: 'Sales Report', icon: <AssessmentRoundedIcon /> },
 ];
 
 export default function MenuContent({ activePage, setActivePage }) {

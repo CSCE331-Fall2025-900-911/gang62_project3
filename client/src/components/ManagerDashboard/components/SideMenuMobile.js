@@ -7,11 +7,13 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
+import { useNavigate } from 'react-router-dom';
 import MenuButton from './MenuButton';
 import MenuContent from './MenuContent';
 import CardAlert from './CardAlert';
 
 function SideMenuMobile({ open, toggleDrawer, activePage, setActivePage }) {
+  const navigate = useNavigate();
   return (
     <Drawer
       anchor="right"
@@ -55,9 +57,8 @@ function SideMenuMobile({ open, toggleDrawer, activePage, setActivePage }) {
           <MenuContent activePage={activePage} setActivePage={setActivePage} />
           <Divider />
         </Stack>
-        <CardAlert />
         <Stack sx={{ p: 2 }}>
-          <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />}>
+          <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />} onClick={() => navigate('/')}>
             Logout
           </Button>
         </Stack>
