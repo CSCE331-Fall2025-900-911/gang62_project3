@@ -23,44 +23,37 @@ import { useTheme } from '@mui/material/styles';
 
 const ITEMS = [
   {
+    id: '0',
+    label: 'All Items',
+  },
+  {
     id: '1',
-    label: 'Website',
+    label: 'Menu',
     children: [
-      { id: '1.1', label: 'Home', color: 'green' },
-      { id: '1.2', label: 'Pricing', color: 'green' },
-      { id: '1.3', label: 'About us', color: 'green' },
+      { id: '1.1', label: 'Milk Teas', color: 'green' },
+      { id: '1.2', label: 'Fruit Teas', color: 'orange' },
+      { id: '1.3', label: 'Smoothies', color: 'purple' },
       {
         id: '1.4',
-        label: 'Blog',
+        label: 'Toppings',
         children: [
-          { id: '1.1.1', label: 'Announcements', color: 'blue' },
-          { id: '1.1.2', label: 'April lookahead', color: 'blue' },
-          { id: '1.1.3', label: "What's new", color: 'blue' },
-          { id: '1.1.4', label: 'Meet the team', color: 'blue' },
+          { id: '1.4.1', label: 'Boba', color: 'blue' },
+          { id: '1.4.2', label: 'Jelly', color: 'blue' },
+          { id: '1.4.3', label: 'Pudding', color: 'blue' },
         ],
       },
     ],
   },
   {
     id: '2',
-    label: 'Store',
+    label: 'Inventory',
     children: [
-      { id: '2.1', label: 'All products', color: 'green' },
-      {
-        id: '2.2',
-        label: 'Categories',
-        children: [
-          { id: '2.2.1', label: 'Gadgets', color: 'blue' },
-          { id: '2.2.2', label: 'Phones', color: 'blue' },
-          { id: '2.2.3', label: 'Wearables', color: 'blue' },
-        ],
-      },
-      { id: '2.3', label: 'Bestsellers', color: 'green' },
-      { id: '2.4', label: 'Sales', color: 'green' },
+      { id: '2.1', label: 'Tea Leaves', color: 'indigo' },
+      { id: '2.2', label: 'Syrups', color: 'indigo' },
+      { id: '2.3', label: 'Milk', color: 'indigo' },
+      { id: '2.4', label: 'Cups & Lids', color: 'indigo' },
     ],
   },
-  { id: '4', label: 'Contact', color: 'blue' },
-  { id: '5', label: 'Help', color: 'blue' },
 ];
 
 function DotIcon({ color }) {
@@ -102,6 +95,9 @@ function CustomLabel({ color, expandable, children, ...other }) {
   const colors = {
     blue: (theme.vars || theme).palette.primary.main,
     green: (theme.vars || theme).palette.success.main,
+    orange: (theme.vars || theme).palette.warning.main,
+    purple: (theme.vars || theme).palette.secondary.main,
+    indigo: (theme.vars || theme).palette.info.main,
   };
 
   const iconColor = color ? colors[color] : null;
@@ -121,7 +117,7 @@ function CustomLabel({ color, expandable, children, ...other }) {
 
 CustomLabel.propTypes = {
   children: PropTypes.node,
-  color: PropTypes.oneOf(['blue', 'green']),
+  color: PropTypes.oneOf(['blue', 'green', 'orange', 'purple', 'indigo']),
   expandable: PropTypes.bool,
 };
 
@@ -196,7 +192,31 @@ CustomTreeItem.propTypes = {
   label: PropTypes.node,
 };
 
-export default function CustomizedTreeView() {
+export default function CustomizedTreeView({ onSelectionChange }) {
+  const handleSelectedItemsChange = (event, ids) => {
+    if (onSelectionChange) {
+      // If multiSelect is true, ids is an array. If false, it's a string | null.
+      // The component below has multiSelect={true}, so we expect an array.
+      // We'll just take the first selected item for filtering simplicity.
+      const selectedId = Array.isArray(ids) ? ids[0] : ids;
+      
+      // Find the label for the selected ID to pass back
+      const findItem = (items, targetId) => {
+        for (const item of items) {
+          if (item.id === targetId) return item;
+          if (item.children) {
+            const found = findItem(item.children, targetId);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+      
+      const item = findItem(ITEMS, selectedId);
+      onSelectionChange(item ? item.label : null);
+    }
+  };
+
   return (
     <Card
       variant="outlined"
@@ -212,6 +232,7 @@ export default function CustomizedTreeView() {
           multiSelect
           defaultExpandedItems={['1', '1.1']}
           defaultSelectedItems={['1.1', '1.1.1']}
+          onSelectedItemsChange={handleSelectedItemsChange}
           sx={{
             m: '0 -8px',
             pb: '8px',

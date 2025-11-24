@@ -14,7 +14,6 @@ import EmployeesPage from './pages/EmployeesPage';
 import XReportPage from './pages/XReportPage';
 import ZReportPage from './pages/ZReportPage';
 import SalesReportPage from './pages/SalesReportPage';
-import ProductChartPage from './pages/ProductChartPage';
 import {
   chartsCustomizations,
   dataGridCustomizations,

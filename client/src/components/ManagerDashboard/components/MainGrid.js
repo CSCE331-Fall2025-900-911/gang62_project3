@@ -1,3 +1,4 @@
+import * as React from 'react';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -10,11 +11,12 @@ import HighlightedCard from './HighlightedCard';
 import PageViewsBarChart from './PageViewsBarChart';
 import SessionsChart from './SessionsChart';
 import StatCard from './StatCard';
+import { rows as initialRows } from '../internals/data/gridData';
 
 const data = [
   {
-    title: 'Users',
-    value: '14k',
+    title: 'Total Sales',
+    value: '$14k',
     interval: 'Last 30 days',
     trend: 'up',
     data: [
@@ -23,7 +25,7 @@ const data = [
     ],
   },
   {
-    title: 'Conversions',
+    title: 'Orders',
     value: '325',
     interval: 'Last 30 days',
     trend: 'down',
@@ -33,8 +35,8 @@ const data = [
     ],
   },
   {
-    title: 'Event count',
-    value: '200k',
+    title: 'Avg. Order Value',
+    value: '$12.50',
     interval: 'Last 30 days',
     trend: 'neutral',
     data: [
@@ -45,6 +47,47 @@ const data = [
 ];
 
 export default function MainGrid() {
+  const [filteredRows, setFilteredRows] = React.useState(initialRows);
+
+  const handleTreeSelection = (selectedLabel) => {
+    if (!selectedLabel) {
+      setFilteredRows(initialRows);
+      return;
+    }
+
+    // Map tree labels to data categories
+    // Tree: "Milk Teas", "Fruit Teas", "Smoothies"
+    // Data: "Milk Tea", "Fruit Tea", "Smoothie"
+    const categoryMap = {
+      'Milk Teas': 'Milk Tea',
+      'Fruit Teas': 'Fruit Tea',
+      'Smoothies': 'Smoothie',
+      'Tea Leaves': 'Tea Leaves',
+      'Syrups': 'Syrups',
+      'Milk': 'Milk',
+      'Cups & Lids': 'Cups & Lids',
+    };
+
+    const mappedCategory = categoryMap[selectedLabel];
+
+    if (mappedCategory) {
+      const newRows = initialRows.filter((row) => row.category === mappedCategory);
+      setFilteredRows(newRows);
+    } else if (selectedLabel === 'Menu') {
+       const menuCategories = ['Milk Tea', 'Fruit Tea', 'Smoothie'];
+       const newRows = initialRows.filter((row) => menuCategories.includes(row.category));
+       setFilteredRows(newRows);
+    } else if (selectedLabel === 'Inventory') {
+       const inventoryCategories = ['Tea Leaves', 'Syrups', 'Milk', 'Cups & Lids'];
+       const newRows = initialRows.filter((row) => inventoryCategories.includes(row.category));
+       setFilteredRows(newRows);
+    } else if (selectedLabel === 'All Items') {
+      setFilteredRows(initialRows);
+    } else {
+      setFilteredRows(initialRows);
+    }
+  };
+
   return (
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
       {/* cards */}
@@ -77,12 +120,11 @@ export default function MainGrid() {
       </Typography>
       <Grid container spacing={2} columns={12}>
         <Grid size={{ xs: 12, lg: 9 }}>
-          <CustomizedDataGrid />
+          <CustomizedDataGrid rows={filteredRows} />
         </Grid>
         <Grid size={{ xs: 12, lg: 3 }}>
           <Stack gap={2} direction={{ xs: 'column', sm: 'row', lg: 'column' }}>
-            <CustomizedTreeView />
-            <ChartUserByCountry />
+            <CustomizedTreeView onSelectionChange={handleTreeSelection} />
           </Stack>
         </Grid>
       </Grid>

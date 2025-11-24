@@ -1,4 +1,6 @@
+import * as React from 'react';
 import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
 import CustomDatePicker from './CustomDatePicker';
 import NavbarBreadcrumbs from './NavbarBreadcrumbs';
@@ -6,6 +8,26 @@ import MenuButton from './MenuButton';
 import ColorModeIconDropdown from '../../../shared-theme/ColorModeIconDropdown';
 
 import Search from './Search';
+
+function Clock() {
+  const [time, setTime] = React.useState(new Date());
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
+  return (
+    <Typography variant="body2" sx={{ color: 'text.primary', alignSelf: 'center', mr: 2 }}>
+      {time.toLocaleTimeString()}
+    </Typography>
+  );
+}
 
 export default function Header() {
   return (
@@ -23,6 +45,7 @@ export default function Header() {
     >
       <NavbarBreadcrumbs />
       <Stack direction="row" sx={{ gap: 1 }}>
+        <Clock />
         <ColorModeIconDropdown />
       </Stack>
     </Stack>

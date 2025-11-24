@@ -52,7 +52,7 @@ export default function SessionsChart() {
     <Card variant="outlined" sx={{ width: '100%' }}>
       <CardContent>
         <Typography component="h2" variant="subtitle2" gutterBottom>
-          Sessions
+          Daily Revenue
         </Typography>
         <Stack sx={{ justifyContent: 'space-between' }}>
           <Stack
@@ -64,12 +64,12 @@ export default function SessionsChart() {
             }}
           >
             <Typography variant="h4" component="p">
-              13,277
+              $13,277
             </Typography>
             <Chip size="small" color="success" label="+35%" />
           </Stack>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Sessions per day for the last 30 days
+            Revenue per day for the last 30 days
           </Typography>
         </Stack>
         <LineChart
@@ -85,8 +85,8 @@ export default function SessionsChart() {
           yAxis={[{ width: 50 }]}
           series={[
             {
-              id: 'direct',
-              label: 'Direct',
+              id: 'instore',
+              label: 'In-Store',
               showMark: false,
               curve: 'linear',
               stack: 'total',
@@ -99,8 +99,8 @@ export default function SessionsChart() {
               ],
             },
             {
-              id: 'referral',
-              label: 'Referral',
+              id: 'online',
+              label: 'Online',
               showMark: false,
               curve: 'linear',
               stack: 'total',
@@ -113,8 +113,8 @@ export default function SessionsChart() {
               ],
             },
             {
-              id: 'organic',
-              label: 'Organic',
+              id: 'delivery',
+              label: 'Delivery',
               showMark: false,
               curve: 'linear',
               stack: 'total',
@@ -131,21 +131,21 @@ export default function SessionsChart() {
           margin={{ left: 0, right: 20, top: 20, bottom: 0 }}
           grid={{ horizontal: true }}
           sx={{
-            '& .MuiAreaElement-series-organic': {
-              fill: "url('#organic')",
+            '& .MuiAreaElement-series-delivery': {
+              fill: "url('#delivery')",
             },
-            '& .MuiAreaElement-series-referral': {
-              fill: "url('#referral')",
+            '& .MuiAreaElement-series-online': {
+              fill: "url('#online')",
             },
-            '& .MuiAreaElement-series-direct': {
-              fill: "url('#direct')",
+            '& .MuiAreaElement-series-instore': {
+              fill: "url('#instore')",
             },
           }}
           hideLegend
         >
-          <AreaGradient color={theme.palette.primary.dark} id="organic" />
-          <AreaGradient color={theme.palette.primary.main} id="referral" />
-          <AreaGradient color={theme.palette.primary.light} id="direct" />
+          <AreaGradient color={theme.palette.primary.dark} id="delivery" />
+          <AreaGradient color={theme.palette.primary.main} id="online" />
+          <AreaGradient color={theme.palette.primary.light} id="instore" />
         </LineChart>
       </CardContent>
     </Card>

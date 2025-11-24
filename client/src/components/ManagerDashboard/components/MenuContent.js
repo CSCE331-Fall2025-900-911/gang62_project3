@@ -21,7 +21,6 @@ const mainListItems = [
   { text: 'X Report', icon: <DescriptionRoundedIcon /> },
   { text: 'Z Report', icon: <SummarizeRoundedIcon /> },
   { text: 'Sales Report', icon: <AssessmentRoundedIcon /> },
-  { text: 'Product Chart', icon: <BarChartRoundedIcon /> },
 ];
 
 export default function MenuContent({ activePage, setActivePage }) {
