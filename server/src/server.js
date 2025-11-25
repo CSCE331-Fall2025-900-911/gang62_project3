@@ -35,27 +35,12 @@ const SERVER_BASE_URL =
     process.env.SERVER_BASE_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${PORT}`);
 
-// Enable CORS for client requests (allow credentials for session cookies)
+// Enable CORS for client requests (allow credentials for session cookies).
+// For this project we keep CORS permissive and simply reflect the request origin.
+// This works with credentials and avoids environment-specific misconfiguration.
 app.use(
     cors({
-        origin(origin, callback) {
-            // In development, allow all origins to simplify local/network testing.
-            if (!IS_PRODUCTION) {
-                return callback(null, true);
-            }
-
-            // In production, restrict to the configured allow-list.
-            // Allow non-browser clients or same-origin server-to-server calls (no Origin header)
-            if (!origin) {
-                return callback(null, true);
-            }
-
-            if (ALLOWED_ORIGINS.includes(origin)) {
-                return callback(null, true);
-            }
-
-            return callback(new Error(`Not allowed by CORS: ${origin}`));
-        },
+        origin: true, // reflect request Origin header
         credentials: true,
     })
 );
