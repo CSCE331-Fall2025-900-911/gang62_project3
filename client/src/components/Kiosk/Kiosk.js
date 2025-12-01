@@ -274,7 +274,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
               {orderItems.length} {orderItems.length === 1 ? translatedTexts.item : translatedTexts.items}
             </Typography>
           </Box>
-          <Button 
+          <Button
             variant="contained" 
             color="primary" 
             size="large"
@@ -325,7 +325,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
                 minWidth: '100%',
                 transition: 'transform 0.5s ease-in-out',
                 transform: `translateX(-${currentSlide * 100}%)`,
-                height: '100%',
+                height: '80%',
               }}
             >
               <Card sx={{ height: '100%', position: 'relative', p: 0, overflow: 'hidden' }}>
