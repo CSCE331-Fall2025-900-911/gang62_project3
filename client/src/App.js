@@ -54,44 +54,32 @@ function App() {
       <div className="App">
         <Routes>
           <Route 
-            path="/" 
-            element={<SignIn onLogin={handleLocalLogin} />} 
+            path="/"
+            element={<SignIn onLogin={handleLocalLogin} />}
           />
           <Route 
-            path="/kiosk" 
+            path="/kiosk"
             element={
-              !authChecked ? (
-                <div />
-              ) : isAuthenticated ? (
-                <Kiosk 
-                  orderItems={orderItems}
-                  setOrderItems={setOrderItems}
-                  orderTotal={orderTotal}
-                  setOrderTotal={setOrderTotal}
-                  user={user}
-                />
-              ) : (
-                <Navigate to="/" />
-              )
-            } 
+              <Kiosk 
+                orderItems={orderItems}
+                setOrderItems={setOrderItems}
+                orderTotal={orderTotal}
+                setOrderTotal={setOrderTotal}
+                user={user}
+              />
+            }
           />
           <Route 
-            path="/checkout" 
+            path="/checkout"
             element={
-              !authChecked ? (
-                <div />
-              ) : isAuthenticated ? (
-                <Checkout 
-                  orderItems={orderItems}
-                  setOrderItems={setOrderItems}
-                  orderTotal={orderTotal}
-                  setOrderTotal={setOrderTotal}
-                  user={user}
-                />
-              ) : (
-                <Navigate to="/" />
-              )
-            } 
+              <Checkout 
+                orderItems={orderItems}
+                setOrderItems={setOrderItems}
+                orderTotal={orderTotal}
+                setOrderTotal={setOrderTotal}
+                user={user}
+              />
+            }
           />
           <Route
             path="/manager"

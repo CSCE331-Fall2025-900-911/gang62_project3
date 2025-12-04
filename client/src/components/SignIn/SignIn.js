@@ -261,6 +261,13 @@ export default function SignIn({ onLogin, ...props }) {
             >
               Sign in with Facebook
             </Button>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => navigate('/kiosk')}
+            >
+              Continue as guest
+            </Button>
             <Typography sx={{ textAlign: 'center' }}>
               Don&apos;t have an account?{' '}
               <Link
