@@ -71,6 +71,8 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = React.useState(0);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [receiptItems, setReceiptItems] = React.useState([]);
+  const [receiptSubtotal, setReceiptSubtotal] = React.useState(0);
   
   // Address form state
   const [firstName, setFirstName] = React.useState('');
@@ -83,6 +85,8 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
   const [cvv, setCvv] = React.useState('');
   const [expirationDate, setExpirationDate] = React.useState('');
   const [cardName, setCardName] = React.useState('');
+  const TAX_RATE = 0.0825; // Match tax used in Review component
+
   const handleNext = async () => {
     const isLastStep = activeStep === steps.length - 1;
 
@@ -145,6 +149,8 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
       }
 
       // Order submitted successfully: advance to confirmation screen and clear cart
+      setReceiptItems(orderItems);
+      setReceiptSubtotal(orderTotal);
       setActiveStep((prev) => prev + 1);
       setOrderItems([]);
       setOrderTotal(0);
@@ -176,8 +182,10 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
     const total = orderItems.reduce((sum, item) => sum + item.price, 0);
     setOrderTotal(total);
   }, [orderItems, setOrderTotal]);
-  
+
   const formattedTotal = `$${orderTotal.toFixed(2)}`;
+  const receiptTax = receiptSubtotal * TAX_RATE;
+  const receiptTotal = receiptSubtotal + receiptTax;
   
   return (
     <AppTheme {...props}>
@@ -355,6 +363,81 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                   Your drinks are being prepared. Please watch the screen or listen
                   for your name when your order is ready for pickup.
                 </Typography>
+                {receiptItems.length > 0 && (
+                  <Card sx={{ mt: 1 }}>
+                    <CardContent>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        Receipt
+                      </Typography>
+                      {receiptItems.map((item, index) => (
+                        <Box
+                          key={`${item.id}-${index}`}
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            mb: 0.5,
+                          }}
+                        >
+                          <Typography variant="body2">{item.name}</Typography>
+                          <Typography variant="body2">
+                            ${item.price.toFixed(2)}
+                          </Typography>
+                        </Box>
+                      ))}
+                      <Box
+                        sx={{
+                          mt: 1,
+                          pt: 1,
+                          borderTop: '1px solid',
+                          borderColor: 'divider',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            mb: 0.5,
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            Subtotal
+                          </Typography>
+                          <Typography variant="body2">
+                            ${receiptSubtotal.toFixed(2)}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            mb: 0.5,
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            Tax ({(TAX_RATE * 100).toFixed(2)}%)
+                          </Typography>
+                          <Typography variant="body2">
+                            ${receiptTax.toFixed(2)}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            mt: 0.5,
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                            Total
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                            ${receiptTotal.toFixed(2)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                )}
                 <Button
                   variant="contained"
                   sx={{ alignSelf: 'start', width: { xs: '100%', sm: 'auto' } }}
