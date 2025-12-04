@@ -22,6 +22,10 @@ import Review from './Review';
 import AppTheme from '../../shared-theme/AppTheme';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const KIOSK_EMPLOYEE_ID = 1; // Default employee for kiosk orders
+const WALK_IN_CUSTOMER_ID = 1; // Default "walk-in" customer
+
 const steps = ['Name', 'Payment details', 'Review your order'];
 function getStepContent(step, orderItems, orderTotal, formData) {
   switch (step) {
@@ -66,6 +70,7 @@ function getStepContent(step, orderItems, orderTotal, formData) {
 export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 0, setOrderTotal, ...props }) {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = React.useState(0);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   
   // Address form state
   const [firstName, setFirstName] = React.useState('');
@@ -78,8 +83,78 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
   const [cvv, setCvv] = React.useState('');
   const [expirationDate, setExpirationDate] = React.useState('');
   const [cardName, setCardName] = React.useState('');
-  const handleNext = () => {
-    setActiveStep(activeStep + 1);
+  const handleNext = async () => {
+    const isLastStep = activeStep === steps.length - 1;
+
+    // If not on the final "Review / Place order" step, just advance the stepper
+    if (!isLastStep) {
+      setActiveStep((prev) => prev + 1);
+      return;
+    }
+
+    // On the final step, submit the order to the backend
+    if (!orderItems || orderItems.length === 0) {
+      alert('Your cart is empty. Please add items before placing an order.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      // Aggregate quantities by menu item ID
+      const quantityById = {};
+      orderItems.forEach((item) => {
+        if (!item || typeof item.id === 'undefined') return;
+        const idKey = String(item.id);
+        quantityById[idKey] = (quantityById[idKey] || 0) + 1;
+      });
+
+      const itemsPayload = Object.entries(quantityById).map(([id, quantity]) => ({
+        id: Number(id),
+        quantity,
+      }));
+
+      if (itemsPayload.length === 0) {
+        alert('Unable to submit order: no valid items found.');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/submit-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          employeeID: KIOSK_EMPLOYEE_ID,
+          customerID: WALK_IN_CUSTOMER_ID,
+          items: itemsPayload,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to submit order';
+        try {
+          const data = await response.json();
+          if (data && data.error) {
+            errorMessage = data.error;
+          }
+        } catch (err) {
+          // Ignore JSON parse errors and fall back to default message
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Order submitted successfully: advance to confirmation screen and clear cart
+      setActiveStep((prev) => prev + 1);
+      setOrderItems([]);
+      setOrderTotal(0);
+      alert('Your order has been placed! Thank you.');
+    } catch (error) {
+      console.error('Error submitting kiosk order:', error);
+      alert(`Failed to place order: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   const handleBack = () => {
     setActiveStep(activeStep - 1);
@@ -343,6 +418,7 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                     endIcon={<ChevronRightRoundedIcon />}
                     onClick={handleNext}
                     sx={{ width: { xs: '100%', sm: 'fit-content' } }}
+                    disabled={activeStep === steps.length - 1 && isSubmitting}
                   >
                     {activeStep === steps.length - 1 ? 'Place order' : 'Next'}
                   </Button>
