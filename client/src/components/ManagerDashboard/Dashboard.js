@@ -13,6 +13,7 @@ import CashierViewPage from './pages/CashierViewPage';
 import EmployeesPage from './pages/EmployeesPage';
 import XReportPage from './pages/XReportPage';
 import ZReportPage from './pages/ZReportPage';
+import OrdersPage from './pages/OrdersPage';
 import {
   chartsCustomizations,
   dataGridCustomizations,
@@ -40,6 +41,8 @@ export default function Dashboard(props) {
         return <CashierViewPage />;
       case 'Employees':
         return <EmployeesPage />;
+      case 'Orders':
+        return <OrdersPage />;
       case 'X Report':
         return <XReportPage />;
       case 'Z Report':

@@ -334,6 +334,113 @@ app.get('/api/dashboard/top-items', async (req, res) => {
 });
 
 /**
+ * API endpoint to retrieve all orders with their line items.
+ *
+ * Response shape:
+ * [
+ *   {
+ *     id: number,
+ *     createdAt: string,
+ *     employeeId: number | null,
+ *     customerId: number | null,
+ *     subtotal: number,   // dollars
+ *     tax: number,        // dollars
+ *     total: number,      // dollars
+ *     items: [
+ *       {
+ *         menuItemId: number,
+ *         name: string,
+ *         qty: number,
+ *         lineTotal: number // dollars
+ *       },
+ *       ...
+ *     ]
+ *   },
+ *   ...
+ * ]
+ *
+ * @route GET /api/orders-with-items
+ * @returns {Promise<void>} Sends JSON response with orders and their items
+ * @author Michael Nguyen
+ */
+app.get('/api/orders-with-items', async (req, res) => {
+    try {
+        const db = new DatabaseConnection();
+
+        // Optional limit query param to avoid returning too many rows by default
+        const rawLimit = req.query.limit;
+        let limit = 20;
+        if (rawLimit !== undefined) {
+            const parsed = parseInt(rawLimit, 10);
+            if (!Number.isNaN(parsed) && parsed > 0) {
+                // Cap the limit to a reasonable maximum to protect the server
+                limit = Math.min(parsed, 1000);
+            }
+        }
+
+        const rows = await db.runQuery({
+            text: `
+                WITH latest_orders AS (
+                    SELECT *
+                    FROM orders
+                    ORDER BY created_at DESC, id DESC
+                    LIMIT $1
+                )
+                SELECT
+                    o.id AS order_id,
+                    o.created_at,
+                    o.employee_id,
+                    o.customer_id,
+                    o.subtotal_cents,
+                    o.tax_cents,
+                    o.total_cents,
+                    t.menu_item_id,
+                    t.qty,
+                    t.line_total_cents,
+                    mi.name AS menu_item_name
+                FROM latest_orders o
+                JOIN tickets t
+                    ON t.order_id = o.id
+                JOIN menu_items mi
+                    ON mi.id = t.menu_item_id
+                ORDER BY o.created_at DESC, o.id DESC, t.id ASC;
+            `,
+            values: [limit],
+        });
+
+        const ordersById = {};
+
+        for (const row of rows) {
+            const id = row.order_id;
+            if (!ordersById[id]) {
+                ordersById[id] = {
+                    id,
+                    createdAt: row.created_at,
+                    employeeId: row.employee_id,
+                    customerId: row.customer_id,
+                    subtotal: (Number(row.subtotal_cents) || 0) / 100.0,
+                    tax: (Number(row.tax_cents) || 0) / 100.0,
+                    total: (Number(row.total_cents) || 0) / 100.0,
+                    items: [],
+                };
+            }
+
+            ordersById[id].items.push({
+                menuItemId: row.menu_item_id,
+                name: row.menu_item_name,
+                qty: Number(row.qty) || 0,
+                lineTotal: (Number(row.line_total_cents) || 0) / 100.0,
+            });
+        }
+
+        res.json(Object.values(ordersById));
+    } catch (error) {
+        console.error('Error fetching orders with items:', error);
+        res.status(500).json({ error: 'Failed to fetch orders with items' });
+    }
+});
+
+/**
  * API endpoint to update inventory stock.
  * 
  * @route PUT /api/inventory/:id

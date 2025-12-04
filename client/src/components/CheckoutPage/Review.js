@@ -6,6 +6,8 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 
 export default function Review({ 
   orderItems = [], 
@@ -16,7 +18,9 @@ export default function Review({
   paymentType = 'creditCard',
   cardNumber = '',
   cardName = '',
-  expirationDate = ''
+  expirationDate = '',
+  extras,
+  setExtras,
 }) {
   const TAX_RATE = 0.0825; // 8.25% tax rate
   const subtotal = orderTotal;
@@ -100,6 +104,57 @@ export default function Review({
             ))}
           </Grid>
         </div>
+        {extras && setExtras && (
+          <div>
+            <Typography variant="subtitle2" gutterBottom>
+              Extras
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {[
+                { key: 'bag', label: 'Bag' },
+                { key: 'cupHolder', label: 'Cup holder' },
+                { key: 'extraStraws', label: 'Extra straws' },
+                { key: 'napkins', label: 'Napkins' },
+              ].map((item) => (
+                <Box
+                  key={item.key}
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                >
+                  <Typography variant="body1" sx={{ flexGrow: 1 }}>
+                    {item.label}
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() =>
+                      setExtras({
+                        ...extras,
+                        [item.key]: Math.max(0, (extras[item.key] || 0) - 1),
+                      })
+                    }
+                  >
+                    -
+                  </Button>
+                  <Typography sx={{ minWidth: 24, textAlign: 'center' }}>
+                    {extras[item.key] || 0}
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() =>
+                      setExtras({
+                        ...extras,
+                        [item.key]: (extras[item.key] || 0) + 1,
+                      })
+                    }
+                  >
+                    +
+                  </Button>
+                </Box>
+              ))}
+            </Box>
+          </div>
+        )}
       </Stack>
     </Stack>
   );

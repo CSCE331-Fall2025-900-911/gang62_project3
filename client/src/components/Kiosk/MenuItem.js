@@ -32,14 +32,19 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
   const [open, setOpen] = useState(false);
   const [sugarLevel, setSugarLevel] = useState('medium');
   const [iceLevel, setIceLevel] = useState('medium');
+  const [size, setSize] = useState('medium');
   const [translatedName, setTranslatedName] = useState(item.name);
   const [translatedTexts, setTranslatedTexts] = useState({
     customize: 'Customize',
+    size: 'Size',
     sugarLevel: 'Sugar Level',
     iceLevel: 'Ice Level',
     low: 'Low',
     medium: 'Medium',
     high: 'High',
+    smallSize: 'Small',
+    mediumSize: 'Medium',
+    largeSize: 'Large',
     cancel: 'Cancel',
     addToOrder: 'Add to Order'
   });
@@ -50,11 +55,15 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
         setTranslatedName(item.name);
         setTranslatedTexts({
           customize: 'Customize',
+          size: 'Size',
           sugarLevel: 'Sugar Level',
           iceLevel: 'Ice Level',
           low: 'Low',
           medium: 'Medium',
           high: 'High',
+          smallSize: 'Small',
+          mediumSize: 'Medium',
+          largeSize: 'Large',
           cancel: 'Cancel',
           addToOrder: 'Add to Order'
         });
@@ -66,11 +75,15 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
       
       const texts = {
         customize: 'Customize',
+        size: 'Size',
         sugarLevel: 'Sugar Level',
         iceLevel: 'Ice Level',
         low: 'Low',
         medium: 'Medium',
         high: 'High',
+        smallSize: 'Small',
+        mediumSize: 'Medium',
+        largeSize: 'Large',
         cancel: 'Cancel',
         addToOrder: 'Add to Order'
       };
@@ -103,6 +116,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
   const handleAddToOrder = () => {
     const customizedItem = {
       ...item,
+      size,
       sugarLevel,
       iceLevel
     };
@@ -117,6 +131,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
     // Reset to defaults for next time
     setSugarLevel('medium');
     setIceLevel('medium');
+    setSize('medium');
   };
 
   return (
@@ -185,6 +200,53 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
         </DialogTitle>
         <DialogContent>
           <Box sx={{ py: 2 }}>
+            {/* Size Selection */}
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+              {translatedTexts.size}
+            </Typography>
+            <ButtonGroup 
+              fullWidth 
+              variant="outlined" 
+              sx={{ mb: 4 }}
+            >
+              <Button
+                variant={size === 'small' ? 'contained' : 'outlined'}
+                color="primary"
+                onClick={() => setSize('small')}
+                sx={{ 
+                  py: 2,
+                  fontSize: '1rem',
+                  fontWeight: 600
+                }}
+              >
+                {translatedTexts.smallSize}
+              </Button>
+              <Button
+                variant={size === 'medium' ? 'contained' : 'outlined'}
+                color="primary"
+                onClick={() => setSize('medium')}
+                sx={{ 
+                  py: 2,
+                  fontSize: '1rem',
+                  fontWeight: 600
+                }}
+              >
+                {translatedTexts.mediumSize}
+              </Button>
+              <Button
+                variant={size === 'large' ? 'contained' : 'outlined'}
+                color="primary"
+                onClick={() => setSize('large')}
+                sx={{ 
+                  py: 2,
+                  fontSize: '1rem',
+                  fontWeight: 600
+                }}
+              >
+                {translatedTexts.largeSize}
+              </Button>
+            </ButtonGroup>
+
             {/* Sugar Level Selection */}
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
               {translatedTexts.sugarLevel}

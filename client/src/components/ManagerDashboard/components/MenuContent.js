@@ -10,12 +10,14 @@ import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded';
 import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import SummarizeRoundedIcon from '@mui/icons-material/SummarizeRounded';
+import ListAltRoundedIcon from '@mui/icons-material/ListAltRounded';
 
 const mainListItems = [
   { text: 'Home', icon: <HomeRoundedIcon /> },
   { text: 'Inventory', icon: <InventoryRoundedIcon /> },
   { text: 'Cashier View', icon: <PointOfSaleRoundedIcon /> },
   { text: 'Employees', icon: <PeopleRoundedIcon /> },
+  { text: 'Orders', icon: <ListAltRoundedIcon /> },
   { text: 'X Report', icon: <DescriptionRoundedIcon /> },
   { text: 'Z Report', icon: <SummarizeRoundedIcon /> },
 ];

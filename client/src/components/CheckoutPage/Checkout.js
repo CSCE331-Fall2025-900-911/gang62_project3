@@ -26,8 +26,23 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 const KIOSK_EMPLOYEE_ID = 1; // Default employee for kiosk orders
 const WALK_IN_CUSTOMER_ID = 1; // Default "walk-in" customer
 
+// Menu item IDs for accessories and packaging
+const STRAW_ITEM_ID = 28;
+const NAPKIN_ITEM_ID = 29;
+const SMALL_CUP_ITEM_ID = 30;
+const MEDIUM_CUP_ITEM_ID = 31;
+const BAG_ITEM_ID = 32;
+const LARGE_CUP_ITEM_ID = 33;
+const CUP_HOLDER_ITEM_ID = 34;
+
+const CUP_SIZE_BY_KEY = {
+  small: SMALL_CUP_ITEM_ID,
+  medium: MEDIUM_CUP_ITEM_ID,
+  large: LARGE_CUP_ITEM_ID,
+};
+
 const steps = ['Name', 'Payment details', 'Review your order'];
-function getStepContent(step, orderItems, orderTotal, formData) {
+function getStepContent(step, orderItems, orderTotal, formData, extrasState) {
   switch (step) {
     case 0:
       return <AddressForm 
@@ -62,6 +77,8 @@ function getStepContent(step, orderItems, orderTotal, formData) {
         cardNumber={formData.cardNumber}
         cardName={formData.cardName}
         expirationDate={formData.expirationDate}
+        extras={extrasState.extras}
+        setExtras={extrasState.setExtras}
       />;
     default:
       throw new Error('Unknown step');
@@ -73,6 +90,13 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [receiptItems, setReceiptItems] = React.useState([]);
   const [receiptSubtotal, setReceiptSubtotal] = React.useState(0);
+  const [extras, setExtras] = React.useState({
+    bag: 0,
+    cupHolder: 0,
+    extraStraws: 0,
+    napkins: 0,
+  });
+  const [receiptExtras, setReceiptExtras] = React.useState(null);
   
   // Address form state
   const [firstName, setFirstName] = React.useState('');
@@ -105,13 +129,43 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
     try {
       setIsSubmitting(true);
 
-      // Aggregate quantities by menu item ID
+      // Aggregate quantities by menu item ID, including cups/straws and extras
       const quantityById = {};
+
+      const incrementQuantity = (id, amount = 1) => {
+        if (!id || amount <= 0) return;
+        const key = String(id);
+        quantityById[key] = (quantityById[key] || 0) + amount;
+      };
+
+      // Drinks from the kiosk
       orderItems.forEach((item) => {
         if (!item || typeof item.id === 'undefined') return;
-        const idKey = String(item.id);
-        quantityById[idKey] = (quantityById[idKey] || 0) + 1;
+        // Base drink
+        incrementQuantity(item.id);
+
+        // One cup per drink, based on selected size (default to medium)
+        const sizeKey = (item.size || 'medium').toLowerCase();
+        const cupId = CUP_SIZE_BY_KEY[sizeKey] || CUP_SIZE_BY_KEY.medium;
+        incrementQuantity(cupId);
+
+        // One straw per drink
+        incrementQuantity(STRAW_ITEM_ID);
       });
+
+      // Extras chosen at checkout
+      if (extras.bag > 0) {
+        incrementQuantity(BAG_ITEM_ID, extras.bag);
+      }
+      if (extras.cupHolder > 0) {
+        incrementQuantity(CUP_HOLDER_ITEM_ID, extras.cupHolder);
+      }
+      if (extras.extraStraws > 0) {
+        incrementQuantity(STRAW_ITEM_ID, extras.extraStraws);
+      }
+      if (extras.napkins > 0) {
+        incrementQuantity(NAPKIN_ITEM_ID, extras.napkins);
+      }
 
       const itemsPayload = Object.entries(quantityById).map(([id, quantity]) => ({
         id: Number(id),
@@ -151,9 +205,16 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
       // Order submitted successfully: advance to confirmation screen and clear cart
       setReceiptItems(orderItems);
       setReceiptSubtotal(orderTotal);
+      setReceiptExtras(extras);
       setActiveStep((prev) => prev + 1);
       setOrderItems([]);
       setOrderTotal(0);
+      setExtras({
+        bag: 0,
+        cupHolder: 0,
+        extraStraws: 0,
+        napkins: 0,
+      });
       alert('Your order has been placed! Thank you.');
     } catch (error) {
       console.error('Error submitting kiosk order:', error);
@@ -384,6 +445,58 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                           </Typography>
                         </Box>
                       ))}
+                      {receiptExtras && (
+                        <Box sx={{ mt: 1 }}>
+                          {receiptExtras.bag > 0 && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                mb: 0.5,
+                              }}
+                            >
+                              <Typography variant="body2">Bag</Typography>
+                              <Typography variant="body2">x{receiptExtras.bag}</Typography>
+                            </Box>
+                          )}
+                          {receiptExtras.cupHolder > 0 && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                mb: 0.5,
+                              }}
+                            >
+                              <Typography variant="body2">Cup holder</Typography>
+                              <Typography variant="body2">x{receiptExtras.cupHolder}</Typography>
+                            </Box>
+                          )}
+                          {receiptExtras.extraStraws > 0 && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                mb: 0.5,
+                              }}
+                            >
+                              <Typography variant="body2">Extra straws</Typography>
+                              <Typography variant="body2">x{receiptExtras.extraStraws}</Typography>
+                            </Box>
+                          )}
+                          {receiptExtras.napkins > 0 && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                mb: 0.5,
+                              }}
+                            >
+                              <Typography variant="body2">Napkins</Typography>
+                              <Typography variant="body2">x{receiptExtras.napkins}</Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      )}
                       <Box
                         sx={{
                           mt: 1,
@@ -456,7 +569,10 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                   cardNumber, setCardNumber,
                   cvv, setCvv,
                   expirationDate, setExpirationDate,
-                  cardName, setCardName
+                  cardName, setCardName,
+                }, {
+                  extras,
+                  setExtras,
                 })}
                 <Box
                   sx={[

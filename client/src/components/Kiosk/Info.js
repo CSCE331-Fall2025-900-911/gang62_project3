@@ -46,6 +46,14 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit }) {
     setEditingIndex(null);
   };
 
+  const formatSize = (size) => {
+    if (!size) return 'Medium';
+    const lower = String(size).toLowerCase();
+    if (lower === 'small') return 'Small';
+    if (lower === 'large') return 'Large';
+    return 'Medium';
+  };
+
   return (
     <React.Fragment>
       <Typography variant="subtitle2" sx={{ color: 'text.secondary' }}>
@@ -70,7 +78,7 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit }) {
               <ListItemText
                 sx={{ mr: 2, flex: 1 }}
                 primary={item.name}
-                secondary={`Sugar: ${item.sugarLevel || 'N/A'} | Ice: ${item.iceLevel || 'N/A'}`}
+                secondary={`Size: ${formatSize(item.size)} | Sugar: ${item.sugarLevel || 'N/A'} | Ice: ${item.iceLevel || 'N/A'}`}
               />
               <Typography variant="body1" sx={{ fontWeight: 'medium', mr: 1 }}>
                 ${item.price.toFixed(2)}

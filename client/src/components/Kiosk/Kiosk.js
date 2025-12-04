@@ -10,6 +10,9 @@ import { useWeather } from "./weather";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
+// Menu item IDs for accessories/packaging that should not appear as main drink tiles
+const ACCESSORY_ITEM_IDS = new Set([28, 29, 30, 31, 32, 33, 34]);
+
 const languages = [
   { code: 'EN', name: 'English' },
   { code: 'ES', name: 'Español' },
@@ -416,7 +419,9 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
       </Box>
       
       <Grid container spacing={3}>
-        {menuItems.map((item) => (
+        {menuItems
+          .filter((item) => !ACCESSORY_ITEM_IDS.has(item.id))
+          .map((item) => (
           <Grid item key={item.id} sx={{ width: 'calc(20% - 24px)', minWidth: '200px' }}>
             <MenuItem item={item} onItemClick={handleAddToOrder} language={language} translate={translate} />
           </Grid>
