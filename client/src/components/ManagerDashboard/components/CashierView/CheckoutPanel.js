@@ -22,7 +22,7 @@ const CheckoutPanel = ({ totalAmount, cartItemCount, onProcessPayment, onNewSale
           <Typography variant="h5" fontWeight="bold" sx={{paddingRight: 2}}>
             Total: {formatPrice(totalAmount)}
           </Typography>
-          { totalAmount > 0 &&
+          { cartItemCount > 0 &&
             <Box sx={{ display: 'flex', gap: 2, width: '100%'}}>
                 <Button
                 variant="contained"
