@@ -3,6 +3,8 @@ import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenu
 import { useNavigate } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import AppTheme from '../../shared-theme/AppTheme';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 import MenuItem from './MenuItem';
@@ -57,6 +59,15 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
   const translationsRef = useRef({});
   const [currentSlide, setCurrentSlide] = useState(0);
   const carouselRef = useRef(null);
+  const [ttsEnabled, setTtsEnabled] = useState(false);
+
+  const speak = useCallback((text) => {
+    if (ttsEnabled && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [ttsEnabled]);
 
   useEffect(() => {
     translationsRef.current = {};
@@ -187,6 +198,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
     setOrderItems([...orderItems, item]);
     console.log('Item added to order:', item);
     console.log('Current order:', [...orderItems, item]);
+    speak(`Added ${item.name} to order for ${item.price} dollars.`);
   };
 
   /**
@@ -251,6 +263,9 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <IconButton onClick={() => setTtsEnabled(!ttsEnabled)} color="primary" aria-label={ttsEnabled ? "Disable text to speech" : "Enable text to speech"}>
+            {ttsEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
+          </IconButton>
           <ColorModeIconDropdown />
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Language</InputLabel>
@@ -423,7 +438,14 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
           .filter((item) => !ACCESSORY_ITEM_IDS.has(item.id))
           .map((item) => (
           <Grid item key={item.id} sx={{ width: 'calc(20% - 24px)', minWidth: '200px' }}>
-            <MenuItem item={item} onItemClick={handleAddToOrder} language={language} translate={translate} />
+            <MenuItem 
+              item={item} 
+              onItemClick={handleAddToOrder} 
+              language={language} 
+              translate={translate}
+              ttsEnabled={ttsEnabled}
+              speak={speak}
+            />
           </Grid>
         ))}
       </Grid>
