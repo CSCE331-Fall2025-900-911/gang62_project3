@@ -248,8 +248,8 @@ export default function SignIn({ onLogin, ...props }) {
             </Link>
           </Box>
           {showKeyboard && (
-            <Box sx={{ position: 'sticky', bottom: 0, mt: 2 }}>
-              <OnScreenKeyboard />
+            <Box sx={{ mt: 2, width: '100%' }}>
+              <OnScreenKeyboard sx={{ width: '100%' }} />
             </Box>
           )}
           <Divider>or</Divider>
