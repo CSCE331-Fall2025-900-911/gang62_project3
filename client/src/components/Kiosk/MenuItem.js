@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -26,14 +26,17 @@ import {
  * @param {Function} [props.onItemClick] - Optional callback function when item is added to order
  * @param {string} [props.language] - Language code for translation
  * @param {Function} [props.translate] - Translation function
+ * @param {boolean} [props.ttsEnabled] - Whether text-to-speech is enabled
+ * @param {Function} [props.speak] - Function to speak text
  * @author Michael Nguyen
  */
-function MenuItem({ item, onItemClick, language = 'EN', translate }) {
+function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, speak }) {
   const [open, setOpen] = useState(false);
   const [sugarLevel, setSugarLevel] = useState('medium');
   const [iceLevel, setIceLevel] = useState('medium');
   const [size, setSize] = useState('medium');
   const [translatedName, setTranslatedName] = useState(item.name);
+  const skipNextFocusRef = useRef(false);
   const [translatedTexts, setTranslatedTexts] = useState({
     customize: 'Customize',
     size: 'Size',
@@ -101,6 +104,16 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
     setOpen(true);
   };
 
+  const handleFocus = () => {
+    if (skipNextFocusRef.current) {
+      skipNextFocusRef.current = false;
+      return;
+    }
+    if (ttsEnabled && speak) {
+      speak(`${translatedName} for ${item.price} dollars.`);
+    }
+  };
+
   const handleKeyDown = (e) => {
     // Activate card on Enter or Space
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
@@ -111,6 +124,12 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const speakOption = (category, value) => {
+    if (ttsEnabled && speak) {
+      speak(`${category} ${value}`);
+    }
   };
 
   const handleAddToOrder = () => {
@@ -127,6 +146,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
       console.log('Selected item:', customizedItem);
     }
     
+    skipNextFocusRef.current = true;
     handleClose();
     // Reset to defaults for next time
     setSugarLevel('medium');
@@ -137,6 +157,12 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
   return (
     <>
       <Card 
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        onClick={handleCardClick}
+        onFocus={handleFocus}
+        role="button"
+        aria-label={`${translatedName}, price $${item.price}`}
         sx={{ 
           height: '100%',
           display: 'flex',
@@ -167,11 +193,6 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
             outline: 'none'
           }
         }}
-        onClick={handleCardClick}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-        role="button"
-        aria-label={`Customize ${translatedName}`}
       >
         <CardContent sx={{ flexGrow: 1, p: 3 }}>
           <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
@@ -213,6 +234,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
                 variant={size === 'small' ? 'contained' : 'outlined'}
                 color="primary"
                 onClick={() => setSize('small')}
+                onFocus={() => speakOption(translatedTexts.size, translatedTexts.smallSize)}
                 sx={{ 
                   py: 2,
                   fontSize: '1rem',
@@ -225,6 +247,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
                 variant={size === 'medium' ? 'contained' : 'outlined'}
                 color="primary"
                 onClick={() => setSize('medium')}
+                onFocus={() => speakOption(translatedTexts.size, translatedTexts.mediumSize)}
                 sx={{ 
                   py: 2,
                   fontSize: '1rem',
@@ -237,6 +260,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
                 variant={size === 'large' ? 'contained' : 'outlined'}
                 color="primary"
                 onClick={() => setSize('large')}
+                onFocus={() => speakOption(translatedTexts.size, translatedTexts.largeSize)}
                 sx={{ 
                   py: 2,
                   fontSize: '1rem',
@@ -260,6 +284,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
                 variant={sugarLevel === 'low' ? 'contained' : 'outlined'}
                 color="primary"
                 onClick={() => setSugarLevel('low')}
+                onFocus={() => speakOption(translatedTexts.sugarLevel, translatedTexts.low)}
                 sx={{ 
                   py: 2,
                   fontSize: '1rem',
@@ -272,6 +297,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
                 variant={sugarLevel === 'medium' ? 'contained' : 'outlined'}
                 color="primary"
                 onClick={() => setSugarLevel('medium')}
+                onFocus={() => speakOption(translatedTexts.sugarLevel, translatedTexts.medium)}
                 sx={{ 
                   py: 2,
                   fontSize: '1rem',
@@ -284,6 +310,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
                 variant={sugarLevel === 'high' ? 'contained' : 'outlined'}
                 color="primary"
                 onClick={() => setSugarLevel('high')}
+                onFocus={() => speakOption(translatedTexts.sugarLevel, translatedTexts.high)}
                 sx={{ 
                   py: 2,
                   fontSize: '1rem',
@@ -306,6 +333,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
                 variant={iceLevel === 'low' ? 'contained' : 'outlined'}
                 color="primary"
                 onClick={() => setIceLevel('low')}
+                onFocus={() => speakOption(translatedTexts.iceLevel, translatedTexts.low)}
                 sx={{ 
                   py: 2,
                   fontSize: '1rem',
@@ -318,6 +346,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
                 variant={iceLevel === 'medium' ? 'contained' : 'outlined'}
                 color="primary"
                 onClick={() => setIceLevel('medium')}
+                onFocus={() => speakOption(translatedTexts.iceLevel, translatedTexts.medium)}
                 sx={{ 
                   py: 2,
                   fontSize: '1rem',
@@ -330,6 +359,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
                 variant={iceLevel === 'high' ? 'contained' : 'outlined'}
                 color="primary"
                 onClick={() => setIceLevel('high')}
+                onFocus={() => speakOption(translatedTexts.iceLevel, translatedTexts.high)}
                 sx={{ 
                   py: 2,
                   fontSize: '1rem',
@@ -344,6 +374,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
         <DialogActions sx={{ p: 3, gap: 2 }}>
           <Button 
             onClick={handleClose}
+            onFocus={() => ttsEnabled && speak && speak(translatedTexts.cancel)}
             variant="outlined"
             color="primary"
             size="large"
@@ -353,6 +384,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
           </Button>
           <Button 
             onClick={handleAddToOrder}
+            onFocus={() => ttsEnabled && speak && speak(translatedTexts.addToOrder)}
             variant="contained"
             color="primary"
             size="large"

@@ -1,3 +1,4 @@
+import React, { useCallback } from 'react';
 import FormLabel from '@mui/material/FormLabel';
 import Grid from '@mui/material/Grid';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -8,7 +9,15 @@ const FormGrid = styled(Grid)(() => ({
   flexDirection: 'column',
 }));
 
-export default function AddressForm({ firstName, setFirstName, lastName, setLastName, phoneNumber, setPhoneNumber }) {
+export default function AddressForm({ firstName, setFirstName, lastName, setLastName, phoneNumber, setPhoneNumber, ttsEnabled }) {
+  const speak = useCallback((text) => {
+    if (ttsEnabled && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [ttsEnabled]);
+
   return (
     <Grid container spacing={3}>
       <FormGrid size={{ xs: 12, md: 6 }}>
@@ -25,6 +34,7 @@ export default function AddressForm({ firstName, setFirstName, lastName, setLast
           size="small"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
+          onFocus={() => speak("Enter your first name")}
         />
       </FormGrid>
       <FormGrid size={{ xs: 12, md: 6 }}>
@@ -41,6 +51,7 @@ export default function AddressForm({ firstName, setFirstName, lastName, setLast
           size="small"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
+          onFocus={() => speak("Enter your last name")}
         />
       </FormGrid>
       <FormGrid size={{ xs: 12 }}>
@@ -56,6 +67,7 @@ export default function AddressForm({ firstName, setFirstName, lastName, setLast
           size="small"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
+          onFocus={() => speak("Enter your phone number")}
         />
       </FormGrid>
     

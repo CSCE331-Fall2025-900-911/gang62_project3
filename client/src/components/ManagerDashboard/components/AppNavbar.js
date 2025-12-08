@@ -28,7 +28,7 @@ const Toolbar = styled(MuiToolbar)({
   },
 });
 
-export default function AppNavbar({ activePage, setActivePage }) {
+export default function AppNavbar({ activePage, setActivePage, menuItems }) {
   const [open, setOpen] = React.useState(false);
 
   const toggleDrawer = (newOpen) => () => {
@@ -72,7 +72,7 @@ export default function AppNavbar({ activePage, setActivePage }) {
           <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
             <MenuRoundedIcon />
           </MenuButton>
-          <SideMenuMobile open={open} toggleDrawer={toggleDrawer} activePage={activePage} setActivePage={setActivePage} />
+          <SideMenuMobile open={open} toggleDrawer={toggleDrawer} activePage={activePage} setActivePage={setActivePage} menuItems={menuItems} />
         </Stack>
       </Toolbar>
     </AppBar>

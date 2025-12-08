@@ -6,6 +6,7 @@ import SignIn from './components/SignIn/SignIn';
 import Kiosk from './components/Kiosk/Kiosk';
 import Checkout from './components/CheckoutPage/Checkout';
 import Dashboard from './components/ManagerDashboard/Dashboard';
+import CashierDashboard from './components/ManagerDashboard/CashierDashboard';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -15,6 +16,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [orderTotal, setOrderTotal] = useState(0);
+  const [ttsEnabled, setTtsEnabled] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -66,6 +68,8 @@ function App() {
                 orderTotal={orderTotal}
                 setOrderTotal={setOrderTotal}
                 user={user}
+                ttsEnabled={ttsEnabled}
+                setTtsEnabled={setTtsEnabled}
               />
             }
           />
@@ -78,6 +82,7 @@ function App() {
                 orderTotal={orderTotal}
                 setOrderTotal={setOrderTotal}
                 user={user}
+                ttsEnabled={ttsEnabled}
               />
             }
           />
@@ -88,6 +93,18 @@ function App() {
                 <div />
               ) : isAuthenticated ? (
                 <Dashboard user={user} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/cashier"
+            element={
+              !authChecked ? (
+                <div />
+              ) : isAuthenticated ? (
+                <CashierDashboard user={user} />
               ) : (
                 <Navigate to="/" />
               )

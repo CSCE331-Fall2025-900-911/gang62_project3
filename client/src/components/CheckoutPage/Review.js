@@ -21,11 +21,30 @@ export default function Review({
   expirationDate = '',
   extras,
   setExtras,
+  ttsEnabled,
 }) {
+  const speak = React.useCallback((text) => {
+    if (ttsEnabled && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [ttsEnabled]);
+
   const TAX_RATE = 0.0825; // 8.25% tax rate
   const subtotal = orderTotal;
   const tax = subtotal * TAX_RATE;
   const total = subtotal + tax;
+
+  React.useEffect(() => {
+    let speechText = `Order summary. Total is ${total.toFixed(2)} dollars. Your Order has ${orderItems.length} ${orderItems.length === 1 ? 'item' : 'items'}. `;
+    
+    orderItems.forEach(item => {
+      speechText += `${item.name}, ${item.price.toFixed(2)} dollars. `;
+    });
+
+    speak(speechText);
+  }, [total, speak, orderItems]);
   
   // Format card number to show last 4 digits
   const maskedCardNumber = cardNumber ? `xxxx-xxxx-xxxx-${cardNumber.replace(/\s/g, '').slice(-4)}` : 'Not provided';
