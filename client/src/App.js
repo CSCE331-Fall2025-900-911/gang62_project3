@@ -16,6 +16,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [orderTotal, setOrderTotal] = useState(0);
+  const [ttsEnabled, setTtsEnabled] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -67,6 +68,8 @@ function App() {
                 orderTotal={orderTotal}
                 setOrderTotal={setOrderTotal}
                 user={user}
+                ttsEnabled={ttsEnabled}
+                setTtsEnabled={setTtsEnabled}
               />
             }
           />
@@ -79,6 +82,7 @@ function App() {
                 orderTotal={orderTotal}
                 setOrderTotal={setOrderTotal}
                 user={user}
+                ttsEnabled={ttsEnabled}
               />
             }
           />

@@ -42,7 +42,7 @@ const CUP_SIZE_BY_KEY = {
 };
 
 const steps = ['Name', 'Payment details', 'Review your order'];
-function getStepContent(step, orderItems, orderTotal, formData, extrasState) {
+function getStepContent(step, orderItems, orderTotal, formData, extrasState, ttsEnabled) {
   switch (step) {
     case 0:
       return <AddressForm 
@@ -52,6 +52,7 @@ function getStepContent(step, orderItems, orderTotal, formData, extrasState) {
         setLastName={formData.setLastName}
         phoneNumber={formData.phoneNumber}
         setPhoneNumber={formData.setPhoneNumber}
+        ttsEnabled={ttsEnabled}
       />;
     case 1:
       return <PaymentForm 
@@ -65,6 +66,7 @@ function getStepContent(step, orderItems, orderTotal, formData, extrasState) {
         setExpirationDate={formData.setExpirationDate}
         cardName={formData.cardName}
         setCardName={formData.setCardName}
+        ttsEnabled={ttsEnabled}
       />;
     case 2:
       return <Review 
@@ -79,12 +81,13 @@ function getStepContent(step, orderItems, orderTotal, formData, extrasState) {
         expirationDate={formData.expirationDate}
         extras={extrasState.extras}
         setExtras={extrasState.setExtras}
+        ttsEnabled={ttsEnabled}
       />;
     default:
       throw new Error('Unknown step');
   }
 }
-export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 0, setOrderTotal, ...props }) {
+export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 0, setOrderTotal, ttsEnabled, ...props }) {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = React.useState(0);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -97,6 +100,20 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
     napkins: 0,
   });
   const [receiptExtras, setReceiptExtras] = React.useState(null);
+
+  const speak = React.useCallback((text) => {
+    if (ttsEnabled && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [ttsEnabled]);
+
+  React.useEffect(() => {
+    if (activeStep === 0) speak("Please enter your name and phone number.");
+    else if (activeStep === 1) speak("Please enter your payment details.");
+    else if (activeStep === 2) speak("Please review your order.");
+  }, [activeStep, speak]);
   
   // Address form state
   const [firstName, setFirstName] = React.useState('');
@@ -573,7 +590,7 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                 }, {
                   extras,
                   setExtras,
-                })}
+                }, ttsEnabled)}
                 <Box
                   sx={[
                     {
@@ -596,6 +613,7 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                       startIcon={<ChevronLeftRoundedIcon />}
                       onClick={handleBack}
                       variant="text"
+                      onFocus={() => speak('Go to the previous step')}
                       sx={{ display: { xs: 'none', sm: 'flex' } }}
                     >
                       Previous
@@ -607,6 +625,7 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                       onClick={handleBack}
                       variant="outlined"
                       fullWidth
+                      onFocus={() => speak('Go to the previous step')}
                       sx={{ display: { xs: 'flex', sm: 'none' } }}
                     >
                       Previous
@@ -616,6 +635,11 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                     variant="contained"
                     endIcon={<ChevronRightRoundedIcon />}
                     onClick={handleNext}
+                    onFocus={() => speak(
+                      activeStep === steps.length - 1
+                        ? 'Place your order'
+                        : 'Go to the next step'
+                    )}
                     sx={{ width: { xs: '100%', sm: 'fit-content' } }}
                     disabled={activeStep === steps.length - 1 && isSubmitting}
                   >

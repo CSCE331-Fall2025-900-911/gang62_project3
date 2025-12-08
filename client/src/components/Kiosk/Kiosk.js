@@ -50,7 +50,7 @@ let carouselItems = [
  * @component
  * @author Michael Nguyen
  */
-function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
+function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, ttsEnabled, setTtsEnabled }) {
   const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,7 +59,6 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
   const translationsRef = useRef({});
   const [currentSlide, setCurrentSlide] = useState(0);
   const carouselRef = useRef(null);
-  const [ttsEnabled, setTtsEnabled] = useState(false);
 
   const speak = useCallback((text) => {
     if (ttsEnabled && 'speechSynthesis' in window) {
@@ -263,7 +262,22 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <IconButton onClick={() => setTtsEnabled(!ttsEnabled)} color="primary" aria-label={ttsEnabled ? "Disable text to speech" : "Enable text to speech"}>
+          <IconButton 
+            onClick={() => {
+              const newEnabled = !ttsEnabled;
+              setTtsEnabled(newEnabled);
+              if (newEnabled && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance("Text to speech enabled");
+                window.speechSynthesis.speak(utterance);
+              }
+            }} 
+            onFocus={() => {
+              if (ttsEnabled) speak("Disable text to speech");
+            }}
+            color="primary" 
+            aria-label={ttsEnabled ? "Disable text to speech" : "Enable text to speech"}
+          >
             {ttsEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
           </IconButton>
           <ColorModeIconDropdown />
@@ -296,6 +310,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
             variant="contained" 
             color="primary" 
             size="large"
+            onFocus={() => speak(translatedTexts.checkout)}
             onClick={() => navigate('/checkout')}
             sx={{ px: 4 }}
           >

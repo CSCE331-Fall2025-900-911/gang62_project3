@@ -82,9 +82,19 @@ const FormGrid = styled('div')(() => ({
   flexDirection: 'column',
 }));
 
-export default function PaymentForm({ paymentType, setPaymentType, cardNumber, setCardNumber, cvv, setCvv, expirationDate, setExpirationDate, cardName, setCardName }) {
+export default function PaymentForm({ paymentType, setPaymentType, cardNumber, setCardNumber, cvv, setCvv, expirationDate, setExpirationDate, cardName, setCardName, ttsEnabled }) {
+  const speak = React.useCallback((text) => {
+    if (ttsEnabled && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [ttsEnabled]);
+
   const handlePaymentTypeChange = (event) => {
     setPaymentType(event.target.value);
+    if (event.target.value === 'creditCard') speak("Credit card selected");
+    else if (event.target.value === 'bankTransfer') speak("Crypto wallet selected");
   };
 
   const handleCardNumberChange = (event) => {
@@ -126,7 +136,10 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
         >
           <Card selected={paymentType === 'creditCard'}>
             <CardActionArea
-              onClick={() => setPaymentType('creditCard')}
+              onClick={() => {
+                setPaymentType('creditCard');
+                speak("Credit card selected");
+              }}
               sx={{
                 '.MuiCardActionArea-focusHighlight': {
                   backgroundColor: 'transparent',
@@ -157,7 +170,10 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
           </Card>
           <Card selected={paymentType === 'bankTransfer'}>
             <CardActionArea
-              onClick={() => setPaymentType('bankTransfer')}
+              onClick={() => {
+                setPaymentType('bankTransfer');
+                speak("Crypto wallet selected");
+              }}
               sx={{
                 '.MuiCardActionArea-focusHighlight': {
                   backgroundColor: 'transparent',
@@ -222,6 +238,7 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
                   size="small"
                   value={cardNumber}
                   onChange={handleCardNumberChange}
+                  onFocus={() => speak("Enter card number")}
                 />
               </FormGrid>
               <FormGrid sx={{ maxWidth: '20%' }}>
@@ -236,6 +253,7 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
                   size="small"
                   value={cvv}
                   onChange={handleCvvChange}
+                  onFocus={() => speak("Enter CVV")}
                 />
               </FormGrid>
             </Box>
@@ -252,6 +270,7 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
                   size="small"
                   value={cardName}
                   onChange={(e) => setCardName(e.target.value)}
+                  onFocus={() => speak("Enter name on card")}
                 />
               </FormGrid>
               <FormGrid sx={{ flexGrow: 1 }}>
@@ -266,6 +285,7 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
                   size="small"
                   value={expirationDate}
                   onChange={handleExpirationDateChange}
+                  onFocus={() => speak("Enter expiration date")}
                 />
               </FormGrid>
             </Box>
