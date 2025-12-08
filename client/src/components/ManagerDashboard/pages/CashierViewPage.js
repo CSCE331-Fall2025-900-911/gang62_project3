@@ -14,6 +14,7 @@ import CheckoutPanel from '../components/CashierView/CheckoutPanel';
 import CustomizationDialog from '../components/CashierView/CustomizationDialog';
 import PaymentDialog from '../components/CashierView/PaymentDialog';
 import MenuItemDialog from '../components/CashierView/MenuItemDialog';
+import { CustomizationData } from '../../../models/CustomizationData';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -31,14 +32,7 @@ export default function CashierViewPage() {
   const [totalAmount, setTotalAmount] = useState(0.0);
   const [customizationDialogOpen, setCustomizationDialogOpen] = useState(false);
   const [currentMenuItem, setCurrentMenuItem] = useState(null);
-  const [customizationData, setCustomizationData] = useState({
-    sugarLevel: 'normal',
-    iceLevel: 'normal',
-    pearls: false,
-    jelly: false,
-    pudding: false,
-    whippedCream: false,
-  });
+  const [customizationData, setCustomizationData] = useState(new CustomizationData());
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [addMenuItemDialogOpen, setAddMenuItemDialogOpen] = useState(false);
   const [editMenuItemDialogOpen, setEditMenuItemDialogOpen] = useState(false);
@@ -109,12 +103,10 @@ export default function CashierViewPage() {
    */
   const calculateCustomizedPrice = (basePrice, customizations) => {
     let price = basePrice;
-    if (customizations.sugarLevel === 'extra') price += 0.50;
-    if (customizations.iceLevel === 'extra') price += 0.25;
-    if (customizations.pearls) price += 0.75;
-    if (customizations.jelly) price += 0.50;
-    if (customizations.pudding) price += 0.60;
-    if (customizations.whippedCream) price += 0.40;
+    // Add pricing logic if needed, for now matching Kiosk which seems to not add price
+    // But preserving some logic if we want to add it back later
+    // if (customizations.hasBoba) price += 0.75;
+    // if (customizations.hasAiyuJelly) price += 0.50;
     return price;
   };
 
@@ -129,14 +121,17 @@ export default function CashierViewPage() {
   const getCustomizedName = (itemName, customizations) => {
     let name = itemName;
     const parts = [];
-    if (customizations.sugarLevel === 'extra') parts.push('+Extra Sugar');
-    if (customizations.sugarLevel === 'no') parts.push('+No Sugar');
-    if (customizations.iceLevel === 'extra') parts.push('+Extra Ice');
-    if (customizations.iceLevel === 'no') parts.push('+No Ice');
-    if (customizations.pearls) parts.push('+Boba');
-    if (customizations.jelly) parts.push('+Jelly');
-    if (customizations.pudding) parts.push('+Pudding');
-    if (customizations.whippedCream) parts.push('+Cream');
+    
+    if (customizations.size !== 'medium') parts.push(`(${customizations.size})`);
+    if (customizations.temperature !== 'cold') parts.push(`(${customizations.temperature})`);
+    if (customizations.sugarLevel !== 'medium') parts.push(`${customizations.sugarLevel} Sugar`);
+    if (customizations.temperature === 'cold' && customizations.iceLevel !== 'medium') {
+      parts.push(`${customizations.iceLevel} Ice`);
+    }
+    
+    if (customizations.hasBoba) parts.push('+Boba');
+    if (customizations.hasAiyuJelly) parts.push('+Aiyu Jelly');
+    
     if (parts.length > 0) {
       name += ' ' + parts.join(' ');
     }
@@ -155,14 +150,7 @@ export default function CashierViewPage() {
    */
   const handleMenuItemClick = (item) => {
     setCurrentMenuItem(item);
-    setCustomizationData({
-      sugarLevel: 'normal',
-      iceLevel: 'normal',
-      pearls: false,
-      jelly: false,
-      pudding: false,
-      whippedCream: false,
-    });
+    setCustomizationData(new CustomizationData());
     setCustomizationDialogOpen(true);
   };
 
@@ -214,7 +202,7 @@ export default function CashierViewPage() {
     if (existingIndex !== -1) {
       // Increment quantity
       const updatedItems = [...cartItems];
-      updatedItems[existingIndex].quantity += 1;
+      updatedItems[existingIndex].quantity += customizationData.quantity;
       updatedItems[existingIndex].subtotal =
         updatedItems[existingIndex].quantity * customizedPrice;
       setCartItems(updatedItems);
@@ -224,8 +212,8 @@ export default function CashierViewPage() {
         id: currentMenuItem.id,
         name: customizedName,
         price: customizedPrice,
-        quantity: 1,
-        subtotal: customizedPrice,
+        quantity: customizationData.quantity,
+        subtotal: customizedPrice * customizationData.quantity,
         originalItem: currentMenuItem,
         customizations: { ...customizationData },
       };

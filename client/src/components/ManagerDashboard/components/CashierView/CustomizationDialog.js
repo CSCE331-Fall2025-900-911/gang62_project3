@@ -14,6 +14,7 @@ import {
   FormLabel,
   Checkbox,
 } from '@mui/material';
+import { CustomizationData } from '../../../../models/CustomizationData';
 
 const CustomizationDialog = ({
   open,
@@ -37,6 +38,56 @@ const CustomizationDialog = ({
       </DialogTitle>
       <DialogContent>
         <Box sx={{ mt: 2 }}>
+          {/* Size */}
+          <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
+            <FormLabel component="legend">Size</FormLabel>
+            <RadioGroup
+              row
+              value={customizationData.size}
+              onChange={(e) =>
+                setCustomizationData({
+                  ...customizationData,
+                  size: e.target.value,
+                })
+              }
+            >
+              {CustomizationData.sizes.map((option) => (
+                <FormControlLabel
+                  key={option.value}
+                  value={option.value}
+                  control={<Radio />}
+                  label={option.label}
+                />
+              ))}
+            </RadioGroup>
+          </FormControl>
+
+          {/* Temperature */}
+          <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
+            <FormLabel component="legend">Temperature</FormLabel>
+            <RadioGroup
+              row
+              value={customizationData.temperature}
+              onChange={(e) =>
+                setCustomizationData({
+                  ...customizationData,
+                  temperature: e.target.value,
+                  // Reset ice level if switching to hot
+                  iceLevel: e.target.value === 'hot' ? 'medium' : customizationData.iceLevel
+                })
+              }
+            >
+              {CustomizationData.temperatures.map((option) => (
+                <FormControlLabel
+                  key={option.value}
+                  value={option.value}
+                  control={<Radio />}
+                  label={option.label}
+                />
+              ))}
+            </RadioGroup>
+          </FormControl>
+
           {/* Sugar Level */}
           <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
             <FormLabel component="legend">Sugar Level</FormLabel>
@@ -50,128 +101,104 @@ const CustomizationDialog = ({
                 })
               }
             >
-              <FormControlLabel
-                value="no"
-                control={<Radio />}
-                label="No Sugar"
-              />
-              <FormControlLabel
-                value="normal"
-                control={<Radio />}
-                label="Normal Sugar"
-              />
-              <FormControlLabel
-                value="extra"
-                control={<Radio />}
-                label="Extra Sugar (+$0.50)"
-              />
+              {CustomizationData.sugarLevels.map((option) => (
+                <FormControlLabel
+                  key={option.value}
+                  value={option.value}
+                  control={<Radio />}
+                  label={option.label}
+                />
+              ))}
             </RadioGroup>
           </FormControl>
 
-          {/* Ice Level */}
-          <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
-            <FormLabel component="legend">Ice Level</FormLabel>
-            <RadioGroup
-              row
-              value={customizationData.iceLevel}
-              onChange={(e) =>
-                setCustomizationData({
-                  ...customizationData,
-                  iceLevel: e.target.value,
-                })
-              }
-            >
-              <FormControlLabel
-                value="no"
-                control={<Radio />}
-                label="No Ice"
-              />
-              <FormControlLabel
-                value="normal"
-                control={<Radio />}
-                label="Normal Ice"
-              />
-              <FormControlLabel
-                value="extra"
-                control={<Radio />}
-                label="Extra Ice (+$0.25)"
-              />
-            </RadioGroup>
-          </FormControl>
+          {/* Ice Level - Only show if cold */}
+          {customizationData.temperature === 'cold' && (
+            <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
+              <FormLabel component="legend">Ice Level</FormLabel>
+              <RadioGroup
+                row
+                value={customizationData.iceLevel}
+                onChange={(e) =>
+                  setCustomizationData({
+                    ...customizationData,
+                    iceLevel: e.target.value,
+                  })
+                }
+              >
+                {CustomizationData.iceLevels.map((option) => (
+                  <FormControlLabel
+                    key={option.value}
+                    value={option.value}
+                    control={<Radio />}
+                    label={option.label}
+                  />
+                ))}
+              </RadioGroup>
+            </FormControl>
+          )}
 
           {/* Toppings */}
           <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
             <FormLabel component="legend">Toppings</FormLabel>
             <Box>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={customizationData.pearls}
-                    onChange={(e) =>
-                      setCustomizationData({
-                        ...customizationData,
-                        pearls: e.target.checked,
-                      })
-                    }
-                  />
-                }
-                label="Boba Pearls (+$0.75)"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={customizationData.jelly}
-                    onChange={(e) =>
-                      setCustomizationData({
-                        ...customizationData,
-                        jelly: e.target.checked,
-                      })
-                    }
-                  />
-                }
-                label="Coconut Jelly (+$0.50)"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={customizationData.pudding}
-                    onChange={(e) =>
-                      setCustomizationData({
-                        ...customizationData,
-                        pudding: e.target.checked,
-                      })
-                    }
-                  />
-                }
-                label="Pudding (+$0.60)"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={customizationData.whippedCream}
-                    onChange={(e) =>
-                      setCustomizationData({
-                        ...customizationData,
-                        whippedCream: e.target.checked,
-                      })
-                    }
-                  />
-                }
-                label="Whipped Cream (+$0.40)"
-              />
+              {CustomizationData.toppings.map((topping) => (
+                <FormControlLabel
+                  key={topping.key}
+                  control={
+                    <Checkbox
+                      checked={customizationData[topping.key]}
+                      onChange={(e) =>
+                        setCustomizationData({
+                          ...customizationData,
+                          [topping.key]: e.target.checked,
+                        })
+                      }
+                    />
+                  }
+                  label={topping.label}
+                />
+              ))}
             </Box>
           </FormControl>
+
+          {/* Quantity */}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, mb: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={() =>
+                setCustomizationData({
+                  ...customizationData,
+                  quantity: Math.max(1, (customizationData.quantity || 1) - 1),
+                })
+              }
+            >
+              -
+            </Button>
+            <Typography variant="h6">{customizationData.quantity || 1}</Typography>
+            <Button
+              variant="outlined"
+              onClick={() =>
+                setCustomizationData({
+                  ...customizationData,
+                  quantity: (customizationData.quantity || 1) + 1,
+                })
+              }
+            >
+              +
+            </Button>
+          </Box>
 
           {/* Price Display */}
           <Typography variant="h6" align="center" sx={{ mt: 2 }}>
             Total Price:{' '}
             {formatPrice(
-              currentMenuItem
+              (currentMenuItem
                 ? calculateCustomizedPrice(
                     currentMenuItem.price,
                     customizationData
                   )
-                : 0
+                : 0) * (customizationData.quantity || 1)
             )}
           </Typography>
         </Box>
