@@ -35,6 +35,9 @@ function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, s
   const [sugarLevel, setSugarLevel] = useState('medium');
   const [iceLevel, setIceLevel] = useState('medium');
   const [size, setSize] = useState('medium');
+  const [temperature, setTemperature] = useState('cold');
+  const [hasBoba, setHasBoba] = useState(false);
+  const [hasAiyuJelly, setHasAiyuJelly] = useState(false);
   const [translatedName, setTranslatedName] = useState(item.name);
   const skipNextFocusRef = useRef(false);
   const [translatedTexts, setTranslatedTexts] = useState({
@@ -42,6 +45,12 @@ function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, s
     size: 'Size',
     sugarLevel: 'Sugar Level',
     iceLevel: 'Ice Level',
+    temperature: 'Temperature',
+    hot: 'Hot',
+    cold: 'Cold',
+    toppings: 'Toppings',
+    boba: 'Boba',
+    aiyuJelly: 'Aiyu Jelly',
     low: 'Low',
     medium: 'Medium',
     high: 'High',
@@ -61,6 +70,12 @@ function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, s
           size: 'Size',
           sugarLevel: 'Sugar Level',
           iceLevel: 'Ice Level',
+          temperature: 'Temperature',
+          hot: 'Hot',
+          cold: 'Cold',
+          toppings: 'Toppings',
+          boba: 'Boba',
+          aiyuJelly: 'Aiyu Jelly',
           low: 'Low',
           medium: 'Medium',
           high: 'High',
@@ -81,6 +96,12 @@ function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, s
         size: 'Size',
         sugarLevel: 'Sugar Level',
         iceLevel: 'Ice Level',
+        temperature: 'Temperature',
+        hot: 'Hot',
+        cold: 'Cold',
+        toppings: 'Toppings',
+        boba: 'Boba',
+        aiyuJelly: 'Aiyu Jelly',
         low: 'Low',
         medium: 'Medium',
         high: 'High',
@@ -133,11 +154,17 @@ function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, s
   };
 
   const handleAddToOrder = () => {
+    const toppings = [];
+    if (hasBoba) toppings.push('Boba');
+    if (hasAiyuJelly) toppings.push('Aiyu Jelly');
+
     const customizedItem = {
       ...item,
       size,
       sugarLevel,
-      iceLevel
+      iceLevel: temperature === 'hot' ? 'no ice' : iceLevel,
+      temperature,
+      toppings
     };
     
     if (onItemClick) {
@@ -152,6 +179,9 @@ function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, s
     setSugarLevel('medium');
     setIceLevel('medium');
     setSize('medium');
+    setTemperature('cold');
+    setHasBoba(false);
+    setHasAiyuJelly(false);
   };
 
   return (
@@ -271,6 +301,43 @@ function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, s
               </Button>
             </ButtonGroup>
 
+            {/* Temperature Selection */}
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+              {translatedTexts.temperature}
+            </Typography>
+            <ButtonGroup 
+              fullWidth 
+              variant="outlined" 
+              sx={{ mb: 4 }}
+            >
+              <Button
+                variant={temperature === 'hot' ? 'contained' : 'outlined'}
+                color="primary"
+                onClick={() => setTemperature('hot')}
+                onFocus={() => speakOption(translatedTexts.temperature, translatedTexts.hot)}
+                sx={{ 
+                  py: 2,
+                  fontSize: '1rem',
+                  fontWeight: 600
+                }}
+              >
+                {translatedTexts.hot}
+              </Button>
+              <Button
+                variant={temperature === 'cold' ? 'contained' : 'outlined'}
+                color="primary"
+                onClick={() => setTemperature('cold')}
+                onFocus={() => speakOption(translatedTexts.temperature, translatedTexts.cold)}
+                sx={{ 
+                  py: 2,
+                  fontSize: '1rem',
+                  fontWeight: 600
+                }}
+              >
+                {translatedTexts.cold}
+              </Button>
+            </ButtonGroup>
+
             {/* Sugar Level Selection */}
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
               {translatedTexts.sugarLevel}
@@ -321,54 +388,94 @@ function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, s
               </Button>
             </ButtonGroup>
 
-            {/* Ice Level Selection */}
+            {/* Ice Level Selection - Only show if cold */}
+            {temperature === 'cold' && (
+              <>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+                  {translatedTexts.iceLevel}
+                </Typography>
+                <ButtonGroup 
+                  fullWidth 
+                  variant="outlined"
+                  sx={{ mb: 4 }}
+                >
+                  <Button
+                    variant={iceLevel === 'low' ? 'contained' : 'outlined'}
+                    color="primary"
+                    onClick={() => setIceLevel('low')}
+                    onFocus={() => speakOption(translatedTexts.iceLevel, translatedTexts.low)}
+                    sx={{ 
+                      py: 2,
+                      fontSize: '1rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    {translatedTexts.low}
+                  </Button>
+                  <Button
+                    variant={iceLevel === 'medium' ? 'contained' : 'outlined'}
+                    color="primary"
+                    onClick={() => setIceLevel('medium')}
+                    onFocus={() => speakOption(translatedTexts.iceLevel, translatedTexts.medium)}
+                    sx={{ 
+                      py: 2,
+                      fontSize: '1rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    {translatedTexts.medium}
+                  </Button>
+                  <Button
+                    variant={iceLevel === 'high' ? 'contained' : 'outlined'}
+                    color="primary"
+                    onClick={() => setIceLevel('high')}
+                    onFocus={() => speakOption(translatedTexts.iceLevel, translatedTexts.high)}
+                    sx={{ 
+                      py: 2,
+                      fontSize: '1rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    {translatedTexts.high}
+                  </Button>
+                </ButtonGroup>
+              </>
+            )}
+
+            {/* Toppings Selection */}
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
-              {translatedTexts.iceLevel}
+              {translatedTexts.toppings}
             </Typography>
-            <ButtonGroup 
-              fullWidth 
-              variant="outlined"
-            >
+            <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
               <Button
-                variant={iceLevel === 'low' ? 'contained' : 'outlined'}
+                variant={hasBoba ? 'contained' : 'outlined'}
                 color="primary"
-                onClick={() => setIceLevel('low')}
-                onFocus={() => speakOption(translatedTexts.iceLevel, translatedTexts.low)}
+                onClick={() => setHasBoba(!hasBoba)}
+                onFocus={() => speakOption(translatedTexts.toppings, translatedTexts.boba)}
+                fullWidth
                 sx={{ 
                   py: 2,
                   fontSize: '1rem',
                   fontWeight: 600
                 }}
               >
-                {translatedTexts.low}
+                {translatedTexts.boba} {hasBoba ? '✓' : ''}
               </Button>
               <Button
-                variant={iceLevel === 'medium' ? 'contained' : 'outlined'}
+                variant={hasAiyuJelly ? 'contained' : 'outlined'}
                 color="primary"
-                onClick={() => setIceLevel('medium')}
-                onFocus={() => speakOption(translatedTexts.iceLevel, translatedTexts.medium)}
+                onClick={() => setHasAiyuJelly(!hasAiyuJelly)}
+                onFocus={() => speakOption(translatedTexts.toppings, translatedTexts.aiyuJelly)}
+                fullWidth
                 sx={{ 
                   py: 2,
                   fontSize: '1rem',
                   fontWeight: 600
                 }}
               >
-                {translatedTexts.medium}
+                {translatedTexts.aiyuJelly} {hasAiyuJelly ? '✓' : ''}
               </Button>
-              <Button
-                variant={iceLevel === 'high' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setIceLevel('high')}
-                onFocus={() => speakOption(translatedTexts.iceLevel, translatedTexts.high)}
-                sx={{ 
-                  py: 2,
-                  fontSize: '1rem',
-                  fontWeight: 600
-                }}
-              >
-                {translatedTexts.high}
-              </Button>
-            </ButtonGroup>
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 3, gap: 2 }}>

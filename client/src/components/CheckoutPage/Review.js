@@ -65,11 +65,35 @@ export default function Review({
   return (
     <Stack spacing={2}>
       <List disablePadding>
+        {orderItems.map((item, index) => (
+          <ListItem key={index} sx={{ py: 1, px: 0 }}>
+            <ListItemText 
+              primary={item.name} 
+              secondary={
+                <React.Fragment>
+                  <Typography variant="caption" display="block" color="text.secondary">
+                    Size: {item.size} | Sugar: {item.sugarLevel}
+                    {item.temperature !== 'hot' && ` | Ice: ${item.iceLevel}`}
+                  </Typography>
+                  {item.temperature && (
+                    <Typography variant="caption" display="block" color="text.secondary">
+                      Temp: {item.temperature}
+                    </Typography>
+                  )}
+                  {item.toppings && item.toppings.length > 0 && (
+                    <Typography variant="caption" display="block" color="text.secondary">
+                      Toppings: {item.toppings.join(', ')}
+                    </Typography>
+                  )}
+                </React.Fragment>
+              } 
+            />
+            <Typography variant="body2">${item.price.toFixed(2)}</Typography>
+          </ListItem>
+        ))}
+        <Divider sx={{ my: 1 }} />
         <ListItem sx={{ py: 1, px: 0 }}>
-          <ListItemText 
-            primary="Products" 
-            secondary={`${orderItems.length} ${orderItems.length === 1 ? 'item' : 'items'} selected`} 
-          />
+          <ListItemText primary="Subtotal" />
           <Typography variant="body2">${subtotal.toFixed(2)}</Typography>
         </ListItem>
         <ListItem sx={{ py: 1, px: 0 }}>
