@@ -24,7 +24,8 @@ CREATE TABLE customers (
 CREATE TABLE menu_items (
     id                  INT PRIMARY KEY,
     name                TEXT NOT NULL,
-    base_price_cents    INT NOT NULL
+    base_price_cents    INT NOT NULL,
+    drink_type          TEXT NOT NULL
 );
 
 CREATE TABLE ingredients (

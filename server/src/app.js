@@ -35,11 +35,11 @@ const Order = require('./models/Order');
     //     console.log(`Added: ${newItem.getName()} for $${newItem.getPrice().toFixed(2)}`);
     // }
 
-    // // Display updated menu
-    // console.log('\nUpdated Menu:');
-    // menu.getMenuItems().forEach(item => {
-    //     console.log(`  - ${item.getName()}: $${item.getPrice().toFixed(2)}`);
-    // });
+    // Display updated menu
+    console.log('\nUpdated Menu:');
+    menu.getMenuItems().forEach(item => {
+        console.log(`  - ${item.getName()} (${item.getDrinkType()}): $${item.getPrice().toFixed(2)}`);
+    });
 
 
     // // Create an Inventory Item
