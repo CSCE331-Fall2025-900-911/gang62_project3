@@ -6,6 +6,7 @@ import SignIn from './components/SignIn/SignIn';
 import Kiosk from './components/Kiosk/Kiosk';
 import Checkout from './components/CheckoutPage/Checkout';
 import Dashboard from './components/ManagerDashboard/Dashboard';
+import CashierDashboard from './components/ManagerDashboard/CashierDashboard';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -88,6 +89,18 @@ function App() {
                 <div />
               ) : isAuthenticated ? (
                 <Dashboard user={user} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/cashier"
+            element={
+              !authChecked ? (
+                <div />
+              ) : isAuthenticated ? (
+                <CashierDashboard user={user} />
               ) : (
                 <Navigate to="/" />
               )

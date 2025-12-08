@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import MenuButton from './MenuButton';
 import MenuContent from './MenuContent';
 
-function SideMenuMobile({ open, toggleDrawer, activePage, setActivePage }) {
+function SideMenuMobile({ open, toggleDrawer, activePage, setActivePage, menuItems }) {
   const navigate = useNavigate();
   return (
     <Drawer
@@ -53,7 +53,7 @@ function SideMenuMobile({ open, toggleDrawer, activePage, setActivePage }) {
         </Stack>
         <Divider />
         <Stack sx={{ flexGrow: 1 }}>
-          <MenuContent activePage={activePage} setActivePage={setActivePage} />
+          <MenuContent activePage={activePage} setActivePage={setActivePage} menuItems={menuItems} />
           <Divider />
         </Stack>
         <Stack sx={{ p: 2 }}>

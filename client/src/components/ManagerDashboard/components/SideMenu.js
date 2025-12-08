@@ -21,7 +21,7 @@ const Drawer = styled(MuiDrawer)({
   },
 });
 
-export default function SideMenu({ activePage, setActivePage }) {
+export default function SideMenu({ activePage, setActivePage, menuItems }) {
   return (
     <Drawer
       variant="permanent"
@@ -41,7 +41,7 @@ export default function SideMenu({ activePage, setActivePage }) {
           flexDirection: 'column',
         }}
       >
-        <MenuContent activePage={activePage} setActivePage={setActivePage} />
+        <MenuContent activePage={activePage} setActivePage={setActivePage} menuItems={menuItems} />
       </Box>
       <Stack
         direction="row"

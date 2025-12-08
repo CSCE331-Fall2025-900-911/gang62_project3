@@ -114,8 +114,17 @@ export default function SignIn({ onLogin, ...props }) {
         });
       }
       navigate('/manager');
-    }
-    else {
+    } else if (username === 'cashier' && password === 'cashier') {
+      console.log('Login successful');
+      if (onLogin) {
+        onLogin({
+          displayName: 'Cashier Account',
+          email: 'cashier@example.com',
+          photo: null,
+        });
+      }
+      navigate('/cashier');
+    } else {
       setUsernameError(true);
       setUsernameErrorMessage('Invalid username or password');
       setPasswordError(true);

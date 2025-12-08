@@ -22,11 +22,12 @@ const mainListItems = [
   { text: 'Z Report', icon: <SummarizeRoundedIcon /> },
 ];
 
-export default function MenuContent({ activePage, setActivePage }) {
+export default function MenuContent({ activePage, setActivePage, menuItems }) {
+  const items = menuItems || mainListItems;
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: 'space-between' }}>
       <List dense>
-        {mainListItems.map((item, index) => (
+        {items.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: 'block' }}>
             <ListItemButton 
               selected={activePage === item.text}
