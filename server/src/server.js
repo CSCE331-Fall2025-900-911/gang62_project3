@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
+const PgSession = require('connect-pg-simple')(session);
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const axios = require('axios');
@@ -46,13 +47,38 @@ app.use(
 );
 app.use(express.json());
 
+const { Pool } = require('pg');
+
+const pgPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT) || 5432,
+    database: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    ssl: process.env.DB_SSL === 'true' || process.env.NODE_ENV === 'production'
+        ? { rejectUnauthorized: false }
+        : false,
+});
+
+pgPool.on('error', (err) => {
+    console.error('Unexpected PG pool error', err);
+});
+
 app.use(
     session({
+        store: new PgSession({
+            pool: pgPool,
+            tableName: 'session',
+            createTableIfMissing: true,
+        }),
         secret: process.env.SESSION_SECRET || 'dev-session-secret',
         resave: false,
         saveUninitialized: false,
         cookie: {
             secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            httpOnly: true,
         },
     })
 );
