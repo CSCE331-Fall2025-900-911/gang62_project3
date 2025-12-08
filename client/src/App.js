@@ -6,6 +6,7 @@ import SignIn from './components/SignIn/SignIn';
 import Kiosk from './components/Kiosk/Kiosk';
 import Checkout from './components/CheckoutPage/Checkout';
 import Dashboard from './components/ManagerDashboard/Dashboard';
+import CashierDashboard from './components/ManagerDashboard/CashierDashboard';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -15,6 +16,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [orderTotal, setOrderTotal] = useState(0);
+  const [ttsEnabled, setTtsEnabled] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -54,44 +56,35 @@ function App() {
       <div className="App">
         <Routes>
           <Route 
-            path="/" 
-            element={<SignIn onLogin={handleLocalLogin} />} 
+            path="/"
+            element={<SignIn onLogin={handleLocalLogin} />}
           />
           <Route 
-            path="/kiosk" 
+            path="/kiosk"
             element={
-              !authChecked ? (
-                <div />
-              ) : isAuthenticated ? (
-                <Kiosk 
-                  orderItems={orderItems}
-                  setOrderItems={setOrderItems}
-                  orderTotal={orderTotal}
-                  setOrderTotal={setOrderTotal}
-                  user={user}
-                />
-              ) : (
-                <Navigate to="/" />
-              )
-            } 
+              <Kiosk 
+                orderItems={orderItems}
+                setOrderItems={setOrderItems}
+                orderTotal={orderTotal}
+                setOrderTotal={setOrderTotal}
+                user={user}
+                ttsEnabled={ttsEnabled}
+                setTtsEnabled={setTtsEnabled}
+              />
+            }
           />
           <Route 
-            path="/checkout" 
+            path="/checkout"
             element={
-              !authChecked ? (
-                <div />
-              ) : isAuthenticated ? (
-                <Checkout 
-                  orderItems={orderItems}
-                  setOrderItems={setOrderItems}
-                  orderTotal={orderTotal}
-                  setOrderTotal={setOrderTotal}
-                  user={user}
-                />
-              ) : (
-                <Navigate to="/" />
-              )
-            } 
+              <Checkout 
+                orderItems={orderItems}
+                setOrderItems={setOrderItems}
+                orderTotal={orderTotal}
+                setOrderTotal={setOrderTotal}
+                user={user}
+                ttsEnabled={ttsEnabled}
+              />
+            }
           />
           <Route
             path="/manager"
@@ -100,6 +93,18 @@ function App() {
                 <div />
               ) : isAuthenticated ? (
                 <Dashboard user={user} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/cashier"
+            element={
+              !authChecked ? (
+                <div />
+              ) : isAuthenticated ? (
+                <CashierDashboard user={user} />
               ) : (
                 <Navigate to="/" />
               )

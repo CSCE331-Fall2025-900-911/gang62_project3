@@ -3,33 +3,18 @@ import {
   Box,
   Typography,
   Grid,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  FormControl,
-  FormLabel,
-  Checkbox,
   Alert,
   CircularProgress,
-  IconButton,
-  Card,
-  CardContent,
 } from '@mui/material';
 import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded';
-import DeleteIcon from '@mui/icons-material/Delete';
+
+import MenuItemsPanel from '../components/CashierView/MenuItemsPanel';
+import ShoppingCartPanel from '../components/CashierView/ShoppingCartPanel';
+import CheckoutPanel from '../components/CashierView/CheckoutPanel';
+import CustomizationDialog from '../components/CashierView/CustomizationDialog';
+import PaymentDialog from '../components/CashierView/PaymentDialog';
+import MenuItemDialog from '../components/CashierView/MenuItemDialog';
+import { CustomizationData } from '../../../models/CustomizationData';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -47,14 +32,7 @@ export default function CashierViewPage() {
   const [totalAmount, setTotalAmount] = useState(0.0);
   const [customizationDialogOpen, setCustomizationDialogOpen] = useState(false);
   const [currentMenuItem, setCurrentMenuItem] = useState(null);
-  const [customizationData, setCustomizationData] = useState({
-    sugarLevel: 'normal',
-    iceLevel: 'normal',
-    pearls: false,
-    jelly: false,
-    pudding: false,
-    whippedCream: false,
-  });
+  const [customizationData, setCustomizationData] = useState(new CustomizationData());
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [addMenuItemDialogOpen, setAddMenuItemDialogOpen] = useState(false);
   const [editMenuItemDialogOpen, setEditMenuItemDialogOpen] = useState(false);
@@ -125,12 +103,10 @@ export default function CashierViewPage() {
    */
   const calculateCustomizedPrice = (basePrice, customizations) => {
     let price = basePrice;
-    if (customizations.sugarLevel === 'extra') price += 0.50;
-    if (customizations.iceLevel === 'extra') price += 0.25;
-    if (customizations.pearls) price += 0.75;
-    if (customizations.jelly) price += 0.50;
-    if (customizations.pudding) price += 0.60;
-    if (customizations.whippedCream) price += 0.40;
+    // Add pricing logic if needed, for now matching Kiosk which seems to not add price
+    // But preserving some logic if we want to add it back later
+    // if (customizations.hasBoba) price += 0.75;
+    // if (customizations.hasAiyuJelly) price += 0.50;
     return price;
   };
 
@@ -145,14 +121,17 @@ export default function CashierViewPage() {
   const getCustomizedName = (itemName, customizations) => {
     let name = itemName;
     const parts = [];
-    if (customizations.sugarLevel === 'extra') parts.push('+Extra Sugar');
-    if (customizations.sugarLevel === 'no') parts.push('+No Sugar');
-    if (customizations.iceLevel === 'extra') parts.push('+Extra Ice');
-    if (customizations.iceLevel === 'no') parts.push('+No Ice');
-    if (customizations.pearls) parts.push('+Boba');
-    if (customizations.jelly) parts.push('+Jelly');
-    if (customizations.pudding) parts.push('+Pudding');
-    if (customizations.whippedCream) parts.push('+Cream');
+    
+    if (customizations.size !== 'medium') parts.push(`(${customizations.size})`);
+    if (customizations.temperature !== 'cold') parts.push(`(${customizations.temperature})`);
+    if (customizations.sugarLevel !== 'medium') parts.push(`${customizations.sugarLevel} Sugar`);
+    if (customizations.temperature === 'cold' && customizations.iceLevel !== 'medium') {
+      parts.push(`${customizations.iceLevel} Ice`);
+    }
+    
+    if (customizations.hasBoba) parts.push('+Boba');
+    if (customizations.hasAiyuJelly) parts.push('+Aiyu Jelly');
+    
     if (parts.length > 0) {
       name += ' ' + parts.join(' ');
     }
@@ -171,14 +150,7 @@ export default function CashierViewPage() {
    */
   const handleMenuItemClick = (item) => {
     setCurrentMenuItem(item);
-    setCustomizationData({
-      sugarLevel: 'normal',
-      iceLevel: 'normal',
-      pearls: false,
-      jelly: false,
-      pudding: false,
-      whippedCream: false,
-    });
+    setCustomizationData(new CustomizationData());
     setCustomizationDialogOpen(true);
   };
 
@@ -230,7 +202,7 @@ export default function CashierViewPage() {
     if (existingIndex !== -1) {
       // Increment quantity
       const updatedItems = [...cartItems];
-      updatedItems[existingIndex].quantity += 1;
+      updatedItems[existingIndex].quantity += customizationData.quantity;
       updatedItems[existingIndex].subtotal =
         updatedItems[existingIndex].quantity * customizedPrice;
       setCartItems(updatedItems);
@@ -240,8 +212,8 @@ export default function CashierViewPage() {
         id: currentMenuItem.id,
         name: customizedName,
         price: customizedPrice,
-        quantity: 1,
-        subtotal: customizedPrice,
+        quantity: customizationData.quantity,
+        subtotal: customizedPrice * customizationData.quantity,
         originalItem: currentMenuItem,
         customizations: { ...customizationData },
       };
@@ -451,412 +423,83 @@ export default function CashierViewPage() {
       <Grid container spacing={3}>
         {/* Menu Items Panel */}
         <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  mb: 2,
-                }}
-              >
-                <Typography variant="h6">Menu Items</Typography>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={() => setAddMenuItemDialogOpen(true)}
-                >
-                  Add Menu Item
-                </Button>
-              </Box>
-              <Typography variant="caption" color="text.secondary" sx={{ mb: 2, display: 'block' }}>
-                Left-click to order, Right-click to edit
-              </Typography>
-              <Grid container spacing={2}>
-                {menuItems.map((item) => (
-                  <Grid item xs={6} sm={4} key={item.id}>
-                    <Button
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        minHeight: 80,
-                        flexDirection: 'column',
-                        textTransform: 'none',
-                      }}
-                      onClick={() => handleMenuItemClick(item)}
-                      onContextMenu={(e) => handleMenuItemRightClick(e, item)}
-                    >
-                      <Typography variant="body2" fontWeight="bold">
-                        {item.name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {formatPrice(item.price)}
-                      </Typography>
-                    </Button>
-                  </Grid>
-                ))}
-              </Grid>
-            </CardContent>
-          </Card>
+          <MenuItemsPanel
+            menuItems={menuItems}
+            onAddClick={() => setAddMenuItemDialogOpen(true)}
+            onItemClick={handleMenuItemClick}
+            onItemRightClick={handleMenuItemRightClick}
+            formatPrice={formatPrice}
+          />
         </Grid>
 
         {/* Shopping Cart Panel */}
         <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                Shopping Cart
-              </Typography>
-              <TableContainer component={Paper} variant="outlined">
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Item</TableCell>
-                      <TableCell align="right">Price</TableCell>
-                      <TableCell align="right">Quantity</TableCell>
-                      <TableCell align="right">Subtotal</TableCell>
-                      <TableCell align="right">Action</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {cartItems.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={5} align="center">
-                          Cart is empty
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      cartItems.map((item, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{item.name}</TableCell>
-                          <TableCell align="right">
-                            {formatPrice(item.price)}
-                          </TableCell>
-                          <TableCell align="right">{item.quantity}</TableCell>
-                          <TableCell align="right">
-                            {formatPrice(item.subtotal)}
-                          </TableCell>
-                          <TableCell align="right">
-                            <IconButton
-                              size="small"
-                              onClick={() => removeSelectedItem(index)}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={clearCart}
-                  disabled={cartItems.length === 0}
-                >
-                  Clear Cart
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
+          <ShoppingCartPanel
+            cartItems={cartItems}
+            onRemoveItem={removeSelectedItem}
+            onClearCart={clearCart}
+            formatPrice={formatPrice}
+          />
         </Grid>
 
         {/* Checkout Panel */}
         <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  mb: 2,
-                }}
-              >
-                <Typography variant="h5" fontWeight="bold">
-                  Total: {formatPrice(totalAmount)}
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="large"
-                    onClick={processPayment}
-                    disabled={cartItems.length === 0}
-                  >
-                    Process Payment
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    onClick={newSale}
-                    disabled={cartItems.length === 0}
-                  >
-                    New Sale
-                  </Button>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
+          <CheckoutPanel
+            totalAmount={totalAmount}
+            cartItemCount={cartItems.length}
+            onProcessPayment={processPayment}
+            onNewSale={newSale}
+            formatPrice={formatPrice}
+          />
         </Grid>
       </Grid>
 
       {/* Customization Dialog */}
-      <Dialog
+      <CustomizationDialog
         open={customizationDialogOpen}
         onClose={() => setCustomizationDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          Customize {currentMenuItem?.name}
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ mt: 2 }}>
-            {/* Sugar Level */}
-            <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
-              <FormLabel component="legend">Sugar Level</FormLabel>
-              <RadioGroup
-                row
-                value={customizationData.sugarLevel}
-                onChange={(e) =>
-                  setCustomizationData({
-                    ...customizationData,
-                    sugarLevel: e.target.value,
-                  })
-                }
-              >
-                <FormControlLabel
-                  value="no"
-                  control={<Radio />}
-                  label="No Sugar"
-                />
-                <FormControlLabel
-                  value="normal"
-                  control={<Radio />}
-                  label="Normal Sugar"
-                />
-                <FormControlLabel
-                  value="extra"
-                  control={<Radio />}
-                  label="Extra Sugar (+$0.50)"
-                />
-              </RadioGroup>
-            </FormControl>
-
-            {/* Ice Level */}
-            <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
-              <FormLabel component="legend">Ice Level</FormLabel>
-              <RadioGroup
-                row
-                value={customizationData.iceLevel}
-                onChange={(e) =>
-                  setCustomizationData({
-                    ...customizationData,
-                    iceLevel: e.target.value,
-                  })
-                }
-              >
-                <FormControlLabel
-                  value="no"
-                  control={<Radio />}
-                  label="No Ice"
-                />
-                <FormControlLabel
-                  value="normal"
-                  control={<Radio />}
-                  label="Normal Ice"
-                />
-                <FormControlLabel
-                  value="extra"
-                  control={<Radio />}
-                  label="Extra Ice (+$0.25)"
-                />
-              </RadioGroup>
-            </FormControl>
-
-            {/* Toppings */}
-            <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
-              <FormLabel component="legend">Toppings</FormLabel>
-              <Box>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={customizationData.pearls}
-                      onChange={(e) =>
-                        setCustomizationData({
-                          ...customizationData,
-                          pearls: e.target.checked,
-                        })
-                      }
-                    />
-                  }
-                  label="Boba Pearls (+$0.75)"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={customizationData.jelly}
-                      onChange={(e) =>
-                        setCustomizationData({
-                          ...customizationData,
-                          jelly: e.target.checked,
-                        })
-                      }
-                    />
-                  }
-                  label="Coconut Jelly (+$0.50)"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={customizationData.pudding}
-                      onChange={(e) =>
-                        setCustomizationData({
-                          ...customizationData,
-                          pudding: e.target.checked,
-                        })
-                      }
-                    />
-                  }
-                  label="Pudding (+$0.60)"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={customizationData.whippedCream}
-                      onChange={(e) =>
-                        setCustomizationData({
-                          ...customizationData,
-                          whippedCream: e.target.checked,
-                        })
-                      }
-                    />
-                  }
-                  label="Whipped Cream (+$0.40)"
-                />
-              </Box>
-            </FormControl>
-
-            {/* Price Display */}
-            <Typography variant="h6" align="center" sx={{ mt: 2 }}>
-              Total Price:{' '}
-              {formatPrice(
-                currentMenuItem
-                  ? calculateCustomizedPrice(
-                      currentMenuItem.price,
-                      customizationData
-                    )
-                  : 0
-              )}
-            </Typography>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setCustomizationDialogOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleAddToCart} variant="contained">
-            Add to Cart
-          </Button>
-        </DialogActions>
-      </Dialog>
+        currentMenuItem={currentMenuItem}
+        customizationData={customizationData}
+        setCustomizationData={setCustomizationData}
+        onAddToCart={handleAddToCart}
+        calculateCustomizedPrice={calculateCustomizedPrice}
+        formatPrice={formatPrice}
+      />
 
       {/* Payment Dialog */}
-      <Dialog
+      <PaymentDialog
         open={paymentDialogOpen}
         onClose={() => setPaymentDialogOpen(false)}
-      >
-        <DialogTitle>Payment Method</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Select payment method for {formatPrice(totalAmount)}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPaymentDialogOpen(false)}>Cancel</Button>
-          <Button
-            onClick={() => handlePaymentSubmit('Cash')}
-            variant="contained"
-          >
-            Cash
-          </Button>
-          <Button
-            onClick={() => handlePaymentSubmit('Card')}
-            variant="contained"
-          >
-            Card
-          </Button>
-        </DialogActions>
-      </Dialog>
+        totalAmount={totalAmount}
+        onPaymentSubmit={handlePaymentSubmit}
+        formatPrice={formatPrice}
+      />
 
       {/* Add Menu Item Dialog */}
-      <Dialog
+      <MenuItemDialog
         open={addMenuItemDialogOpen}
         onClose={() => setAddMenuItemDialogOpen(false)}
-      >
-        <DialogTitle>Add New Menu Item</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2 }}>
-            <TextField
-              fullWidth
-              label="Name"
-              value={newMenuItemName}
-              onChange={(e) => setNewMenuItemName(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Price ($)"
-              type="number"
-              value={newMenuItemPrice}
-              onChange={(e) => setNewMenuItemPrice(e.target.value)}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setAddMenuItemDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddMenuItem} variant="contained">
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
+        title="Add New Menu Item"
+        name={newMenuItemName}
+        price={newMenuItemPrice}
+        onNameChange={setNewMenuItemName}
+        onPriceChange={setNewMenuItemPrice}
+        onSubmit={handleAddMenuItem}
+        submitLabel="Add"
+      />
 
       {/* Edit Menu Item Dialog */}
-      <Dialog
+      <MenuItemDialog
         open={editMenuItemDialogOpen}
         onClose={() => setEditMenuItemDialogOpen(false)}
-      >
-        <DialogTitle>Edit Menu Item</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2 }}>
-            <TextField
-              fullWidth
-              label="Name"
-              value={newMenuItemName}
-              onChange={(e) => setNewMenuItemName(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              fullWidth
-              label="Price ($)"
-              type="number"
-              value={newMenuItemPrice}
-              onChange={(e) => setNewMenuItemPrice(e.target.value)}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditMenuItemDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleEditMenuItem} variant="contained">
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+        title="Edit Menu Item"
+        name={newMenuItemName}
+        price={newMenuItemPrice}
+        onNameChange={setNewMenuItemName}
+        onPriceChange={setNewMenuItemPrice}
+        onSubmit={handleEditMenuItem}
+        submitLabel="Save"
+      />
     </Box>
   );
 }

@@ -114,8 +114,17 @@ export default function SignIn({ onLogin, ...props }) {
         });
       }
       navigate('/manager');
-    }
-    else {
+    } else if (username === 'cashier' && password === 'cashier') {
+      console.log('Login successful');
+      if (onLogin) {
+        onLogin({
+          displayName: 'Cashier Account',
+          email: 'cashier@example.com',
+          photo: null,
+        });
+      }
+      navigate('/cashier');
+    } else {
       setUsernameError(true);
       setUsernameErrorMessage('Invalid username or password');
       setPasswordError(true);
@@ -239,8 +248,8 @@ export default function SignIn({ onLogin, ...props }) {
             </Link>
           </Box>
           {showKeyboard && (
-            <Box sx={{ position: 'sticky', bottom: 0, mt: 2 }}>
-              <OnScreenKeyboard />
+            <Box sx={{ mt: 2, width: '100%' }}>
+              <OnScreenKeyboard sx={{ width: '100%' }} />
             </Box>
           )}
           <Divider>or</Divider>
@@ -253,13 +262,13 @@ export default function SignIn({ onLogin, ...props }) {
             >
               Sign in with Google
             </Button>
+      
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign in with Facebook')}
-              startIcon={<FacebookIcon />}
+              onClick={() => navigate('/kiosk')}
             >
-              Sign in with Facebook
+              Continue as guest
             </Button>
             <Typography sx={{ textAlign: 'center' }}>
               Don&apos;t have an account?{' '}

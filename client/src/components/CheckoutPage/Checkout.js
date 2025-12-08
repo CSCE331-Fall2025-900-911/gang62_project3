@@ -22,8 +22,27 @@ import Review from './Review';
 import AppTheme from '../../shared-theme/AppTheme';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const KIOSK_EMPLOYEE_ID = 1; // Default employee for kiosk orders
+const WALK_IN_CUSTOMER_ID = 1; // Default "walk-in" customer
+
+// Menu item IDs for accessories and packaging
+const STRAW_ITEM_ID = 28;
+const NAPKIN_ITEM_ID = 29;
+const SMALL_CUP_ITEM_ID = 30;
+const MEDIUM_CUP_ITEM_ID = 31;
+const BAG_ITEM_ID = 32;
+const LARGE_CUP_ITEM_ID = 33;
+const CUP_HOLDER_ITEM_ID = 34;
+
+const CUP_SIZE_BY_KEY = {
+  small: SMALL_CUP_ITEM_ID,
+  medium: MEDIUM_CUP_ITEM_ID,
+  large: LARGE_CUP_ITEM_ID,
+};
+
 const steps = ['Name', 'Payment details', 'Review your order'];
-function getStepContent(step, orderItems, orderTotal, formData) {
+function getStepContent(step, orderItems, orderTotal, formData, extrasState, ttsEnabled) {
   switch (step) {
     case 0:
       return <AddressForm 
@@ -33,6 +52,7 @@ function getStepContent(step, orderItems, orderTotal, formData) {
         setLastName={formData.setLastName}
         phoneNumber={formData.phoneNumber}
         setPhoneNumber={formData.setPhoneNumber}
+        ttsEnabled={ttsEnabled}
       />;
     case 1:
       return <PaymentForm 
@@ -46,6 +66,7 @@ function getStepContent(step, orderItems, orderTotal, formData) {
         setExpirationDate={formData.setExpirationDate}
         cardName={formData.cardName}
         setCardName={formData.setCardName}
+        ttsEnabled={ttsEnabled}
       />;
     case 2:
       return <Review 
@@ -58,14 +79,41 @@ function getStepContent(step, orderItems, orderTotal, formData) {
         cardNumber={formData.cardNumber}
         cardName={formData.cardName}
         expirationDate={formData.expirationDate}
+        extras={extrasState.extras}
+        setExtras={extrasState.setExtras}
+        ttsEnabled={ttsEnabled}
       />;
     default:
       throw new Error('Unknown step');
   }
 }
-export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 0, setOrderTotal, ...props }) {
+export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 0, setOrderTotal, ttsEnabled, ...props }) {
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = React.useState(0);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [receiptItems, setReceiptItems] = React.useState([]);
+  const [receiptSubtotal, setReceiptSubtotal] = React.useState(0);
+  const [extras, setExtras] = React.useState({
+    bag: 0,
+    cupHolder: 0,
+    extraStraws: 0,
+    napkins: 0,
+  });
+  const [receiptExtras, setReceiptExtras] = React.useState(null);
+
+  const speak = React.useCallback((text) => {
+    if (ttsEnabled && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [ttsEnabled]);
+
+  React.useEffect(() => {
+    if (activeStep === 0) speak("Please enter your name and phone number.");
+    else if (activeStep === 1) speak("Please enter your payment details.");
+    else if (activeStep === 2) speak("Please review your order.");
+  }, [activeStep, speak]);
   
   // Address form state
   const [firstName, setFirstName] = React.useState('');
@@ -78,8 +126,119 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
   const [cvv, setCvv] = React.useState('');
   const [expirationDate, setExpirationDate] = React.useState('');
   const [cardName, setCardName] = React.useState('');
-  const handleNext = () => {
-    setActiveStep(activeStep + 1);
+  const TAX_RATE = 0.0825; // Match tax used in Review component
+
+  const handleNext = async () => {
+    const isLastStep = activeStep === steps.length - 1;
+
+    // If not on the final "Review / Place order" step, just advance the stepper
+    if (!isLastStep) {
+      setActiveStep((prev) => prev + 1);
+      return;
+    }
+
+    // On the final step, submit the order to the backend
+    if (!orderItems || orderItems.length === 0) {
+      alert('Your cart is empty. Please add items before placing an order.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      // Aggregate quantities by menu item ID, including cups/straws and extras
+      const quantityById = {};
+
+      const incrementQuantity = (id, amount = 1) => {
+        if (!id || amount <= 0) return;
+        const key = String(id);
+        quantityById[key] = (quantityById[key] || 0) + amount;
+      };
+
+      // Drinks from the kiosk
+      orderItems.forEach((item) => {
+        if (!item || typeof item.id === 'undefined') return;
+        // Base drink
+        incrementQuantity(item.id);
+
+        // One cup per drink, based on selected size (default to medium)
+        const sizeKey = (item.size || 'medium').toLowerCase();
+        const cupId = CUP_SIZE_BY_KEY[sizeKey] || CUP_SIZE_BY_KEY.medium;
+        incrementQuantity(cupId);
+
+        // One straw per drink
+        incrementQuantity(STRAW_ITEM_ID);
+      });
+
+      // Extras chosen at checkout
+      if (extras.bag > 0) {
+        incrementQuantity(BAG_ITEM_ID, extras.bag);
+      }
+      if (extras.cupHolder > 0) {
+        incrementQuantity(CUP_HOLDER_ITEM_ID, extras.cupHolder);
+      }
+      if (extras.extraStraws > 0) {
+        incrementQuantity(STRAW_ITEM_ID, extras.extraStraws);
+      }
+      if (extras.napkins > 0) {
+        incrementQuantity(NAPKIN_ITEM_ID, extras.napkins);
+      }
+
+      const itemsPayload = Object.entries(quantityById).map(([id, quantity]) => ({
+        id: Number(id),
+        quantity,
+      }));
+
+      if (itemsPayload.length === 0) {
+        alert('Unable to submit order: no valid items found.');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/submit-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          employeeID: KIOSK_EMPLOYEE_ID,
+          customerID: WALK_IN_CUSTOMER_ID,
+          items: itemsPayload,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to submit order';
+        try {
+          const data = await response.json();
+          if (data && data.error) {
+            errorMessage = data.error;
+          }
+        } catch (err) {
+          // Ignore JSON parse errors and fall back to default message
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Order submitted successfully: advance to confirmation screen and clear cart
+      setReceiptItems(orderItems);
+      setReceiptSubtotal(orderTotal);
+      setReceiptExtras(extras);
+      setActiveStep((prev) => prev + 1);
+      setOrderItems([]);
+      setOrderTotal(0);
+      setExtras({
+        bag: 0,
+        cupHolder: 0,
+        extraStraws: 0,
+        napkins: 0,
+      });
+      alert('Your order has been placed! Thank you.');
+    } catch (error) {
+      console.error('Error submitting kiosk order:', error);
+      alert(`Failed to place order: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   const handleBack = () => {
     setActiveStep(activeStep - 1);
@@ -101,8 +260,10 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
     const total = orderItems.reduce((sum, item) => sum + item.price, 0);
     setOrderTotal(total);
   }, [orderItems, setOrderTotal]);
-  
+
   const formattedTotal = `$${orderTotal.toFixed(2)}`;
+  const receiptTax = receiptSubtotal * TAX_RATE;
+  const receiptTotal = receiptSubtotal + receiptTax;
   
   return (
     <AppTheme {...props}>
@@ -274,18 +435,145 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
             </Stepper>
             {activeStep === steps.length ? (
               <Stack spacing={2} useFlexGap>
-                <Typography variant="h1">📦</Typography>
+                <Typography variant="h1">🧋</Typography>
                 <Typography variant="h5">Thank you for your order!</Typography>
                 <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-                  Your order number is
-                  <strong>&nbsp;#140396</strong>. We have emailed your order
-                  confirmation and will update you once its shipped.
+                  Your drinks are being prepared. Please watch the screen or listen
+                  for your name when your order is ready for pickup.
                 </Typography>
+                {receiptItems.length > 0 && (
+                  <Card sx={{ mt: 1 }}>
+                    <CardContent>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        Receipt
+                      </Typography>
+                      {receiptItems.map((item, index) => (
+                        <Box
+                          key={`${item.id}-${index}`}
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            mb: 0.5,
+                          }}
+                        >
+                          <Typography variant="body2">{item.name}</Typography>
+                          <Typography variant="body2">
+                            ${item.price.toFixed(2)}
+                          </Typography>
+                        </Box>
+                      ))}
+                      {receiptExtras && (
+                        <Box sx={{ mt: 1 }}>
+                          {receiptExtras.bag > 0 && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                mb: 0.5,
+                              }}
+                            >
+                              <Typography variant="body2">Bag</Typography>
+                              <Typography variant="body2">x{receiptExtras.bag}</Typography>
+                            </Box>
+                          )}
+                          {receiptExtras.cupHolder > 0 && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                mb: 0.5,
+                              }}
+                            >
+                              <Typography variant="body2">Cup holder</Typography>
+                              <Typography variant="body2">x{receiptExtras.cupHolder}</Typography>
+                            </Box>
+                          )}
+                          {receiptExtras.extraStraws > 0 && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                mb: 0.5,
+                              }}
+                            >
+                              <Typography variant="body2">Extra straws</Typography>
+                              <Typography variant="body2">x{receiptExtras.extraStraws}</Typography>
+                            </Box>
+                          )}
+                          {receiptExtras.napkins > 0 && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                mb: 0.5,
+                              }}
+                            >
+                              <Typography variant="body2">Napkins</Typography>
+                              <Typography variant="body2">x{receiptExtras.napkins}</Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      )}
+                      <Box
+                        sx={{
+                          mt: 1,
+                          pt: 1,
+                          borderTop: '1px solid',
+                          borderColor: 'divider',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            mb: 0.5,
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            Subtotal
+                          </Typography>
+                          <Typography variant="body2">
+                            ${receiptSubtotal.toFixed(2)}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            mb: 0.5,
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            Tax ({(TAX_RATE * 100).toFixed(2)}%)
+                          </Typography>
+                          <Typography variant="body2">
+                            ${receiptTax.toFixed(2)}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            mt: 0.5,
+                          }}
+                        >
+                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                            Total
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                            ${receiptTotal.toFixed(2)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                )}
                 <Button
                   variant="contained"
                   sx={{ alignSelf: 'start', width: { xs: '100%', sm: 'auto' } }}
+                  onClick={() => navigate('/kiosk')}
                 >
-                  Go to my orders
+                  Start a new order
                 </Button>
               </Stack>
             ) : (
@@ -298,8 +586,11 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                   cardNumber, setCardNumber,
                   cvv, setCvv,
                   expirationDate, setExpirationDate,
-                  cardName, setCardName
-                })}
+                  cardName, setCardName,
+                }, {
+                  extras,
+                  setExtras,
+                }, ttsEnabled)}
                 <Box
                   sx={[
                     {
@@ -322,6 +613,7 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                       startIcon={<ChevronLeftRoundedIcon />}
                       onClick={handleBack}
                       variant="text"
+                      onFocus={() => speak('Go to the previous step')}
                       sx={{ display: { xs: 'none', sm: 'flex' } }}
                     >
                       Previous
@@ -333,6 +625,7 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                       onClick={handleBack}
                       variant="outlined"
                       fullWidth
+                      onFocus={() => speak('Go to the previous step')}
                       sx={{ display: { xs: 'flex', sm: 'none' } }}
                     >
                       Previous
@@ -342,7 +635,13 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                     variant="contained"
                     endIcon={<ChevronRightRoundedIcon />}
                     onClick={handleNext}
+                    onFocus={() => speak(
+                      activeStep === steps.length - 1
+                        ? 'Place your order'
+                        : 'Go to the next step'
+                    )}
                     sx={{ width: { xs: '100%', sm: 'fit-content' } }}
+                    disabled={activeStep === steps.length - 1 && isSubmitting}
                   >
                     {activeStep === steps.length - 1 ? 'Place order' : 'Next'}
                   </Button>

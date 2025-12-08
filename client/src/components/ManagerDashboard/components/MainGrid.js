@@ -15,6 +15,7 @@ import StatCard from './StatCard';
 import { rows as initialRows } from '../internals/data/gridData';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+console.log('API_BASE_URL:', API_BASE_URL);
 
 /**
  * Manager dashboard home grid component.

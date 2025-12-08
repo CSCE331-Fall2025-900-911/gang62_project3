@@ -62,6 +62,8 @@ export default function OnScreenKeyboard({ sx }) {
         borderColor: 'divider',
         borderRadius: 1,
         boxShadow: 1,
+        maxWidth: '100%',
+        overflowX: 'auto',
         ...sx,
       }}
     >
@@ -73,6 +75,7 @@ export default function OnScreenKeyboard({ sx }) {
               variant="outlined"
               size="small"
               onClick={() => sendToActiveInput(k)}
+              onMouseDown={(event) => event.preventDefault()}
               aria-label={`Type ${k}`}
               sx={{ minWidth: 36 }}
             >
@@ -82,13 +85,32 @@ export default function OnScreenKeyboard({ sx }) {
         </Box>
       ))}
       <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-        <Button variant="outlined" size="small" onClick={() => sendToActiveInput('Backspace')} aria-label="Backspace">
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => sendToActiveInput('Backspace')}
+          onMouseDown={(event) => event.preventDefault()}
+          aria-label="Backspace"
+        >
           ⌫
         </Button>
-        <Button variant="outlined" size="small" onClick={() => sendToActiveInput('Space')} aria-label="Space">
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => sendToActiveInput('Space')}
+          onMouseDown={(event) => event.preventDefault()}
+          aria-label="Space"
+        >
           Space
         </Button>
-        <Button variant="outlined" size="small" color="error" onClick={() => sendToActiveInput('Clear')} aria-label="Clear input">
+        <Button
+          variant="outlined"
+          size="small"
+          color="error"
+          onClick={() => sendToActiveInput('Clear')}
+          onMouseDown={(event) => event.preventDefault()}
+          aria-label="Clear input"
+        >
           Clear
         </Button>
       </Box>

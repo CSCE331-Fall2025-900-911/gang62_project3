@@ -3,12 +3,17 @@ import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenu
 import { useNavigate } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import AppTheme from '../../shared-theme/AppTheme';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 import MenuItem from './MenuItem';
 import { useWeather } from "./weather";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
+// Menu item IDs for accessories/packaging that should not appear as main drink tiles
+const ACCESSORY_ITEM_IDS = new Set([28, 29, 30, 31, 32, 33, 34]);
 
 const languages = [
   { code: 'EN', name: 'English' },
@@ -45,7 +50,7 @@ let carouselItems = [
  * @component
  * @author Michael Nguyen
  */
-function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
+function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, ttsEnabled, setTtsEnabled }) {
   const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +59,14 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
   const translationsRef = useRef({});
   const [currentSlide, setCurrentSlide] = useState(0);
   const carouselRef = useRef(null);
+
+  const speak = useCallback((text) => {
+    if (ttsEnabled && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [ttsEnabled]);
 
   useEffect(() => {
     translationsRef.current = {};
@@ -184,6 +197,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
     setOrderItems([...orderItems, item]);
     console.log('Item added to order:', item);
     console.log('Current order:', [...orderItems, item]);
+    speak(`Added ${item.name} to order for ${item.price} dollars.`);
   };
 
   /**
@@ -248,6 +262,24 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <IconButton 
+            onClick={() => {
+              const newEnabled = !ttsEnabled;
+              setTtsEnabled(newEnabled);
+              if (newEnabled && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance("Text to speech enabled");
+                window.speechSynthesis.speak(utterance);
+              }
+            }} 
+            onFocus={() => {
+              if (ttsEnabled) speak("Disable text to speech");
+            }}
+            color="primary" 
+            aria-label={ttsEnabled ? "Disable text to speech" : "Enable text to speech"}
+          >
+            {ttsEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
+          </IconButton>
           <ColorModeIconDropdown />
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Language</InputLabel>
@@ -278,6 +310,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
             variant="contained" 
             color="primary" 
             size="large"
+            onFocus={() => speak(translatedTexts.checkout)}
             onClick={() => navigate('/checkout')}
             sx={{ px: 4 }}
           >
@@ -416,9 +449,18 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user }) {
       </Box>
       
       <Grid container spacing={3}>
-        {menuItems.map((item) => (
+        {menuItems
+          .filter((item) => !ACCESSORY_ITEM_IDS.has(item.id))
+          .map((item) => (
           <Grid item key={item.id} sx={{ width: 'calc(20% - 24px)', minWidth: '200px' }}>
-            <MenuItem item={item} onItemClick={handleAddToOrder} language={language} translate={translate} />
+            <MenuItem 
+              item={item} 
+              onItemClick={handleAddToOrder} 
+              language={language} 
+              translate={translate}
+              ttsEnabled={ttsEnabled}
+              speak={speak}
+            />
           </Grid>
         ))}
       </Grid>

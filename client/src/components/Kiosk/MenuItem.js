@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -11,6 +11,7 @@ import {
   Box,
   ButtonGroup
 } from '@mui/material';
+import { CustomizationData } from '../../models/CustomizationData';
 
 /**
  * MenuItem component that displays a single menu item card.
@@ -26,20 +27,40 @@ import {
  * @param {Function} [props.onItemClick] - Optional callback function when item is added to order
  * @param {string} [props.language] - Language code for translation
  * @param {Function} [props.translate] - Translation function
+ * @param {boolean} [props.ttsEnabled] - Whether text-to-speech is enabled
+ * @param {Function} [props.speak] - Function to speak text
  * @author Michael Nguyen
  */
-function MenuItem({ item, onItemClick, language = 'EN', translate }) {
+function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, speak }) {
+  const defaultData = new CustomizationData();
   const [open, setOpen] = useState(false);
-  const [sugarLevel, setSugarLevel] = useState('medium');
-  const [iceLevel, setIceLevel] = useState('medium');
+  const [sugarLevel, setSugarLevel] = useState(defaultData.sugarLevel);
+  const [iceLevel, setIceLevel] = useState(defaultData.iceLevel);
+  const [size, setSize] = useState(defaultData.size);
+  const [temperature, setTemperature] = useState(defaultData.temperature);
+  const [hasBoba, setHasBoba] = useState(defaultData.hasBoba);
+  const [hasAiyuJelly, setHasAiyuJelly] = useState(defaultData.hasAiyuJelly);
+  const [quantity, setQuantity] = useState(defaultData.quantity);
   const [translatedName, setTranslatedName] = useState(item.name);
+  const skipNextFocusRef = useRef(false);
   const [translatedTexts, setTranslatedTexts] = useState({
     customize: 'Customize',
+    size: 'Size',
     sugarLevel: 'Sugar Level',
     iceLevel: 'Ice Level',
+    temperature: 'Temperature',
+    hot: 'Hot',
+    cold: 'Cold',
+    toppings: 'Toppings',
+    hasBoba: 'Boba',
+    hasAiyuJelly: 'Aiyu Jelly',
+    quantity: 'Quantity',
     low: 'Low',
     medium: 'Medium',
     high: 'High',
+    smallSize: 'Small',
+    mediumSize: 'Medium',
+    largeSize: 'Large',
     cancel: 'Cancel',
     addToOrder: 'Add to Order'
   });
@@ -50,11 +71,22 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
         setTranslatedName(item.name);
         setTranslatedTexts({
           customize: 'Customize',
+          size: 'Size',
           sugarLevel: 'Sugar Level',
           iceLevel: 'Ice Level',
+          temperature: 'Temperature',
+          hot: 'Hot',
+          cold: 'Cold',
+          toppings: 'Toppings',
+          boba: 'Boba',
+          aiyuJelly: 'Aiyu Jelly',
+          quantity: 'Quantity',
           low: 'Low',
           medium: 'Medium',
           high: 'High',
+          smallSize: 'Small',
+          mediumSize: 'Medium',
+          largeSize: 'Large',
           cancel: 'Cancel',
           addToOrder: 'Add to Order'
         });
@@ -66,11 +98,22 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
       
       const texts = {
         customize: 'Customize',
+        size: 'Size',
         sugarLevel: 'Sugar Level',
         iceLevel: 'Ice Level',
+        temperature: 'Temperature',
+        hot: 'Hot',
+        cold: 'Cold',
+        toppings: 'Toppings',
+        boba: 'Boba',
+        aiyuJelly: 'Aiyu Jelly',
+        quantity: 'Quantity',
         low: 'Low',
         medium: 'Medium',
         high: 'High',
+        smallSize: 'Small',
+        mediumSize: 'Medium',
+        largeSize: 'Large',
         cancel: 'Cancel',
         addToOrder: 'Add to Order'
       };
@@ -88,6 +131,16 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
     setOpen(true);
   };
 
+  const handleFocus = () => {
+    if (skipNextFocusRef.current) {
+      skipNextFocusRef.current = false;
+      return;
+    }
+    if (ttsEnabled && speak) {
+      speak(`${translatedName} for ${item.price} dollars.`);
+    }
+  };
+
   const handleKeyDown = (e) => {
     // Activate card on Enter or Space
     if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
@@ -100,28 +153,61 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
     setOpen(false);
   };
 
+  const speakOption = (category, value) => {
+    if (ttsEnabled && speak) {
+      speak(`${category} ${value}`);
+    }
+  };
+
   const handleAddToOrder = () => {
+    const toppings = [];
+    if (hasBoba) toppings.push('Boba');
+    if (hasAiyuJelly) toppings.push('Aiyu Jelly');
+
     const customizedItem = {
       ...item,
+      size,
       sugarLevel,
-      iceLevel
+      iceLevel: temperature === 'hot' ? 'no ice' : iceLevel,
+      temperature,
+      toppings
     };
     
     if (onItemClick) {
-      onItemClick(customizedItem);
+      for (let i = 0; i < quantity; i++) {
+        onItemClick(customizedItem);
+      }
     } else {
-      console.log('Selected item:', customizedItem);
+      console.log('Selected item:', customizedItem, 'Quantity:', quantity);
     }
     
+    skipNextFocusRef.current = true;
     handleClose();
     // Reset to defaults for next time
-    setSugarLevel('medium');
-    setIceLevel('medium');
+    const defaults = new CustomizationData();
+    setSugarLevel(defaults.sugarLevel);
+    setIceLevel(defaults.iceLevel);
+    setSize(defaults.size);
+    setTemperature(defaults.temperature);
+    setHasBoba(defaults.hasBoba);
+    setHasAiyuJelly(defaults.hasAiyuJelly);
+    setQuantity(defaults.quantity);
+  };
+
+  const toppingState = {
+    hasBoba: { value: hasBoba, setter: setHasBoba },
+    hasAiyuJelly: { value: hasAiyuJelly, setter: setHasAiyuJelly }
   };
 
   return (
     <>
       <Card 
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        onClick={handleCardClick}
+        onFocus={handleFocus}
+        role="button"
+        aria-label={`${translatedName}, price $${item.price}`}
         sx={{ 
           height: '100%',
           display: 'flex',
@@ -152,11 +238,6 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
             outline: 'none'
           }
         }}
-        onClick={handleCardClick}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-        role="button"
-        aria-label={`Customize ${translatedName}`}
       >
         <CardContent sx={{ flexGrow: 1, p: 3 }}>
           <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
@@ -185,6 +266,60 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
         </DialogTitle>
         <DialogContent>
           <Box sx={{ py: 2 }}>
+            {/* Size Selection */}
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+              {translatedTexts.size}
+            </Typography>
+            <ButtonGroup 
+              fullWidth 
+              variant="outlined" 
+              sx={{ mb: 4 }}
+            >
+              {CustomizationData.sizes.map((option) => (
+                <Button
+                  key={option.value}
+                  variant={size === option.value ? 'contained' : 'outlined'}
+                  color="primary"
+                  onClick={() => setSize(option.value)}
+                  onFocus={() => speakOption(translatedTexts.size, translatedTexts[`${option.value}Size`] || option.label)}
+                  sx={{ 
+                    py: 2,
+                    fontSize: '1rem',
+                    fontWeight: 600
+                  }}
+                >
+                  {translatedTexts[`${option.value}Size`] || option.label}
+                </Button>
+              ))}
+            </ButtonGroup>
+
+            {/* Temperature Selection */}
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+              {translatedTexts.temperature}
+            </Typography>
+            <ButtonGroup 
+              fullWidth 
+              variant="outlined" 
+              sx={{ mb: 4 }}
+            >
+              {CustomizationData.temperatures.map((option) => (
+                <Button
+                  key={option.value}
+                  variant={temperature === option.value ? 'contained' : 'outlined'}
+                  color="primary"
+                  onClick={() => setTemperature(option.value)}
+                  onFocus={() => speakOption(translatedTexts.temperature, translatedTexts[option.value] || option.label)}
+                  sx={{ 
+                    py: 2,
+                    fontSize: '1rem',
+                    fontWeight: 600
+                  }}
+                >
+                  {translatedTexts[option.value] || option.label}
+                </Button>
+              ))}
+            </ButtonGroup>
+
             {/* Sugar Level Selection */}
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
               {translatedTexts.sugarLevel}
@@ -194,94 +329,114 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
               variant="outlined" 
               sx={{ mb: 4 }}
             >
-              <Button
-                variant={sugarLevel === 'low' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setSugarLevel('low')}
-                sx={{ 
-                  py: 2,
-                  fontSize: '1rem',
-                  fontWeight: 600
-                }}
-              >
-                {translatedTexts.low}
-              </Button>
-              <Button
-                variant={sugarLevel === 'medium' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setSugarLevel('medium')}
-                sx={{ 
-                  py: 2,
-                  fontSize: '1rem',
-                  fontWeight: 600
-                }}
-              >
-                {translatedTexts.medium}
-              </Button>
-              <Button
-                variant={sugarLevel === 'high' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setSugarLevel('high')}
-                sx={{ 
-                  py: 2,
-                  fontSize: '1rem',
-                  fontWeight: 600
-                }}
-              >
-                {translatedTexts.high}
-              </Button>
+              {CustomizationData.sugarLevels.map((option) => (
+                <Button
+                  key={option.value}
+                  variant={sugarLevel === option.value ? 'contained' : 'outlined'}
+                  color="primary"
+                  onClick={() => setSugarLevel(option.value)}
+                  onFocus={() => speakOption(translatedTexts.sugarLevel, translatedTexts[option.value] || option.label)}
+                  sx={{ 
+                    py: 2,
+                    fontSize: '1rem',
+                    fontWeight: 600
+                  }}
+                >
+                  {translatedTexts[option.value] || option.label}
+                </Button>
+              ))}
             </ButtonGroup>
 
-            {/* Ice Level Selection */}
+            {/* Ice Level Selection - Only show if cold */}
+            {temperature === 'cold' && (
+              <>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+                  {translatedTexts.iceLevel}
+                </Typography>
+                <ButtonGroup 
+                  fullWidth 
+                  variant="outlined"
+                  sx={{ mb: 4 }}
+                >
+                  {CustomizationData.iceLevels.map((option) => (
+                    <Button
+                      key={option.value}
+                      variant={iceLevel === option.value ? 'contained' : 'outlined'}
+                      color="primary"
+                      onClick={() => setIceLevel(option.value)}
+                      onFocus={() => speakOption(translatedTexts.iceLevel, translatedTexts[option.value] || option.label)}
+                      sx={{ 
+                        py: 2,
+                        fontSize: '1rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      {translatedTexts[option.value] || option.label}
+                    </Button>
+                  ))}
+                </ButtonGroup>
+              </>
+            )}
+
+            {/* Toppings Selection */}
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
-              {translatedTexts.iceLevel}
+              {translatedTexts.toppings}
             </Typography>
-            <ButtonGroup 
-              fullWidth 
-              variant="outlined"
-            >
+            <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {CustomizationData.toppings.map((topping) => {
+                const state = toppingState[topping.key];
+                if (!state) return null; // Safety check
+                return (
+                  <Button
+                    key={topping.key}
+                    variant={state.value ? 'contained' : 'outlined'}
+                    color="primary"
+                    onClick={() => state.setter(!state.value)}
+                    onFocus={() => speakOption(translatedTexts.toppings, translatedTexts[topping.key] || topping.label)}
+                    fullWidth
+                    sx={{ 
+                      py: 2,
+                      fontSize: '1rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    {translatedTexts[topping.key] || topping.label} {state.value ? '✓' : ''}
+                  </Button>
+                );
+              })}
+            </Box>
+
+            {/* Quantity Selection */}
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+              {translatedTexts.quantity}
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, mb: 2 }}>
               <Button
-                variant={iceLevel === 'low' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setIceLevel('low')}
-                sx={{ 
-                  py: 2,
-                  fontSize: '1rem',
-                  fontWeight: 600
-                }}
+                variant="outlined"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                onFocus={() => speakOption(translatedTexts.quantity, "decrease")}
+                sx={{ minWidth: '50px', fontSize: '1.5rem' }}
               >
-                {translatedTexts.low}
+                -
               </Button>
+              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                {quantity}
+              </Typography>
               <Button
-                variant={iceLevel === 'medium' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setIceLevel('medium')}
-                sx={{ 
-                  py: 2,
-                  fontSize: '1rem',
-                  fontWeight: 600
-                }}
+                variant="outlined"
+                onClick={() => setQuantity(quantity + 1)}
+                onFocus={() => speakOption(translatedTexts.quantity, "increase")}
+                sx={{ minWidth: '50px', fontSize: '1.5rem' }}
               >
-                {translatedTexts.medium}
+                +
               </Button>
-              <Button
-                variant={iceLevel === 'high' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setIceLevel('high')}
-                sx={{ 
-                  py: 2,
-                  fontSize: '1rem',
-                  fontWeight: 600
-                }}
-              >
-                {translatedTexts.high}
-              </Button>
-            </ButtonGroup>
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 3, gap: 2 }}>
           <Button 
             onClick={handleClose}
+            onFocus={() => ttsEnabled && speak && speak(translatedTexts.cancel)}
             variant="outlined"
             color="primary"
             size="large"
@@ -291,6 +446,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate }) {
           </Button>
           <Button 
             onClick={handleAddToOrder}
+            onFocus={() => ttsEnabled && speak && speak(translatedTexts.addToOrder)}
             variant="contained"
             color="primary"
             size="large"

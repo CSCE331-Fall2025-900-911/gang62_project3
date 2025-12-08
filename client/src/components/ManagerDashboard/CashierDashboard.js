@@ -5,15 +5,10 @@ import Stack from '@mui/material/Stack';
 import { useState } from 'react';
 import AppNavbar from './components/AppNavbar';
 import Header from './components/Header';
-import MainGrid from './components/MainGrid';
 import SideMenu from './components/SideMenu';
 import AppTheme from '../../shared-theme/AppTheme';
-import InventoryPage from './pages/InventoryPage';
 import CashierViewPage from './pages/CashierViewPage';
-import EmployeesPage from './pages/EmployeesPage';
-import XReportPage from './pages/XReportPage';
-import ZReportPage from './pages/ZReportPage';
-import OrdersPage from './pages/OrdersPage';
+import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded';
 import {
   chartsCustomizations,
   dataGridCustomizations,
@@ -28,28 +23,19 @@ const xThemeComponents = {
   ...treeViewCustomizations,
 };
 
-export default function Dashboard(props) {
-  const [activePage, setActivePage] = useState('Home');
+const cashierMenuItems = [
+  { text: 'Cashier View', icon: <PointOfSaleRoundedIcon /> },
+];
+
+export default function CashierDashboard(props) {
+  const [activePage, setActivePage] = useState('Cashier View');
 
   const renderPage = () => {
     switch (activePage) {
-      case 'Home':
-        return <MainGrid />;
-      case 'Inventory':
-        return <InventoryPage />;
       case 'Cashier View':
         return <CashierViewPage />;
-      case 'Employees':
-        return <EmployeesPage />;
-      case 'Orders':
-        return <OrdersPage />;
-      case 'X Report':
-        return <XReportPage />;
-      case 'Z Report':
-        return <ZReportPage />;
-
       default:
-        return <MainGrid />;
+        return <CashierViewPage />;
     }
   };
 
@@ -57,8 +43,8 @@ export default function Dashboard(props) {
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
-        <SideMenu activePage={activePage} setActivePage={setActivePage} />
-        <AppNavbar activePage={activePage} setActivePage={setActivePage} />
+        <SideMenu activePage={activePage} setActivePage={setActivePage} menuItems={cashierMenuItems} />
+        <AppNavbar activePage={activePage} setActivePage={setActivePage} menuItems={cashierMenuItems} />
         {/* Main content */}
         <Box
           component="main"
