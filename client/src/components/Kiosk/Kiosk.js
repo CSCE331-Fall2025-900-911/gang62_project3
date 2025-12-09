@@ -36,7 +36,8 @@ const CATEGORIES = [
   { id: 'coffee', label: 'Coffee' },
   { id: 'blended', label: 'Blended' },
   { id: 'matcha', label: 'Matcha' },
-  { id: 'fruit', label: 'Fruit' }
+  { id: 'fruit', label: 'Fruit' },
+  { id: 'special', label: 'Specials' }
 ];
 
 
@@ -44,12 +45,18 @@ const CATEGORIES = [
 let carouselItems = [
   {
     id: 1,
+    title: 'Pokemon Legends Drinks',
+    image: 'https://i.imgur.com/m5NSorh.jpeg',
+    description: ''
+  },
+  {
+    id: 2,
     title: 'None',
     image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fbiyopos.com%2Fwp-content%2Fuploads%2F2025%2F08%2Fboba-flavors-collection.png&f=1&nofb=1&ipt=06f3d63629bc2383e39a4189637bc2397016b4eed438e199ec072b78fa2f8994',
     description: 'None'
   },
   {
-    id: 2,
+    id: 3,
     title: 'Fruit collection',
     image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fbiyopos.com%2Fwp-content%2Fuploads%2F2025%2F08%2Fboba-flavors-collection.png&f=1&nofb=1&ipt=06f3d63629bc2383e39a4189637bc2397016b4eed438e199ec072b78fa2f8994',
     description: '3-6 PM - Special pricing'
@@ -155,16 +162,16 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   const { temp, weather_error } = useWeather();
 
   if (temp < 60) {
-    carouselItems[0] = {
-      id: 1,
+    carouselItems[1] = {
+      id: 2,
       title: 'Hot Boba Bubble Tea',
       image: 'https://www.hungryhuy.com/wp-content/uploads/adding-boba-to-milk-tea.jpg',
       description: 'Warm up with our hot boba special'
     };  
   }
   else {
-    carouselItems[0] = {
-      id: 1,
+    carouselItems[1] = {
+      id: 2,
       title: 'Boba Fruit Smoothie',
       image: 'https://foodsocial.io/wp-content/uploads/2022/07/Bubble-Tea-2-1080x720.jpg',
       description: 'Cool off with our special Boba Fruit Smoothie'
@@ -416,7 +423,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                 borderRadius: 2,
                 position: 'relative',
                 width: '100%',
-                aspectRatio: '5/1',
+                aspectRatio: '7/2',
               }}
             >
               {carouselItems.map((item, index) => (
