@@ -93,7 +93,7 @@ export default function SignIn({ onLogin, ...props }) {
     const username = data.get('username');
     const password = data.get('password');
     
-    // Check for admin credentials
+    // local test credentials for different roles (non-OAuth).
     if (username === 'customer' && password === 'customer') {
       console.log('Login successful');
       if (onLogin) {
@@ -101,6 +101,8 @@ export default function SignIn({ onLogin, ...props }) {
           displayName: 'Customer Account',
           email: 'customer@example.com',
           photo: null,
+          role: 'customer',
+          isAdmin: false,
         });
       }
       navigate('/kiosk');
@@ -111,6 +113,8 @@ export default function SignIn({ onLogin, ...props }) {
           displayName: 'Admin Account',
           email: 'admin@example.com',
           photo: null,
+          role: 'admin',
+          isAdmin: true,
         });
       }
       navigate('/manager');
@@ -121,6 +125,8 @@ export default function SignIn({ onLogin, ...props }) {
           displayName: 'Cashier Account',
           email: 'cashier@example.com',
           photo: null,
+          role: 'cashier',
+          isAdmin: false,
         });
       }
       navigate('/cashier');

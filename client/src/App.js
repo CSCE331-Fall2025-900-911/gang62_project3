@@ -91,7 +91,7 @@ function App() {
             element={
               !authChecked ? (
                 <div />
-              ) : isAuthenticated ? (
+              ) : isAuthenticated && user && (user.role === 'admin' || user.isAdmin) ? (
                 <Dashboard user={user} />
               ) : (
                 <Navigate to="/" />
