@@ -369,7 +369,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
       </Box>
 
       {/* Carousel Section */}
-      <Box sx={{ position: 'relative', mb: 4, width: '100%' }}>
+      <Box sx={{ position: 'relative', mb: 4, width: '100%'}}>
         <Box
           ref={carouselRef}
           sx={{
@@ -378,7 +378,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             borderRadius: 2,
             position: 'relative',
             width: '100%',
-            aspectRatio: '3/1',
+            aspectRatio: '5/1',
           }}
         >
           {carouselItems.map((item, index) => (
@@ -386,9 +386,9 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
               key={item.id}
               sx={{
                 minWidth: '100%',
+                height: '100%',
                 transition: 'transform 0.5s ease-in-out',
                 transform: `translateX(-${currentSlide * 100}%)`,
-                height: '80%',
               }}
             >
               <Card sx={{ height: '100%', position: 'relative', p: 0, overflow: 'hidden' }}>
@@ -430,6 +430,9 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             top: '50%',
             transform: 'translateY(-50%)',
             backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 1)',
+            }
           }}
         >
           <ChevronLeftIcon />
@@ -442,6 +445,9 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             top: '50%',
             transform: 'translateY(-50%)',
             backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 1)',
+            }
           }}
         >
           <ChevronRightIcon />
@@ -456,6 +462,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             transform: 'translateX(-50%)',
             display: 'flex',
             gap: 1,
+            zIndex: 10,
           }}
         >
           {carouselItems.map((_, index) => (
