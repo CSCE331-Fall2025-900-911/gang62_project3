@@ -31,10 +31,14 @@ const xThemeComponents = {
 export default function Dashboard(props) {
   const [activePage, setActivePage] = useState('Home');
 
+  function setTab(tab) {
+    setActivePage(tab);
+  }
+
   const renderPage = () => {
     switch (activePage) {
       case 'Home':
-        return <MainGrid />;
+        return <MainGrid setActivePage={setTab} />;
       case 'Inventory':
         return <InventoryPage />;
       case 'Cashier View':

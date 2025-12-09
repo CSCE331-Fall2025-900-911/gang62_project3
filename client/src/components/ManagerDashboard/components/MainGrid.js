@@ -26,7 +26,7 @@ const API_BASE_URL =  process.env.REACT_APP_API_URL || 'http://localhost:3001';
  * @component
  * @author Michael Nguyen
  */
-export default function MainGrid() {
+export default function MainGrid({setActivePage}) {
   const [allRows, setAllRows] = React.useState(initialRows);
   const [filteredRows, setFilteredRows] = React.useState(initialRows);
   const [summary, setSummary] = React.useState(null);
@@ -251,7 +251,7 @@ export default function MainGrid() {
           </Grid>
         ))}
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <HighlightedCard />
+          <HighlightedCard setActivePage={setActivePage} />
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <SessionsChart summary={summary} />

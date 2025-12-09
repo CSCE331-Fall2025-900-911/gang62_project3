@@ -7,7 +7,7 @@ import InsightsRoundedIcon from '@mui/icons-material/InsightsRounded';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 
-export default function HighlightedCard() {
+export default function HighlightedCard({setActivePage}) {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -32,7 +32,7 @@ export default function HighlightedCard() {
           color="primary"
           endIcon={<ChevronRightRoundedIcon />}
           fullWidth={isSmallScreen}
-          onClick={() => alert('Navigating to Sales Reports...')}
+          onClick={() => setActivePage('X Report')}
         >
           View Reports
         </Button>
