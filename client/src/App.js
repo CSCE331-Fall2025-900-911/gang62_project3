@@ -12,7 +12,6 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 function AppContent() {
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [user, setUser] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
@@ -27,15 +26,12 @@ function AppContent() {
 
       if (response.ok) {
         const data = await response.json();
-        setIsAuthenticated(Boolean(data.user));
         setUser(data.user || null);
       } else {
-        setIsAuthenticated(false);
         setUser(null);
       }
     } catch (error) {
       console.error('Failed to verify session', error);
-      setIsAuthenticated(false);
       setUser(null);
     } finally {
       setAuthChecked(true);
@@ -55,7 +51,6 @@ function AppContent() {
   }, [location.pathname, authChecked, checkSession]);
 
   const handleLocalLogin = (localUser = null) => {
-    setIsAuthenticated(true);
     setAuthChecked(true);
     setUser(localUser);
   };
@@ -107,13 +102,7 @@ function AppContent() {
         <Route
           path="/cashier"
           element={
-            !authChecked ? (
-              <div />
-            ) : isAuthenticated ? (
-              <CashierDashboard user={user} />
-            ) : (
-              <Navigate to="/" />
-            )
+            <CashierDashboard user={user} />
           }
         />
       </Routes>
