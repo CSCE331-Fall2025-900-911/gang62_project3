@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel, IconButton, Card, CardMedia, Avatar } from '@mui/material';
+import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel, IconButton, Card, CardMedia, Avatar, Tabs, Tab } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -25,6 +25,18 @@ const languages = [
   { code: 'JA', name: 'Japanese' },
   { code: 'ZH', name: 'Chinese' }
 ];
+
+// Category definitions
+const CATEGORIES = [
+  { id: 'all', label: 'All Drinks' },
+  { id: 'flavored tea', label: 'Flavored Tea' },
+  { id: 'milk tea', label: 'Milk Tea' },
+  { id: 'coffee', label: 'Coffee' },
+  { id: 'blended', label: 'Blended' },
+  { id: 'matcha', label: 'Matcha' },
+  { id: 'fruit', label: 'Fruit' }
+];
+
 
 // Carousel promotional items
 let carouselItems = [
@@ -59,6 +71,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   const translationsRef = useRef({});
   const [currentSlide, setCurrentSlide] = useState(0);
   const carouselRef = useRef(null);
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   const speak = useCallback((text) => {
     if (ttsEnabled && 'speechSynthesis' in window) {
@@ -210,6 +223,16 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   const handleNextSlide = () => {
     setCurrentSlide((prev) => (prev === carouselItems.length - 1 ? 0 : prev + 1));
   };
+
+  const filteredMenuItems = menuItems
+    .filter((item) => !ACCESSORY_ITEM_IDS.has(item.id))
+    .filter((item) => {
+      if (selectedCategory === 'all') return true;
+      const drinkType = item.drink_type || '';
+      console.log(`Item: ${item.drink_type}"`);
+      return drinkType === selectedCategory;
+  });
+
   if (loading) {
     return (
       <AppTheme>
@@ -447,11 +470,33 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
           ))}
         </Box>
       </Box>
+
+      {/* Category Tabs */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs 
+          value={selectedCategory} 
+          onChange={(e, newValue) => setSelectedCategory(newValue)}
+          variant="scrollable"
+          scrollButtons="auto"
+          aria-label="drink categories"
+        >
+          {CATEGORIES.map((category) => (
+            <Tab 
+              key={category.id} 
+              label={category.label} 
+              value={category.id}
+              sx={{ 
+                fontSize: '1rem',
+                fontWeight: 'medium',
+                textTransform: 'capitalize'
+              }}
+            />
+          ))}
+        </Tabs>
+      </Box>
       
       <Grid container spacing={3}>
-        {menuItems
-          .filter((item) => !ACCESSORY_ITEM_IDS.has(item.id))
-          .map((item) => (
+        {filteredMenuItems.map((item) => (
           <Grid item key={item.id} sx={{ width: 'calc(20% - 24px)', minWidth: '200px' }}>
             <MenuItem 
               item={item} 
@@ -464,6 +509,17 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
           </Grid>
         ))}
       </Grid>
+
+      {/* Empty State */}
+      {filteredMenuItems.length === 0 && (
+        <Box sx={{ textAlign: 'center', py: 8 }}>
+          <Typography variant="h5" color="text.secondary">
+            No items found in this category
+          </Typography>
+        </Box>
+      )}
+
+
     </Box>
     </AppTheme>
   );
