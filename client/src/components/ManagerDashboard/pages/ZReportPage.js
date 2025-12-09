@@ -3,7 +3,7 @@ import { Box, Typography, Card, CardContent, Alert, CircularProgress } from '@mu
 import Grid from '@mui/material/Grid';
 import SummarizeRoundedIcon from '@mui/icons-material/SummarizeRounded';
 
-const API_URL =  'http://localhost:3001';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 // Global variable to track Z-Report status across component mounts (simulating daily session)
 if (window.isZReportGenerated === undefined) {

@@ -521,6 +521,7 @@ app.get('/api/dashboard/top-items', async (req, res) => {
                     mi.id,
                     mi.name,
                     mi.base_price_cents,
+                    mi.drink_type,
                     COALESCE(SUM(t.qty), 0) AS quantity_sold,
                     COALESCE(SUM(t.qty * mi.base_price_cents), 0) AS total_cents
                 FROM menu_items mi
@@ -529,7 +530,7 @@ app.get('/api/dashboard/top-items', async (req, res) => {
                 LEFT JOIN orders o
                     ON o.id = t.order_id
                     AND o.created_at >= NOW() - INTERVAL '30 days'
-                GROUP BY mi.id, mi.name, mi.base_price_cents
+                GROUP BY mi.id, mi.name, mi.base_price_cents, mi.drink_type
                 ORDER BY total_cents DESC
                 LIMIT 20;
             `,
@@ -539,6 +540,7 @@ app.get('/api/dashboard/top-items', async (req, res) => {
             id: row.id,
             name: row.name,
             basePrice: (Number(row.base_price_cents) || 0) / 100.0,
+            drinkType: row.drink_type,
             quantitySold: Number(row.quantity_sold) || 0,
             totalRevenue: (Number(row.total_cents) || 0) / 100.0,
         }));

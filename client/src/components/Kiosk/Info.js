@@ -14,17 +14,25 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import Box from '@mui/material/Box';
+import { CustomizationData } from '../../models/CustomizationData';
 
 function Info({ totalPrice, orderItems = [], onDelete, onEdit }) {
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [editingIndex, setEditingIndex] = React.useState(null);
+  
+  const [editingSize, setEditingSize] = React.useState('medium');
   const [editingSugarLevel, setEditingSugarLevel] = React.useState('medium');
   const [editingIceLevel, setEditingIceLevel] = React.useState('medium');
+  const [editingTemperature, setEditingTemperature] = React.useState('cold');
+  const [editingToppings, setEditingToppings] = React.useState([]);
 
   const handleEditClick = (index, item) => {
     setEditingIndex(index);
+    setEditingSize(item.size || 'medium');
     setEditingSugarLevel(item.sugarLevel || 'medium');
     setEditingIceLevel(item.iceLevel || 'medium');
+    setEditingTemperature(item.temperature || 'cold');
+    setEditingToppings(item.toppings || []);
     setEditDialogOpen(true);
   };
 
@@ -32,8 +40,11 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit }) {
     if (editingIndex !== null && onEdit) {
       const updatedItem = {
         ...orderItems[editingIndex],
+        size: editingSize,
         sugarLevel: editingSugarLevel,
-        iceLevel: editingIceLevel
+        iceLevel: editingTemperature === 'hot' ? 'no ice' : editingIceLevel,
+        temperature: editingTemperature,
+        toppings: editingToppings
       };
       onEdit(editingIndex, updatedItem);
     }
@@ -78,7 +89,13 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit }) {
               <ListItemText
                 sx={{ mr: 2, flex: 1 }}
                 primary={item.name}
-                secondary={`Size: ${formatSize(item.size)} | Sugar: ${item.sugarLevel || 'N/A'} | Ice: ${item.iceLevel || 'N/A'}`}
+                secondary={
+                  `Size: ${formatSize(item.size)} | ` +
+                  `Temp: ${item.temperature || 'Cold'} | ` +
+                  `Sugar: ${item.sugarLevel || 'N/A'} | ` +
+                  `Ice: ${item.iceLevel || 'N/A'}` +
+                  (item.toppings && item.toppings.length > 0 ? ` | Toppings: ${item.toppings.join(', ')}` : '')
+                }
               />
               <Typography variant="body1" sx={{ fontWeight: 'medium', mr: 1 }}>
                 ${item.price.toFixed(2)}
@@ -125,67 +142,109 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit }) {
         </DialogTitle>
         <DialogContent>
           <Box sx={{ py: 2 }}>
+            {/* Size Selection */}
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+              Size
+            </Typography>
+            <ButtonGroup fullWidth variant="outlined" sx={{ mb: 4 }}>
+              {CustomizationData.sizes.map((option) => (
+                <Button
+                  key={option.value}
+                  variant={editingSize === option.value ? 'contained' : 'outlined'}
+                  color="primary"
+                  onClick={() => setEditingSize(option.value)}
+                  sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
+                >
+                  {option.label}
+                </Button>
+              ))}
+            </ButtonGroup>
+
+            {/* Temperature Selection */}
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+              Temperature
+            </Typography>
+            <ButtonGroup fullWidth variant="outlined" sx={{ mb: 4 }}>
+              {CustomizationData.temperatures.map((option) => (
+                <Button
+                  key={option.value}
+                  variant={editingTemperature === option.value ? 'contained' : 'outlined'}
+                  color="primary"
+                  onClick={() => setEditingTemperature(option.value)}
+                  sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
+                >
+                  {option.label}
+                </Button>
+              ))}
+            </ButtonGroup>
+
             {/* Sugar Level Selection */}
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
               Sugar Level
             </Typography>
             <ButtonGroup fullWidth variant="outlined" sx={{ mb: 4 }}>
-              <Button
-                variant={editingSugarLevel === 'low' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setEditingSugarLevel('low')}
-                sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
-              >
-                Low
-              </Button>
-              <Button
-                variant={editingSugarLevel === 'medium' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setEditingSugarLevel('medium')}
-                sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
-              >
-                Medium
-              </Button>
-              <Button
-                variant={editingSugarLevel === 'high' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setEditingSugarLevel('high')}
-                sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
-              >
-                High
-              </Button>
+              {CustomizationData.sugarLevels.map((option) => (
+                <Button
+                  key={option.value}
+                  variant={editingSugarLevel === option.value ? 'contained' : 'outlined'}
+                  color="primary"
+                  onClick={() => setEditingSugarLevel(option.value)}
+                  sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
+                >
+                  {option.label}
+                </Button>
+              ))}
             </ButtonGroup>
 
-            {/* Ice Level Selection */}
+            {/* Ice Level Selection - Only show if cold */}
+            {editingTemperature === 'cold' && (
+              <>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
+                  Ice Level
+                </Typography>
+                <ButtonGroup fullWidth variant="outlined" sx={{ mb: 4 }}>
+                  {CustomizationData.iceLevels.map((option) => (
+                    <Button
+                      key={option.value}
+                      variant={editingIceLevel === option.value ? 'contained' : 'outlined'}
+                      color="primary"
+                      onClick={() => setEditingIceLevel(option.value)}
+                      sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </ButtonGroup>
+              </>
+            )}
+
+            {/* Toppings Selection */}
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-              Ice Level
+              Toppings
             </Typography>
-            <ButtonGroup fullWidth variant="outlined">
-              <Button
-                variant={editingIceLevel === 'low' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setEditingIceLevel('low')}
-                sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
-              >
-                Low
-              </Button>
-              <Button
-                variant={editingIceLevel === 'medium' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setEditingIceLevel('medium')}
-                sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
-              >
-                Medium
-              </Button>
-              <Button
-                variant={editingIceLevel === 'high' ? 'contained' : 'outlined'}
-                color="primary"
-                onClick={() => setEditingIceLevel('high')}
-                sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
-              >
-                High
-              </Button>
-            </ButtonGroup>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              {CustomizationData.toppings.map((topping) => {
+                const isSelected = editingToppings.includes(topping.label);
+                return (
+                  <Button
+                    key={topping.key}
+                    variant={isSelected ? 'contained' : 'outlined'}
+                    color="primary"
+                    onClick={() => {
+                      if (isSelected) {
+                        setEditingToppings(editingToppings.filter(t => t !== topping.label));
+                      } else {
+                        setEditingToppings([...editingToppings, topping.label]);
+                      }
+                    }}
+                    fullWidth
+                    sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
+                  >
+                    {topping.label} {isSelected ? '✓' : ''}
+                  </Button>
+                );
+              })}
+            </Box>
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 3, gap: 2 }}>
