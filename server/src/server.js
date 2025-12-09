@@ -185,6 +185,80 @@ app.get('/api/menu-items', async (req, res) => {
 });
 
 /**
+ * API endpoint to add a new menu item to the database.
+ * Accepts a JSON body with name and price (in dollars) and returns the created item.
+ *
+ * Request body:
+ * {
+ *   "name": string,
+ *   "price": number,
+ *   "drinkType": string,   // or "drink_type"
+ *   "imageUrl": string     // or "image_url"
+ * }
+ *
+ * @route POST /api/menu-items
+ * @returns {Promise<void>} Sends JSON response with the created menu item
+ * @throws {Error} If validation fails or database operations fail
+ * @author Michael Nguyen
+ */
+app.post('/api/menu-items', async (req, res) => {
+    try {
+        const {
+            name,
+            price,
+            drinkType,
+            drink_type,
+            imageUrl,
+            image_url,
+        } = req.body || {};
+
+        const trimmedName = (name || '').trim();
+        const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
+
+        const rawDrinkType = drinkType !== undefined ? drinkType : drink_type;
+        const rawImageUrl = imageUrl !== undefined ? imageUrl : image_url;
+
+        const trimmedDrinkType = (rawDrinkType || '').toString().trim();
+        const trimmedImageUrl = (rawImageUrl || '').toString().trim();
+
+        if (!trimmedName) {
+            return res.status(400).json({ error: 'Menu item name is required' });
+        }
+
+        if (Number.isNaN(numericPrice) || numericPrice <= 0) {
+            return res.status(400).json({ error: 'Price must be a number greater than 0' });
+        }
+
+        if (!trimmedDrinkType) {
+            return res.status(400).json({ error: 'Drink type is required' });
+        }
+
+        const menu = new Menu();
+        const newItem = await menu.addMenuItem(
+            trimmedName,
+            numericPrice,
+            trimmedDrinkType,
+            trimmedImageUrl || null
+        );
+
+        if (!newItem) {
+            return res.status(500).json({ error: 'Failed to add menu item' });
+        }
+
+        res.status(201).json({
+            id: newItem.getID(),
+            name: newItem.getName(),
+            price: newItem.getPrice(),
+            drink_type: newItem.getDrinkType(),
+            image_url: newItem.getImageURL()
+        });
+    } catch (error) {
+        console.error('Error adding menu item:', error);
+        res.status(500).json({ error: 'Failed to add menu item' });
+    }
+});
+
+/**
  * Dashboard summary endpoint.
  * Returns aggregate metrics and daily time-series data for the last 30 days.
  *
