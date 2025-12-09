@@ -49,7 +49,7 @@ const OAuthCallback = ({ onLogin }) => {
                 onLogin(payload);
             }
             
-            const targetPath = (payload.isAdmin || payload.role === 'admin') ? '/manager' : '/kiosk';
+            const targetPath = (payload.isAdmin || payload.role === 'admin') ? '/manager' : '/cashier';
             safeNavigate(navigate, targetPath);
         } catch (e) {
             console.error('Error processing token:', e);
