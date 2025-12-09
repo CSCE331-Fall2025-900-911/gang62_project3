@@ -172,12 +172,22 @@ export default function SignIn({ onLogin, ...props }) {
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
-      <SignInContainer direction="column" justifyContent="space-between">
-        <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
+      <SignInContainer
+        direction="column"
+        justifyContent="space-between"
+        component="main"
+        role="main"
+        aria-labelledby="sign-in-heading"
+      >
+        <ColorModeSelect
+          sx={{ position: 'fixed', top: '1rem', right: '1rem' }}
+          aria-label="Color mode"
+        />
         <Card variant="outlined">
           <Typography
             component="h1"
             variant="h4"
+            id="sign-in-heading"
             sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
           >
             Sign in
