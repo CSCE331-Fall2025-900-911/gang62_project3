@@ -92,8 +92,11 @@ app.use(
         saveUninitialized: false,
         cookie: {
             httpOnly: true,
-            secure: IS_PRODUCTION, // in production, requires HTTPS
+            // When sameSite is 'none', secure MUST be true (required by browsers)
+            secure: IS_PRODUCTION ? true : false, // in production, requires HTTPS
             sameSite: IS_PRODUCTION ? 'none' : 'lax', // allow cross site cookies in production
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours
+            // Don't set domain - allows cookies to work across different domains
         },
     })
 );
@@ -863,14 +866,22 @@ app.get(
         keepSessionInfo: true,
     }),
     (req, res) => {
-        // afer successful oauth, redirect to the client root.
-        // The client will handle navigation based on the user role using React Router.
-        const user = req.user;
+        // Ensure session is saved before redirecting
+        req.session.save((err) => {
+            if (err) {
+                console.error('Error saving session:', err);
+                return res.redirect(`${CLIENT_URL}/?error=session`);
+            }
+            
+            // After successful oauth, redirect to the client root.
+            // The client will handle navigation based on the user role using React Router.
+            const user = req.user;
 
-        if (user && (user.role === 'admin' || user.isAdmin)) { // if user is an admin, redirect to manager dashboard
-            return res.redirect(`${CLIENT_URL}/manager`);
-        }
-        return res.redirect(`${CLIENT_URL}/kiosk`);
+            if (user && (user.role === 'admin' || user.isAdmin)) { // if user is an admin, redirect to manager dashboard
+                return res.redirect(`${CLIENT_URL}/manager`);
+            }
+            return res.redirect(`${CLIENT_URL}/kiosk`);
+        });
     }
 );
 
