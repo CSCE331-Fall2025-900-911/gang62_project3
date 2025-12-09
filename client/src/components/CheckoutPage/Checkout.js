@@ -26,14 +26,14 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 const KIOSK_EMPLOYEE_ID = 1; // Default employee for kiosk orders
 const WALK_IN_CUSTOMER_ID = 1; // Default "walk-in" customer
 
-// Menu item IDs for accessories and packaging
-const STRAW_ITEM_ID = 28;
-const NAPKIN_ITEM_ID = 29;
-const SMALL_CUP_ITEM_ID = 30;
-const MEDIUM_CUP_ITEM_ID = 31;
-const BAG_ITEM_ID = 32;
-const LARGE_CUP_ITEM_ID = 33;
-const CUP_HOLDER_ITEM_ID = 34;
+// Menu item IDs for accessories and packaging (must match data/menu_items.csv)
+const STRAW_ITEM_ID = 46;
+const NAPKIN_ITEM_ID = 47;
+const SMALL_CUP_ITEM_ID = 48;
+const MEDIUM_CUP_ITEM_ID = 49;
+const LARGE_CUP_ITEM_ID = 50;
+const BAG_ITEM_ID = 51;
+const CUP_HOLDER_ITEM_ID = 52;
 
 const CUP_SIZE_BY_KEY = {
   small: SMALL_CUP_ITEM_ID,
