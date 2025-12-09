@@ -30,6 +30,7 @@ const EXTRA_ORIGINS = process.env.EXTRA_ORIGINS
 const ALLOWED_ORIGINS = [CLIENT_URL, ...EXTRA_ORIGINS];
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
+// so that secure cookies and protocol detection work correctly.
 app.set('trust proxy', 1);
 
 // Base URL for this server (used for OAuth callback URLs).
@@ -87,9 +88,9 @@ app.use(
         resave: false,
         saveUninitialized: false,
         cookie: {
-            secure: IS_PRODUCTION,
-            sameSite: IS_PRODUCTION ? 'none' : 'lax',
             httpOnly: true,
+            secure: IS_PRODUCTION, // in production, requires HTTPS
+            sameSite: IS_PRODUCTION ? 'none' : 'lax', // allow cross site cookies in production
         },
     })
 );
