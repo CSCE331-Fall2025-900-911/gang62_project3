@@ -30,6 +30,8 @@ const EXTRA_ORIGINS = process.env.EXTRA_ORIGINS
 const ALLOWED_ORIGINS = [CLIENT_URL, ...EXTRA_ORIGINS];
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
+app.set('trust proxy', 1);
+
 // Base URL for this server (used for OAuth callback URLs).
 // In production on Vercel, prefer the deployed URL if SERVER_BASE_URL is not explicitly set.
 const SERVER_BASE_URL =
@@ -85,8 +87,8 @@ app.use(
         resave: false,
         saveUninitialized: false,
         cookie: {
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            secure: IS_PRODUCTION,
+            sameSite: IS_PRODUCTION ? 'none' : 'lax',
             httpOnly: true,
         },
     })
@@ -161,7 +163,7 @@ app.get('/api/menu-items', async (req, res) => {
         const menu = new Menu();
         await menu.load();
         const menuItems = menu.getMenuItems();
-        
+
         // Convert MenuItem objects to plain JSON
         const items = menuItems.map(item => ({
             id: item.getID(),

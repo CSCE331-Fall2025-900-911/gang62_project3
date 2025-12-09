@@ -64,3 +64,32 @@ Blockers: Getting OAuth connected not as intuitive.
 - Jonah: Finished order class for submitting to the database. Planning to implement recommendation. Roadblock of getting recommendations working with front end, but should be fine.
 - David: Been working on X and Z report UI for a bit. Planning on finishing that and then adding the other charts and making sure everything is the same from project 2. Roadbloacks include timing & exams.
 - Zane: Was working on Google OAuth, but not completed yet. Planning to Finish Google OAuth, revise accessibility features, and completing slides/written materials. Only roadblock is Google Oauth but should be done for tmrw.
+
+Sprint 3 --
+
+## Scrum Meeting 12/1 Notes:
+Meeting Location: Zachry
+Time: 1:15 – 1:30 p.m.
+Leading Questions: What are your remaining tasks for the final sprint? What will you complete before Wednesday? Any blockers?
+- Jonah: Working on categorizing items in cashier view and verifying backend order submission reliability. No blockers.
+- Michael: Improving UI polish including button sizing and menu grid layout across kiosk views. No blockers.
+- Zane: Finalizing Google OAuth and continuing accessibility improvements. Minor blocker: redirect issues in deployed environment.
+- David: Adding menu card images and reorganizing item categories for browsing. No blockers.
+
+## SCRUM Meeting - 12/3 Notes
+Meeting Location: Zoom
+Time: 8:00 – 8:15 p.m.
+Leading Questions: What progress has been made since Monday? What will be completed before the final release? Any blockers?
+- Jonah: Completed cashier categorization and fixed payment visibility issue. No blockers.
+- Michael: Added drink size options and refining topping customization UI. No blockers.
+- Zane: OAuth fully working in development and performing requirements verification. Blocker: deployment callback configuration still being fixed.
+- David: Cleaned up kiosk assets and improved UI consistency across pages. No blockers.
+
+## SCRUM Meeting - 12/6 Notes
+Meeting Location Zoom
+Time: 1:30– 1:45 p.m.
+Leading Questions: What has been completed since Wednesday? What remains before final submission? Any blockers?
+- Jonah: Final backend updates completed with integration testing underway. No blockers.
+- Michael: Finished sort-by-price feature and polished cart interaction flow. No blockers.
+- Zane: Deployment stable and accessibility refinements finalized; preparing documentation and slides. No blockers.
+- David: Finalized guest login flow and supported deployment testing for final release. No blockers.

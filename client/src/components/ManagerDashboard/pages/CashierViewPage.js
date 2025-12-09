@@ -5,6 +5,10 @@ import {
   Grid,
   Alert,
   CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem as MuiMenuItem,
 } from '@mui/material';
 import PointOfSaleRoundedIcon from '@mui/icons-material/PointOfSaleRounded';
 
@@ -15,6 +19,16 @@ import CustomizationDialog from '../components/CashierView/CustomizationDialog';
 import PaymentDialog from '../components/CashierView/PaymentDialog';
 import MenuItemDialog from '../components/CashierView/MenuItemDialog';
 import { CustomizationData } from '../../../models/CustomizationData';
+
+const DRINK_TYPES = [
+  { id: 'all', label: 'All Drinks' },
+  { id: 'flavored tea', label: 'Flavored Tea' },
+  { id: 'milk tea', label: 'Milk Tea' },
+  { id: 'coffee', label: 'Coffee' },
+  { id: 'blended', label: 'Blended' },
+  { id: 'matcha', label: 'Matcha' },
+  { id: 'fruit', label: 'Fruit' },
+];
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -39,6 +53,12 @@ export default function CashierViewPage() {
   const [newMenuItemName, setNewMenuItemName] = useState('');
   const [newMenuItemPrice, setNewMenuItemPrice] = useState('');
   const [editingMenuItem, setEditingMenuItem] = useState(null);
+  const [selectedDrinkType, setSelectedDrinkType] = useState('all');
+  const [sortBy, setSortBy] = useState('default'); // 'default', 'price-low', 'price-high'
+
+  // Normalize drink type strings so we are resilient to casing/whitespace from the DB
+  const normalizeDrinkType = (value) =>
+    (value || '').toString().trim().toLowerCase();
 
   useEffect(() => {
     fetchMenuItems();
@@ -317,6 +337,22 @@ export default function CashierViewPage() {
     alert('Ready for new sale!');
   };
 
+  // Filter and sort menu items by drink type and price
+  const filteredMenuItems = menuItems
+    .filter((item) => {
+      if (selectedDrinkType === 'all') return true;
+      const drinkTypeId = normalizeDrinkType(item.drink_type);
+      return drinkTypeId === selectedDrinkType;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'price-low') {
+        return a.price - b.price;
+      } else if (sortBy === 'price-high') {
+        return b.price - a.price;
+      }
+      return 0; // default order
+    });
+
   /**
    * Handles adding a new menu item to the database.
    * Validates input and calls the API endpoint to create the menu item.
@@ -420,11 +456,49 @@ export default function CashierViewPage() {
         </Typography>
       </Box>
 
+      {/* Filter and sort controls */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 2,
+          mb: 3,
+        }}
+      >
+        <FormControl size="small" sx={{ minWidth: 180 }}>
+          <InputLabel>Drink Type</InputLabel>
+          <Select
+            value={selectedDrinkType}
+            label="Drink Type"
+            onChange={(e) => setSelectedDrinkType(e.target.value)}
+          >
+            {DRINK_TYPES.map((type) => (
+              <MuiMenuItem key={type.id} value={type.id}>
+                {type.label}
+              </MuiMenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={{ minWidth: 160 }}>
+          <InputLabel>Sort By</InputLabel>
+          <Select
+            value={sortBy}
+            label="Sort By"
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <MuiMenuItem value="default">Default</MuiMenuItem>
+            <MuiMenuItem value="price-low">Price: Low to High</MuiMenuItem>
+            <MuiMenuItem value="price-high">Price: High to Low</MuiMenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
       <Grid container spacing={3}>
         {/* Menu Items Panel */}
         <Grid item xs={12} md={6}>
           <MenuItemsPanel
-            menuItems={menuItems}
+            menuItems={filteredMenuItems}
             onAddClick={() => setAddMenuItemDialogOpen(true)}
             onItemClick={handleMenuItemClick}
             onItemRightClick={handleMenuItemRightClick}
