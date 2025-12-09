@@ -10,7 +10,7 @@ import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 import MenuItem from './MenuItem';
 import { useWeather } from "./weather";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_BASE_URL = 'http://localhost:3001';
 
 // Menu item IDs for accessories/packaging that should not appear as main drink tiles
 const ACCESSORY_ITEM_IDS = new Set([28, 29, 30, 31, 32, 33, 34]);
@@ -208,9 +208,12 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
    * @param {Object} item - The menu item to add to the order
    */
   const handleAddToOrder = (item) => {
-    setOrderItems([...orderItems, item]);
-    console.log('Item added to order:', item);
-    console.log('Current order:', [...orderItems, item]);
+    setOrderItems(prevItems => {
+      const newItems = [...prevItems, item];
+      console.log('Item added to order:', item);
+      console.log('Current order:', newItems);
+      return newItems;
+    });
     speak(`Added ${item.name} to order for ${item.price} dollars.`);
   };
 
@@ -229,8 +232,8 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   .filter((item) => !ACCESSORY_ITEM_IDS.has(item.id))
   .filter((item) => {
     if (selectedCategory === 'all') return true;
-    const drinkType = item.drink_type || '';
-    return drinkType === selectedCategory;
+    const drinkType = (item.drink_type || '').toLowerCase().trim();
+    return drinkType === selectedCategory.toLowerCase().trim();
   })
   .sort((a, b) => {
     if (sortBy === 'price-low') {
