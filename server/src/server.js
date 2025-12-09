@@ -859,31 +859,16 @@ app.get(
     })
 );
 
-// app.get(
-//     '/api/auth/google/callback',
-//     passport.authenticate('google', {
-//         failureRedirect: `${CLIENT_URL}/?error=google`,
-//         keepSessionInfo: true,
-//     }),
-//     (req, res) => {
-//         // Ensure session is saved before redirecting
-//         req.session.save((err) => {
-//             if (err) {
-//                 console.error('Error saving session:', err);
-//                 return res.redirect(`${CLIENT_URL}/?error=session`);
-//             }
-            
-//             // After successful oauth, redirect to the client root.
-//             // The client will handle navigation based on the user role using React Router.
-//             const user = req.user;
-
-//             if (user && (user.role === 'admin' || user.isAdmin)) { // if user is an admin, redirect to manager dashboard
-//                 return res.redirect(`${CLIENT_URL}/manager`);
-//             }
-//             return res.redirect(`${CLIENT_URL}/kiosk`);
-//         });
-//     }
-// );
+app.get(
+    '/api/auth/google/callback',
+    passport.authenticate('google', {
+        failureRedirect: `${CLIENT_URL}/?error=google`,
+        keepSessionInfo: true,
+    }),
+    (req, res) => {
+        alert("Req = " + JSON.stringify(req.user));
+    }
+);
 
 app.get('/api/auth/user', (req, res) => {
     res.json({ user: req.user || null });

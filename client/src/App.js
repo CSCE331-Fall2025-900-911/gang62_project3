@@ -12,11 +12,11 @@ import CashierDashboard from './components/ManagerDashboard/CashierDashboard';
 // const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 function AppContent() {
-  // const location = useLocation();
   const [user, setUser] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [orderTotal, setOrderTotal] = useState(0);
   const [ttsEnabled, setTtsEnabled] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   
 
@@ -65,14 +65,13 @@ function AppContent() {
         <Route
           path="/manager"
           element={
-            <Dashboard user={user} />
-            // !authChecked ? (
-            //   <div />
-            // ) : user && (user.isAdmin || user.role === 'admin') ? (
-            //   <Dashboard user={user} />
-            // ) : (
-            //   <Navigate to="/" />
-            // )
+            !isAdmin ? (
+              <div />
+            ) : user && (user.isAdmin || user.role === 'admin') ? (
+              <Dashboard user={user} />
+            ) : (
+              <Navigate to="/" />
+            )
           }
         />
         <Route
