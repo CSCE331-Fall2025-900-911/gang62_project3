@@ -1,22 +1,28 @@
-import React, { useEffect, useState, useCallback } from 'react';
-
+// import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import './App.css';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
 import SignIn from './components/SignIn/SignIn';
 import Kiosk from './components/Kiosk/Kiosk';
 import Checkout from './components/CheckoutPage/Checkout';
 import Dashboard from './components/ManagerDashboard/Dashboard';
 import CashierDashboard from './components/ManagerDashboard/CashierDashboard';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 function AppContent() {
-  const location = useLocation();
+  // const location = useLocation();
   const [user, setUser] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [orderTotal, setOrderTotal] = useState(0);
   const [ttsEnabled, setTtsEnabled] = useState(false);
 
+  
+
+  const handleLocalLogin = (localUser = null) => {
+    setUser(localUser);
+  };
 
   return (
     <div className="App">
