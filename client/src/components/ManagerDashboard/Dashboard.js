@@ -59,8 +59,8 @@ export default function Dashboard(props) {
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
-        <SideMenu activePage={activePage} setActivePage={setActivePage} />
-        <AppNavbar activePage={activePage} setActivePage={setActivePage} />
+        <SideMenu activePage={activePage} setActivePage={setActivePage} user={props.user} />
+        <AppNavbar activePage={activePage} setActivePage={setActivePage} user={props.user} />
         {/* Main content */}
         <Box
           component="main"

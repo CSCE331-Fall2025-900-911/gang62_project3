@@ -43,8 +43,8 @@ export default function CashierDashboard(props) {
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
-        <SideMenu activePage={activePage} setActivePage={setActivePage} menuItems={cashierMenuItems} />
-        <AppNavbar activePage={activePage} setActivePage={setActivePage} menuItems={cashierMenuItems} />
+        <SideMenu activePage={activePage} setActivePage={setActivePage} menuItems={cashierMenuItems} user={props.user} />
+        <AppNavbar activePage={activePage} setActivePage={setActivePage} menuItems={cashierMenuItems} user={props.user} />
         {/* Main content */}
         <Box
           component="main"

@@ -17,6 +17,7 @@ function AppContent() {
   const [orderTotal, setOrderTotal] = useState(0);
   const [ttsEnabled, setTtsEnabled] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
     const checkAdminAccess = async () => {
@@ -27,30 +28,27 @@ function AppContent() {
 
         if (response.ok) {
           const data = await response.json();
-          const user = data.user;
+          const userData = data.user;
+          setUser(userData);
           
           // Check if user is authenticated and is an admin
-          if (!user || (!user.isAdmin && user.role !== 'admin')) {
-            // Not an admin, redirect to login
+          if (!userData || (!userData.isAdmin && userData.role !== 'admin')) {
+            // Not an admin
             setIsAuthorized(false);
-            navigate('/', { replace: true });
-            return;
+          } else {
+            // User is admin, allow access
+            setIsAuthorized(true);
           }
-          
-          // User is admin, allow access
-          setIsAuthorized(true);
         } else {
-          // Not authenticated, redirect to login
+          // Not authenticated
           setIsAuthorized(false);
-          navigate('/', { replace: true });
-          return;
         }
       } catch (error) {
         console.error('Failed to verify admin access:', error);
         setIsAuthorized(false);
-        navigate('/', { replace: true });
-        return;
-      } 
+      } finally {
+        setIsCheckingAuth(false);
+      }
     };
 
     checkAdminAccess();
@@ -58,6 +56,11 @@ function AppContent() {
 
   const handleLocalLogin = (localUser = null) => {
     setUser(localUser);
+    if (localUser && (localUser.isAdmin || localUser.role === 'admin')) {
+      setIsAuthorized(true);
+    } else {
+      setIsAuthorized(false);
+    }
   };
 
   return (
@@ -101,10 +104,13 @@ function AppContent() {
         <Route
           path="/manager"
           element={
-            isAuthorized ? (
+            isCheckingAuth ? (
+              <div>Loading...</div>
+            ) : isAuthorized ? (
               <Dashboard user={user} />
-            ) : 
+            ) : (
               <Navigate to="/" replace />
+            )
           }
         />
         <Route
