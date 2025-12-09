@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel, IconButton, Card, CardMedia, Avatar, Tabs, Tab } from '@mui/material';
+import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel, IconButton, Card, CardMedia, Avatar, Tabs, Tab, Collapse, Fade } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AppTheme from '../../shared-theme/AppTheme';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 import MenuItem from './MenuItem';
+import Info from './Info';
 import { useWeather } from "./weather";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
@@ -73,6 +75,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   const carouselRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('default'); // 'default', 'price-low', 'price-high'
+  const [showCart, setShowCart] = useState(false);
 
   const speak = useCallback((text) => {
     if (ttsEnabled && 'speechSynthesis' in window) {
@@ -218,6 +221,25 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   };
 
   /**
+   * Handles deleting an item from the order
+   * 
+   * @param {number} index - The index of the item to delete
+   */
+  const handleDeleteItem = (index) => {
+    setOrderItems(prevItems => prevItems.filter((_, i) => i !== index));
+  };
+
+  /**
+   * Handles editing an item in the order
+   * 
+   * @param {number} index - The index of the item to edit
+   * @param {Object} updatedItem - The updated item
+   */
+  const handleEditItem = (index, updatedItem) => {
+    setOrderItems(prevItems => prevItems.map((item, i) => i === index ? updatedItem : item));
+  };
+
+  /**
    * Handles carousel navigation
    */
   const handlePrevSlide = () => {
@@ -269,290 +291,313 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   return (
     <AppTheme>
       <CssBaseline />
-      <Box sx={{ p: 4, minHeight: '100vh', backgroundColor: 'background.default' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography 
-          variant="h3" 
-          component="h1" 
-          sx={{ fontWeight: 'bold' }}
-        >
-          {translatedTexts.menu}
-        </Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {weather_error ? (
-            <Typography variant="body2" color="error">
-              Weather unavailable
-            </Typography>
-          ) : temp === null ? (
-            <Typography variant="body2" color="text.secondary">
-            </Typography>
-          ) : (
-            <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-            </Typography>
-          )}
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-          <IconButton 
-            onClick={() => {
-              const newEnabled = !ttsEnabled;
-              setTtsEnabled(newEnabled);
-              if (newEnabled && 'speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance("Text to speech enabled");
-                window.speechSynthesis.speak(utterance);
-              }
-            }} 
-            onFocus={() => {
-              if (ttsEnabled) speak("Disable text to speech");
-            }}
-            color="primary" 
-            aria-label={ttsEnabled ? "Disable text to speech" : "Enable text to speech"}
-          >
-            {ttsEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
-          </IconButton>
-          <ColorModeIconDropdown />
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Language</InputLabel>
-            <Select
-              value={language}
-              label="Language"
-              onChange={(e) => setLanguage(e.target.value)}
-            >
-              {languages.map((lang) => (
-                <MuiMenuItem key={lang.code} value={lang.code}>
-                  {lang.name}
-                </MuiMenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="body2" color="text.secondary">
-              {translatedTexts.orderTotal}
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-              ${orderTotal.toFixed(2)}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {orderItems.length} {orderItems.length === 1 ? translatedTexts.item : translatedTexts.items}
-            </Typography>
+      <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: 'background.default' }}>
+        <Collapse in={showCart} orientation="horizontal" timeout={300}>
+          <Box sx={{ width: '350px', p: 2, borderRight: 1, borderColor: 'divider', backgroundColor: 'background.paper', height: '100%' }}>
+            <Info totalPrice={orderTotal} orderItems={orderItems} onDelete={handleDeleteItem} onEdit={handleEditItem} />
           </Box>
-          <Button
-            variant="contained" 
-            color="primary" 
-            size="large"
-            onFocus={() => speak(translatedTexts.checkout)}
-            onClick={() => navigate('/checkout')}
-            sx={{ px: 4 }}
-          >
-            {translatedTexts.checkout}
-          </Button>
-          {user && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Avatar
-                alt={user.displayName || user.email || 'Account'}
-                src={user.photo || undefined}
-                sx={{ width: 48, height: 48 }}
-              >
-                {(user.displayName || user.email || 'A')
-                  .split(' ')
-                  .map((segment) => segment.charAt(0))
-                  .join('')
-                  .slice(0, 2)
-                  .toUpperCase()}
-              </Avatar>
-              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                {user.displayName || user.email || 'Signed in'}
-              </Typography>
-            </Box>
-          )}
-        </Box>
-      </Box>
-
-      {/* Carousel Section */}
-      <Box sx={{ position: 'relative', mb: 4, width: '100%'}}>
-        <Box
-          ref={carouselRef}
-          sx={{
-            display: 'flex',
-            overflow: 'hidden',
-            borderRadius: 2,
-            position: 'relative',
-            width: '100%',
-            aspectRatio: '5/1',
-          }}
-        >
-          {carouselItems.map((item, index) => (
-            <Box
-              key={item.id}
-              sx={{
-                minWidth: '100%',
-                height: '100%',
-                transition: 'transform 0.5s ease-in-out',
-                transform: `translateX(-${currentSlide * 100}%)`,
-              }}
+        </Collapse>
+        <Box sx={{ flex: 1, p: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+            <Typography 
+              variant="h3" 
+              component="h1" 
+              sx={{ fontWeight: 'bold' }}
             >
-              <Card sx={{ height: '100%', position: 'relative', p: 0, overflow: 'hidden' }}>
-                <CardMedia
-                  component="img"
-                  image={item.image}
-                  alt={item.title}
-                  sx={{ objectFit: 'cover', display: 'block', height: '100%', width: '100%' }}
-                />
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
-                    color: 'white',
-                    p: 2,
-                  }}
+              {translatedTexts.menu}
+            </Typography>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {weather_error ? (
+                <Typography variant="body2" color="error">
+                  Weather unavailable
+                </Typography>
+              ) : temp === null ? (
+                <Typography variant="body2" color="text.secondary">
+                </Typography>
+              ) : (
+                <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                </Typography>
+              )}
+            </Box>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              <IconButton 
+                onClick={() => {
+                  const newEnabled = !ttsEnabled;
+                  setTtsEnabled(newEnabled);
+                  if (newEnabled && 'speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance("Text to speech enabled");
+                    window.speechSynthesis.speak(utterance);
+                  }
+                }} 
+                onFocus={() => {
+                  if (ttsEnabled) speak("Disable text to speech");
+                }}
+                color="primary" 
+                aria-label={ttsEnabled ? "Disable text to speech" : "Enable text to speech"}
+              >
+                {ttsEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
+              </IconButton>
+              <ColorModeIconDropdown />
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Language</InputLabel>
+                <Select
+                  value={language}
+                  label="Language"
+                  onChange={(e) => setLanguage(e.target.value)}
                 >
-                  <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
-                    {item.title}
-                  </Typography>
-                  <Typography variant="body1">
-                    {item.description}
+                  {languages.map((lang) => (
+                    <MuiMenuItem key={lang.code} value={lang.code}>
+                      {lang.name}
+                    </MuiMenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Box sx={{ textAlign: 'right' }}>
+                <Typography variant="body2" color="text.secondary">
+                  {translatedTexts.orderTotal}
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                  ${orderTotal.toFixed(2)}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {orderItems.length} {orderItems.length === 1 ? translatedTexts.item : translatedTexts.items}
+                </Typography>
+              </Box>
+              <IconButton
+                onClick={() => setShowCart(!showCart)}
+                onFocus={() => speak(showCart ? "Hide shopping cart" : "Show shopping cart")}
+                color="primary"
+                aria-label={showCart ? "Hide shopping cart" : "Show shopping cart"}
+              >
+                <ShoppingCartIcon />
+              </IconButton>
+              <Button
+                variant="contained" 
+                color="primary" 
+                size={showCart ? "medium" : "large"}
+                onFocus={() => speak(translatedTexts.checkout)}
+                onClick={() => navigate('/checkout')}
+                sx={{ px: showCart ? 2 : 4 }}
+              >
+                {translatedTexts.checkout}
+              </Button>
+              {user && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Avatar
+                    alt={user.displayName || user.email || 'Account'}
+                    src={user.photo || undefined}
+                    sx={{ width: 48, height: 48 }}
+                  >
+                    {(user.displayName || user.email || 'A')
+                      .split(' ')
+                      .map((segment) => segment.charAt(0))
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase()}
+                  </Avatar>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {user.displayName || user.email || 'Signed in'}
                   </Typography>
                 </Box>
-              </Card>
+              )}
             </Box>
-          ))}
-        </Box>
-
-        {/* Navigation Buttons */}
-        <IconButton
-          onClick={handlePrevSlide}
-          sx={{
-            position: 'absolute',
-            left: 16,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 1)',
-            }
-          }}
-        >
-          <ChevronLeftIcon />
-        </IconButton>
-        <IconButton
-          onClick={handleNextSlide}
-          sx={{
-            position: 'absolute',
-            right: 16,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 1)',
-            }
-          }}
-        >
-          <ChevronRightIcon />
-        </IconButton>
-
-        {/* Indicator Dots */}
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 16,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            gap: 1,
-            zIndex: 10,
-          }}
-        >
-          {carouselItems.map((_, index) => (
-            <Box
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              sx={{
-                width: 12,
-                height: 12,
-                borderRadius: '50%',
-                backgroundColor: currentSlide === index ? 'white' : 'rgba(255, 255, 255, 0.5)',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  backgroundColor: 'white',
-                },
-              }}
-            />
-          ))}
-        </Box>
-      </Box>
-
-      {/* Category Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs 
-          value={selectedCategory} 
-          onChange={(e, newValue) => setSelectedCategory(newValue)}
-          variant="scrollable"
-          scrollButtons="auto"
-          aria-label="drink categories"
-        >
-          {CATEGORIES.map((category) => (
-            <Tab 
-              key={category.id} 
-              label={category.label} 
-              value={category.id}
-              sx={{ 
-                fontSize: '1rem',
-                fontWeight: 'medium',
-                textTransform: 'capitalize'
-              }}
-            />
-          ))}
-        </Tabs>
-
-        <FormControl size="small" sx={{ minWidth: 150, mr: 2, mt: 2 }}>
-          <InputLabel>Sort By</InputLabel>
-          <Select
-            value={sortBy}
-            label="Sort By"
-            onChange={(e) => setSortBy(e.target.value)}
-          >
-            <MuiMenuItem value="default">Default</MuiMenuItem>
-            <MuiMenuItem value="price-low">Price: Low to High</MuiMenuItem>
-            <MuiMenuItem value="price-high">Price: High to Low</MuiMenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-      
-      <Box sx={{ minHeight: '600px' }}>
-        <Grid container spacing={3}>
-          {filteredMenuItems.map((item) => (
-            <Grid item key={item.id} sx={{ width: 'calc(20% - 24px)', minWidth: '200px' }}>
-              <MenuItem 
-                item={item} 
-                imageUrl={item.image_url}
-                onItemClick={handleAddToOrder} 
-                language={language} 
-                translate={translate}
-                ttsEnabled={ttsEnabled}
-                speak={speak}
-              />
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* Empty State */}
-        {filteredMenuItems.length === 0 && (
-          <Box sx={{ textAlign: 'center', py: 8 }}>
-            <Typography variant="h5" color="text.secondary">
-              No items found in this category
-            </Typography>
           </Box>
-        )}
+
+          {/* Carousel Section */}
+          <Box sx={{ position: 'relative', mb: 4, width: '100%'}}>
+            <Box
+              ref={carouselRef}
+              sx={{
+                display: 'flex',
+                overflow: 'hidden',
+                borderRadius: 2,
+                position: 'relative',
+                width: '100%',
+                aspectRatio: '5/1',
+              }}
+            >
+              {carouselItems.map((item, index) => (
+                <Box
+                  key={item.id}
+                  sx={{
+                    minWidth: '100%',
+                    height: '100%',
+                    transition: 'transform 0.5s ease-in-out',
+                    transform: `translateX(-${currentSlide * 100}%)`,
+                  }}
+                >
+                  <Card sx={{ height: '100%', position: 'relative', p: 0, overflow: 'hidden' }}>
+                    <CardMedia
+                      component="img"
+                      image={item.image}
+                      alt={item.title}
+                      sx={{ objectFit: 'cover', display: 'block', height: '100%', width: '100%' }}
+                    />
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
+                        color: 'white',
+                        p: 2,
+                      }}
+                    >
+                      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+                        {item.title}
+                      </Typography>
+                      <Typography variant="body1">
+                        {item.description}
+                      </Typography>
+                    </Box>
+                  </Card>
+                </Box>
+              ))}
+            </Box>
+
+            {/* Navigation Buttons */}
+            <IconButton
+              onClick={handlePrevSlide}
+              size={showCart ? "small" : "medium"}
+              sx={{
+                position: 'absolute',
+                left: 16,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 1)',
+                },
+                width: showCart ? 24 : 48,
+                height: showCart ? 24 : 48,
+              }}
+            >
+              <ChevronLeftIcon fontSize={showCart ? "small" : "medium"} />
+            </IconButton>
+            <IconButton
+              onClick={handleNextSlide}
+              size={showCart ? "small" : "medium"}
+              sx={{
+                position: 'absolute',
+                right: 16,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 1)',
+                },
+                width: showCart ? 24 : 48,
+                height: showCart ? 24 : 48,
+              }}
+            >
+              <ChevronRightIcon fontSize={showCart ? "small" : "medium"} />
+            </IconButton>
+
+            {/* Indicator Dots */}
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 16,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                display: 'flex',
+                gap: 1,
+                zIndex: 10,
+              }}
+            >
+              {carouselItems.map((_, index) => (
+                <Box
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    backgroundColor: currentSlide === index ? 'white' : 'rgba(255, 255, 255, 0.5)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      backgroundColor: 'white',
+                    },
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+
+          {/* Category Tabs */}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+            <Tabs 
+              value={selectedCategory} 
+              onChange={(e, newValue) => setSelectedCategory(newValue)}
+              variant="scrollable"
+              scrollButtons="auto"
+              aria-label="drink categories"
+            >
+              {CATEGORIES.map((category) => (
+                <Tab 
+                  key={category.id} 
+                  label={category.label} 
+                  value={category.id}
+                  sx={{ 
+                    fontSize: '1rem',
+                    fontWeight: 'medium',
+                    textTransform: 'capitalize'
+                  }}
+                />
+              ))}
+            </Tabs>
+
+            <FormControl size="small" sx={{ minWidth: 150, mr: 2, mt: 2 }}>
+              <InputLabel>Sort By</InputLabel>
+              <Select
+                value={sortBy}
+                label="Sort By"
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <MuiMenuItem value="default">Default</MuiMenuItem>
+                <MuiMenuItem value="price-low">Price: Low to High</MuiMenuItem>
+                <MuiMenuItem value="price-high">Price: High to Low</MuiMenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+          
+          <Box sx={{ minHeight: '600px' }}>
+            <Grid container spacing={3}>
+              {filteredMenuItems.map((item, index) => (
+                <Grid item key={item.id} sx={{ width: 'calc(20% - 24px)', minWidth: '200px' }}>
+                  <Fade in={true} timeout={(index % 10) * 100 + 300}>
+                    <Box sx={{ height: '100%' }}>
+                      <MenuItem 
+                        item={item} 
+                        imageUrl={item.image_url}
+                        onItemClick={handleAddToOrder} 
+                        language={language} 
+                        translate={translate}
+                        ttsEnabled={ttsEnabled}
+                        speak={speak}
+                      />
+                    </Box>
+                  </Fade>
+                </Grid>
+              ))}
+            </Grid>
+
+            {/* Empty State */}
+            {filteredMenuItems.length === 0 && (
+              <Box sx={{ textAlign: 'center', py: 8 }}>
+                <Typography variant="h5" color="text.secondary">
+                  No items found in this category
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </Box>
       </Box>
-
-
-    </Box>
     </AppTheme>
   );
 }
