@@ -24,7 +24,7 @@ function Clock() {
   );
 }
 
-export default function Header() {
+export default function Header({ activePage = 'Home' }) {
   return (
     <Stack
       direction="row"
@@ -38,7 +38,7 @@ export default function Header() {
       }}
       spacing={2}
     >
-      <NavbarBreadcrumbs />
+      <NavbarBreadcrumbs activePage={activePage} />
       <Stack direction="row" sx={{ gap: 1 }}>
         <Clock />
         <ColorModeIconDropdown />
