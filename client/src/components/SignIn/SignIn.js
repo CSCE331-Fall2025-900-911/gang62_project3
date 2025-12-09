@@ -106,7 +106,7 @@ export default function SignIn({ onLogin, ...props }) {
         onLogin({
           displayName: 'Admin Account',
           email: 'admin@example.com',
-          photo: null,
+          photo: '/static/images/avatar/7.jpg',
           role: 'admin',
           isAdmin: true,
         });
