@@ -6,15 +6,19 @@ export class CustomizationData {
   ];
 
   static sugarLevels = [
+    { value: 'none', label: 'None' },
     { value: 'low', label: 'Low' },
     { value: 'medium', label: 'Medium' },
-    { value: 'high', label: 'High' }
+    { value: 'high', label: 'High' },
+    { value: 'extra', label: 'Extra' }
   ];
 
   static iceLevels = [
+    { value: 'none', label: 'None' },
     { value: 'low', label: 'Low' },
     { value: 'medium', label: 'Medium' },
-    { value: 'high', label: 'High' }
+    { value: 'high', label: 'High' },
+    { value: 'extra', label: 'Extra' }
   ];
 
   static temperatures = [
