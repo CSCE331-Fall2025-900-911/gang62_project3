@@ -866,7 +866,7 @@ app.get(
         keepSessionInfo: true,
     }),
     (req, res) => {
-        alert("Req = " + JSON.stringify(req.user));
+        res.json({ user: req.user, token });
     }
 );
 
