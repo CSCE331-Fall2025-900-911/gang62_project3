@@ -56,11 +56,13 @@ class Menu extends DatabaseConnection {
      * 
      * @param {string} name - The name of the menu item
      * @param {number} price - The price in dollars
+     * @param {string|null} drinkType - The drink type/category
+     * @param {string|null} imageUrl - The image URL for this menu item
      * @returns {Promise<MenuItem|null>} The newly created MenuItem object if successful, null otherwise
      * @throws {Error} If database operations fail
      * @author Michael Nguyen
      */
-    async addMenuItem(name, price) {
+    async addMenuItem(name, price, drinkType = null, imageUrl = null) {
         try {
             const getIdQuery = 'SELECT MAX(id) as max_id FROM menu_items;';
             const idResult = await this.runQuery(getIdQuery);
@@ -71,8 +73,8 @@ class Menu extends DatabaseConnection {
             }
             
             const query = {
-                text: 'INSERT INTO menu_items (id, name, base_price_cents) VALUES ($1, $2, $3);',
-                values: [nextId, name, Math.round(price * 100)]
+                text: 'INSERT INTO menu_items (id, name, base_price_cents, drink_type, image_url) VALUES ($1, $2, $3, $4, $5);',
+                values: [nextId, name, Math.round(price * 100), drinkType, imageUrl]
             };
             
             await this.runQuery(query);

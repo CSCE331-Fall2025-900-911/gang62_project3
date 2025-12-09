@@ -52,6 +52,8 @@ export default function CashierViewPage() {
   const [editMenuItemDialogOpen, setEditMenuItemDialogOpen] = useState(false);
   const [newMenuItemName, setNewMenuItemName] = useState('');
   const [newMenuItemPrice, setNewMenuItemPrice] = useState('');
+  const [newMenuItemDrinkType, setNewMenuItemDrinkType] = useState('milk tea');
+  const [newMenuItemImageUrl, setNewMenuItemImageUrl] = useState('');
   const [editingMenuItem, setEditingMenuItem] = useState(null);
   const [selectedDrinkType, setSelectedDrinkType] = useState('all');
   const [sortBy, setSortBy] = useState('default'); // 'default', 'price-low', 'price-high'
@@ -190,6 +192,8 @@ export default function CashierViewPage() {
     setEditingMenuItem(item);
     setNewMenuItemName(item.name);
     setNewMenuItemPrice(item.price.toString());
+    setNewMenuItemDrinkType(item.drink_type || '');
+    setNewMenuItemImageUrl(item.image_url || '');
     setEditMenuItemDialogOpen(true);
   };
 
@@ -356,7 +360,6 @@ export default function CashierViewPage() {
   /**
    * Handles adding a new menu item to the database.
    * Validates input and calls the API endpoint to create the menu item.
-   * Currently shows a placeholder alert as the API endpoint is not yet implemented.
    * 
    * @returns {Promise<void>} Promise that resolves when menu item is added
    * @throws {Error} If validation fails or API call fails, shows error alert
@@ -366,6 +369,8 @@ export default function CashierViewPage() {
     try {
       const name = newMenuItemName.trim();
       const price = parseFloat(newMenuItemPrice);
+      const drinkType = newMenuItemDrinkType.trim();
+      const imageUrl = newMenuItemImageUrl.trim();
 
       if (!name) {
         alert('Please enter a menu item name!');
@@ -377,12 +382,36 @@ export default function CashierViewPage() {
         return;
       }
 
-      // TODO: Implement API endpoint for adding menu items
-      // For now, just refresh the menu
-      alert('Menu item addition not yet implemented via API');
+      if (!drinkType) {
+        alert('Please enter a drink type!');
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/menu-items`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, price, drinkType, imageUrl }),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({}));
+        const message = errorBody.error || 'Failed to add menu item';
+        throw new Error(message);
+      }
+
+      const createdItem = await response.json();
+
+      // Optimistically update local state so the new item appears immediately
+      setMenuItems((prev) => [...prev, createdItem]);
+
+      alert('Menu item added successfully!');
       setAddMenuItemDialogOpen(false);
       setNewMenuItemName('');
       setNewMenuItemPrice('');
+      setNewMenuItemDrinkType('milk tea');
+      setNewMenuItemImageUrl('');
     } catch (error) {
       alert('Error adding menu item: ' + error.message);
     }
@@ -556,8 +585,13 @@ export default function CashierViewPage() {
         title="Add New Menu Item"
         name={newMenuItemName}
         price={newMenuItemPrice}
+        drinkType={newMenuItemDrinkType}
+        imageUrl={newMenuItemImageUrl}
+        drinkTypeOptions={DRINK_TYPES.filter((type) => type.id !== 'all')}
         onNameChange={setNewMenuItemName}
         onPriceChange={setNewMenuItemPrice}
+        onDrinkTypeChange={setNewMenuItemDrinkType}
+        onImageUrlChange={setNewMenuItemImageUrl}
         onSubmit={handleAddMenuItem}
         submitLabel="Add"
       />
@@ -569,8 +603,13 @@ export default function CashierViewPage() {
         title="Edit Menu Item"
         name={newMenuItemName}
         price={newMenuItemPrice}
+        drinkType={newMenuItemDrinkType}
+        imageUrl={newMenuItemImageUrl}
+        drinkTypeOptions={DRINK_TYPES.filter((type) => type.id !== 'all')}
         onNameChange={setNewMenuItemName}
         onPriceChange={setNewMenuItemPrice}
+        onDrinkTypeChange={setNewMenuItemDrinkType}
+        onImageUrlChange={setNewMenuItemImageUrl}
         onSubmit={handleEditMenuItem}
         submitLabel="Save"
       />

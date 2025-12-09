@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  MenuItem,
 } from '@mui/material';
 
 const MenuItemDialog = ({
@@ -15,8 +16,13 @@ const MenuItemDialog = ({
   title,
   name,
   price,
+  drinkType,
+  imageUrl,
+  drinkTypeOptions = [],
   onNameChange,
   onPriceChange,
+  onDrinkTypeChange,
+  onImageUrlChange,
   onSubmit,
   submitLabel,
 }) => {
@@ -41,6 +47,27 @@ const MenuItemDialog = ({
             type="number"
             value={price}
             onChange={(e) => onPriceChange(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            select
+            fullWidth
+            label="Drink Type"
+            value={drinkType}
+            onChange={(e) => onDrinkTypeChange && onDrinkTypeChange(e.target.value)}
+            sx={{ mb: 2 }}
+          >
+            {drinkTypeOptions.map((option) => (
+              <MenuItem key={option.id} value={option.id}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            fullWidth
+            label="Image URL"
+            value={imageUrl}
+            onChange={(e) => onImageUrlChange && onImageUrlChange(e.target.value)}
           />
         </Box>
       </DialogContent>
