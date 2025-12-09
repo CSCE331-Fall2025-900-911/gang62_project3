@@ -495,29 +495,31 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
         </Tabs>
       </Box>
       
-      <Grid container spacing={3}>
-        {filteredMenuItems.map((item) => (
-          <Grid item key={item.id} sx={{ width: 'calc(20% - 24px)', minWidth: '200px' }}>
-            <MenuItem 
-              item={item} 
-              onItemClick={handleAddToOrder} 
-              language={language} 
-              translate={translate}
-              ttsEnabled={ttsEnabled}
-              speak={speak}
-            />
-          </Grid>
-        ))}
-      </Grid>
+      <Box sx={{ minHeight: '600px' }}>
+        <Grid container spacing={3}>
+          {filteredMenuItems.map((item) => (
+            <Grid item key={item.id} sx={{ width: 'calc(20% - 24px)', minWidth: '200px' }}>
+              <MenuItem 
+                item={item} 
+                onItemClick={handleAddToOrder} 
+                language={language} 
+                translate={translate}
+                ttsEnabled={ttsEnabled}
+                speak={speak}
+              />
+            </Grid>
+          ))}
+        </Grid>
 
-      {/* Empty State */}
-      {filteredMenuItems.length === 0 && (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h5" color="text.secondary">
-            No items found in this category
-          </Typography>
-        </Box>
-      )}
+        {/* Empty State */}
+        {filteredMenuItems.length === 0 && (
+          <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Typography variant="h5" color="text.secondary">
+              No items found in this category
+            </Typography>
+          </Box>
+        )}
+      </Box>
 
 
     </Box>
