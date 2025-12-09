@@ -15,7 +15,7 @@ import { useWeather } from "./weather";
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 // Menu item IDs for accessories/packaging that should not appear as main drink tiles
-const ACCESSORY_ITEM_IDS = new Set([]);
+const ACCESSORY_ITEM_IDS = new Set([46, 47, 48, 49, 50, 51, 52]);
 
 const languages = [
   { code: 'EN', name: 'English' },
