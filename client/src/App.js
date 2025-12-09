@@ -95,8 +95,14 @@ function AppContent() {
         />
         <Route
           path="/manager"
-          element={ 
-            <Dashboard user={user} />
+          element={
+            !authChecked ? (
+              <div />
+            ) : user && (user.isAdmin || user.role === 'admin') ? (
+              <Dashboard user={user} />
+            ) : (
+              <Navigate to="/" />
+            )
           }
         />
         <Route

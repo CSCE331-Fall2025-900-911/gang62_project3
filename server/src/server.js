@@ -870,7 +870,7 @@ app.get(
         if (user && (user.role === 'admin' || user.isAdmin)) { // if user is an admin, redirect to manager dashboard
             return res.redirect(`${CLIENT_URL}/manager`);
         }
-        return res.redirect(`${CLIENT_URL}/cashier`);
+        return res.redirect(`${CLIENT_URL}/kiosk`);
     }
 );
 
