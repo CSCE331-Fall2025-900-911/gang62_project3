@@ -36,6 +36,15 @@ const SERVER_BASE_URL =
     process.env.SERVER_BASE_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${PORT}`);
 
+// hard coded admin email allowlist for oauth logins.
+// any google account with an email in this list will be treated as an admin
+// and redirected to the manager dashboard after they successfully authenticate.
+const ADMIN_EMAILS = new Set([
+    'michaelmn@tamu.edu',
+    'zhangdavid275@tamu.edu',
+    'coffelt.jonah@tamu.edu',
+]);
+
 // Enable CORS for client requests (allow credentials for session cookies).
 // For this project we keep CORS permissive and simply reflect the request origin.
 // This works with credentials and avoids environment-specific misconfiguration.
@@ -93,12 +102,23 @@ passport.use(
             callbackURL: `${SERVER_BASE_URL}/api/auth/google/callback`,
         },
         (accessToken, refreshToken, profile, done) => {
+            // take email we get from google and convert it to lowercase
+            const rawEmail =
+                profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+            const email = rawEmail ? rawEmail.toLowerCase() : null;
+
+            const isAdmin = email ? ADMIN_EMAILS.has(email) : false;
+            const role = isAdmin ? 'admin' : 'customer';
+
             const user = {
                 id: profile.id,
                 displayName: profile.displayName,
-                email: profile.emails && profile.emails[0] ? profile.emails[0].value : null,
+                email,
                 photo: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
+                role,
+                isAdmin,
             };
+
             done(null, user);
         }
     )
@@ -585,7 +605,15 @@ app.get(
         keepSessionInfo: true,
     }),
     (req, res) => {
-        res.redirect(`${CLIENT_URL}/kiosk`);
+        // afer successful oauth, redirect based on the authenticated users role.
+        // admin emails go directly to the manager dashboard and all others go to the kiosk.
+        const user = req.user;
+
+        if (user && (user.role === 'admin' || user.isAdmin)) { // if user is an admin, redirect to manager dashboard
+            return res.redirect(`${CLIENT_URL}/manager`);
+        }
+
+        return res.redirect(`${CLIENT_URL}/kiosk`);
     }
 );
 
