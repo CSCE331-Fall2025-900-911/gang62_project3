@@ -609,7 +609,6 @@ app.get('/api/dashboard/top-items', async (req, res) => {
                     AND o.created_at >= NOW() - INTERVAL '30 days'
                 GROUP BY mi.id, mi.name, mi.base_price_cents, mi.drink_type
                 ORDER BY total_cents DESC
-                LIMIT 20;
             `,
         });
 
