@@ -14,6 +14,7 @@ export default function ColorModeSelect(props) {
       onChange={(event) => setMode(event.target.value)}
       SelectDisplayProps={{
         'data-screenshot': 'toggle-mode',
+        'aria-label': 'Color mode',
       }}
       {...props}
     >
