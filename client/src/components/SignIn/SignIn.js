@@ -203,9 +203,6 @@ export default function SignIn({ onLogin, ...props }) {
               gap: 2,
             }}
           >
-            <Button variant={showKeyboard ? 'contained' : 'outlined'} size="small" onClick={() => setShowKeyboard((v) => !v)} aria-pressed={showKeyboard} aria-label="Toggle on-screen keyboard">
-              {showKeyboard ? 'Hide on-screen keyboard' : 'Show on-screen keyboard'}
-            </Button>
             <FormControl>
               <FormLabel htmlFor="username">Username</FormLabel>
               <TextField
@@ -240,10 +237,6 @@ export default function SignIn({ onLogin, ...props }) {
                 color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
             <ForgotPassword open={open} handleClose={handleClose} />
             <Button
               type="submit"
@@ -253,16 +246,10 @@ export default function SignIn({ onLogin, ...props }) {
             >
               Sign in
             </Button>
-            <Link
-              component="button"
-              type="button"
-              onClick={handleClickOpen}
-              variant="body2"
-              sx={{ alignSelf: 'center' }}
-            >
-              Forgot your password?
-            </Link>
-          </Box>
+            <Button variant={showKeyboard ? 'contained' : 'outlined'} size="small" onClick={() => setShowKeyboard((v) => !v)} aria-pressed={showKeyboard} aria-label="Toggle on-screen keyboard">
+              {showKeyboard ? 'Hide on-screen keyboard' : 'Show on-screen keyboard'}
+            </Button>
+            </Box>
           {showKeyboard && (
             <Box sx={{ mt: 2, width: '100%' }}>
               <OnScreenKeyboard sx={{ width: '100%' }} />
@@ -286,16 +273,6 @@ export default function SignIn({ onLogin, ...props }) {
             >
               Continue as guest
             </Button>
-            <Typography sx={{ textAlign: 'center' }}>
-              Don&apos;t have an account?{' '}
-              <Link
-                href="/signup"
-                variant="body2"
-                sx={{ alignSelf: 'center' }}
-              >
-                Sign up
-              </Link>
-            </Typography>
           </Box>
         </Card>
       </SignInContainer>
