@@ -1,33 +1,35 @@
-menu_item_id,name,base_price_cents,drink_type
-1,classic tea (black),465,flavored tea
-2,classic tea (green),465,flavored tea
-3,classic tea (oolong),465,flavored tea
-4,honey tea (black),485,flavored tea
-5,honey tea (green),485,flavored tea
-6,honey tea (oolong),485,flavored tea
-7,honey pearl milk tea (black),600,milk tea
-8,honey pearl milk tea (green),600,milk tea
-9,honey pearl milk tea (oolong),600,milk tea
-10,mango green milk tea,650,milk tea
-11,coffee creama,650,coffee
-12,thai pearl milk tea,625,milk tea
-13,classic pearl milk tea (black),580,milk tea
-14,classic pearl milk tea (green),580,milk tea
-15,classic pearl milk tea (oolong),580,milk tea
-16,taro pearl milk tea,625,milk tea
-17,peach tea w/ honey jelly,625,fruit
-18,honey lemonade,520,fruit
-19,mango green tea,580,fruit
-20,mango & passion fruit tea,625,fruit
-21,berry lychee burst,625,fruit
-22,matcha pearl milk tea,650,matcha
-23,mango matcha fresh milk,650,matcha
-24,strawberry matcha fresh milk,650,matcha
-25,matcha fresh milk,625,matcha
-26,tiger boba,650,milk tea
-27,halo halo,695,blended
-28,straw,000,extras
-29,napkin,000,extras
-30,small cup,000,extras
-31,medium cup,000,extras
-32,bag,000,extras
+menu_item_id,name,base_price_cents,drink_type,image_url
+1,classic tea (black),465,flavored tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+2,classic tea (green),465,flavored tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+3,classic tea (oolong),465,flavored tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+4,honey tea (black),485,flavored tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+5,honey tea (green),485,flavored tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+6,honey tea (oolong),485,flavored tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+7,honey pearl milk tea (black),600,milk tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+8,honey pearl milk tea (green),600,milk tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+9,honey pearl milk tea (oolong),600,milk tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+10,mango green milk tea,650,milk tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+11,coffee creama,650,coffee, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+12,thai pearl milk tea,625,milk tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+13,classic pearl milk tea (black),580,milk tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+14,classic pearl milk tea (green),580,milk tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+15,classic pearl milk tea (oolong),580,milk tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+16,taro pearl milk tea,625,milk tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+17,peach tea w/ honey jelly,625,fruit, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+18,honey lemonade,520,fruit, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+19,mango green tea,580,fruit, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+20,mango & passion fruit tea,625,fruit, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+21,berry lychee burst,625,fruit, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+22,matcha pearl milk tea,650,matcha, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+23,mango matcha fresh milk,650,matcha, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+24,strawberry matcha fresh milk,650,matcha, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+25,matcha fresh milk,625,matcha, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+26,tiger boba,650,milk tea, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+27,halo halo,695,blended, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+28,straw,000,extras, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+29,napkin,000,extras, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+30,small cup,000,extras, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+31,medium cup,000,extras, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+32,large cup,000,extras, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+33,bag,000,extras, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1
+34,drink carrier,000,extras, https://d1ouk4tp1vcuss.cloudfront.net/s3.amazonaws.com/ODNUploads/6622f9bd6fe63aef3c6cd21ee858b1f606692cb7fef9804829dff23b4b47e5beb63a31a4cc61786f6aaf81bbfa12f2aab773e801807004ac231eff61adfe7e38b535df55227b0.jpeg?mode=crop&v=1

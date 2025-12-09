@@ -31,7 +31,7 @@ import { CustomizationData } from '../../models/CustomizationData';
  * @param {Function} [props.speak] - Function to speak text
  * @author Michael Nguyen
  */
-function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, speak }) {
+function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, ttsEnabled, speak }) {
   const defaultData = new CustomizationData();
   const [open, setOpen] = useState(false);
   const [sugarLevel, setSugarLevel] = useState(defaultData.sugarLevel);
@@ -225,9 +225,7 @@ function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, s
           },
           '&:active': {
             transform: 'scale(0.98)'
-          }
-          ,
-          // Visible focus styles for keyboard users
+          },
           '&:focus': {
             outline: 'none',
             borderColor: 'primary.main',
@@ -239,6 +237,25 @@ function MenuItem({ item, onItemClick, language = 'EN', translate, ttsEnabled, s
           }
         }}
       >
+        {/* Image Section */}
+        {imageUrl && (
+          <Box
+            component="img"
+            src={imageUrl}
+            alt={translatedName}
+            sx={{
+              width: '100%',
+              height: 200,
+              objectFit: 'cover',
+              bgcolor: 'grey.200'
+            }}
+            onError={(e) => {
+              // Hide image if it fails to load
+              e.target.style.display = 'none';
+            }}
+          />
+        )}
+        
         <CardContent sx={{ flexGrow: 1, p: 3 }}>
           <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
             {translatedName}

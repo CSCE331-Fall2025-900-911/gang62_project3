@@ -147,7 +147,8 @@ app.get('/api/menu-items', async (req, res) => {
             id: item.getID(),
             name: item.getName(),
             price: item.getPrice(),
-            drink_type: item.getDrinkType()
+            drink_type: item.getDrinkType(),
+            image_url: item.getImageURL()
         }));
         
         res.json(items);

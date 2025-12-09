@@ -34,12 +34,13 @@ class MenuItem extends DatabaseConnection {
      * @param {number} price - The menu item's price in dollars
      * @author Jonah Coffelt
      */
-    constructor(id = null, name = null, price = null, drink_type = null) {
+    constructor(id = null, name = null, price = null, drink_type = null, image_url = null) {
         super();
         this.id = id;
         this.name = name;
         this.price = price;
         this.drink_type = drink_type;
+        this.image_url = image_url;
     }
 
     /**
@@ -72,6 +73,7 @@ class MenuItem extends DatabaseConnection {
         instance.name = item.name;
         instance.price = item.base_price_cents / 100.0;
         instance.drink_type = item.drink_type;
+        instance.image_url = item.image_url;
 
         return instance;
     }
@@ -106,8 +108,22 @@ class MenuItem extends DatabaseConnection {
         return this.price;
     }
 
+    /**
+     * 
+     * @returns {string} Type of drink
+     * @author Jonah Coffelt
+     */
     getDrinkType() {
         return this.drink_type;
+    }
+
+    /**
+     * 
+     * @returns {string} URL for image
+     * @author Jonah Coffelt
+     */
+    getImageURL() {
+        return this.image_url;
     }
 
     /**

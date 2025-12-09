@@ -520,6 +520,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             <Grid item key={item.id} sx={{ width: 'calc(20% - 24px)', minWidth: '200px' }}>
               <MenuItem 
                 item={item} 
+                imageUrl={item.image_url}
                 onItemClick={handleAddToOrder} 
                 language={language} 
                 translate={translate}
