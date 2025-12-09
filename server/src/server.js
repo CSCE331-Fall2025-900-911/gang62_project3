@@ -149,7 +149,16 @@ app.get('/', (req, res) => {
     res.json({ 
         status: 'ok', 
         message: 'Server is running',
-        endpoints: ['/api/menu-items', '/api/translate', '/api/submit-order', '/api/employees', '/api/inventory']
+        endpoints: [
+            '/api/menu-items', 
+            '/api/translate', 
+            '/api/submit-order', 
+            '/api/employees', 
+            '/api/inventory',
+            '/api/auth/google',
+            '/api/auth/google/callback',
+            '/api/auth/user'
+        ]
     });
 });
 
@@ -861,7 +870,7 @@ app.get(
         if (user && (user.role === 'admin' || user.isAdmin)) { // if user is an admin, redirect to manager dashboard
             return res.redirect(`${CLIENT_URL}/manager`);
         }
-        return res.redirect(`${CLIENT_URL}/kiosk`);
+        return res.redirect(`${CLIENT_URL}/cashier`);
     }
 );
 
