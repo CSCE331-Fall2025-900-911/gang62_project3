@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import MenuContent from './MenuContent';
 import OptionsMenu from './OptionsMenu';
 
-const drawerWidth = 240;
+const drawerWidth = 280;
 
 const Drawer = styled(MuiDrawer)({
   width: drawerWidth,
@@ -21,7 +21,7 @@ const Drawer = styled(MuiDrawer)({
   },
 });
 
-export default function SideMenu({ activePage, setActivePage, menuItems }) {
+export default function SideMenu({ activePage, setActivePage, menuItems, user }) {
   return (
     <Drawer
       variant="permanent"
@@ -55,16 +55,18 @@ export default function SideMenu({ activePage, setActivePage, menuItems }) {
       >
         <Avatar
           sizes="small"
-          alt="Administrator"
-          src="/static/images/avatar/7.jpg"
+          alt={user?.displayName || user?.email || 'Administrator'}
+          src={user?.photo || undefined}
           sx={{ width: 36, height: 36 }}
-        />
+        >
+           {!user?.photo && (user?.displayName || user?.email || 'A').charAt(0).toUpperCase()}
+        </Avatar>
         <Box sx={{ mr: 'auto' }}>
           <Typography variant="body2" sx={{ fontWeight: 500, lineHeight: '16px' }}>
-            Administrator
+            {user?.displayName || 'Administrator'}
           </Typography>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            admin@email.com
+            {user?.email || 'admin@email.com'}
           </Typography>
         </Box>
         <OptionsMenu />

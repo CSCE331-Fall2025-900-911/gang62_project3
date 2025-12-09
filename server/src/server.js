@@ -5,6 +5,7 @@ const PgSession = require('connect-pg-simple')(session);
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const axios = require('axios');
+const jwt = require('jsonwebtoken');
 const Menu = require('./models/Menu');
 const Order = require('./models/Order');
 const MenuItem = require('./models/MenuItem');
@@ -21,6 +22,7 @@ const DatabaseConnection = require('./config/db');
  */
 const app = express();
 const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // Frontend origins allowed to call this API.
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
@@ -31,7 +33,9 @@ const ALLOWED_ORIGINS = [CLIENT_URL, ...EXTRA_ORIGINS];
 // Treat both standard NODE_ENV=production and Vercel's serverless environment
 // as "production" for purposes of cookie security settings.
 const IS_PRODUCTION =
-    process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+    process.env.NODE_ENV === 'production' || 
+    process.env.VERCEL === '1' ||
+    (process.env.SERVER_BASE_URL && process.env.SERVER_BASE_URL.includes('vercel.app'));
 
 // so that secure cookies and protocol detection work correctly.
 app.set('trust proxy', 1);
@@ -90,10 +94,14 @@ app.use(
         secret: process.env.SESSION_SECRET || 'dev-session-secret',
         resave: false,
         saveUninitialized: false,
+        proxy: true, // Required for Vercel/Heroku (behind proxies)
         cookie: {
             httpOnly: true,
+            // When sameSite is 'none', secure MUST be true (required by browsers)
             secure: IS_PRODUCTION, // in production, requires HTTPS
             sameSite: IS_PRODUCTION ? 'none' : 'lax', // allow cross site cookies in production
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours
+            // Don't set domain - allows cookies to work across different domains
         },
     })
 );
@@ -863,19 +871,56 @@ app.get(
         keepSessionInfo: true,
     }),
     (req, res) => {
-        // afer successful oauth, redirect to the client root.
-        // The client will handle navigation based on the user role using React Router.
-        const user = req.user;
+        // Ensure session is saved before redirecting
+        req.session.save((err) => {
+            if (err) {
+                console.error('Error saving session:', err);
+                return res.redirect(`${CLIENT_URL}/?error=session`);
+            }
+            
+            // After successful oauth, redirect to the client root.
+            // The client will handle navigation based on the user role using React Router.
+            const user = req.user;
+            
+            // Generate JWT token
+            const token = jwt.sign(
+                { 
+                    id: user.id, 
+                    email: user.email, 
+                    role: user.role, 
+                    isAdmin: user.isAdmin,
+                    displayName: user.displayName,
+                    photo: user.photo
+                },
+                JWT_SECRET,
+                { expiresIn: '24h' }
+            );
 
-        if (user && (user.role === 'admin' || user.isAdmin)) { // if user is an admin, redirect to manager dashboard
-            return res.redirect(`${CLIENT_URL}/manager`);
-        }
-        return res.redirect(`${CLIENT_URL}/kiosk`);
+            // Redirect with token
+            return res.redirect(`${CLIENT_URL}/oauth/callback?token=${token}`);
+        });
     }
 );
 
 app.get('/api/auth/user', (req, res) => {
-    res.json({ user: req.user || null });
+    // Check for session user first
+    if (req.user) {
+        return res.json({ user: req.user });
+    }
+
+    // Check for JWT token in Authorization header
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            return res.json({ user: decoded });
+        } catch (error) {
+            console.error('Invalid token:', error);
+        }
+    }
+
+    res.json({ user: null });
 });
 
 app.post('/api/auth/logout', (req, res, next) => {

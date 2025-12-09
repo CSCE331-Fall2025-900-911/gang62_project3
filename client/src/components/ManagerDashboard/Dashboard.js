@@ -21,6 +21,7 @@ import {
   treeViewCustomizations,
 } from './theme/customizations';
 
+
 const xThemeComponents = {
   ...chartsCustomizations,
   ...dataGridCustomizations,
@@ -30,6 +31,7 @@ const xThemeComponents = {
 
 export default function Dashboard(props) {
   const [activePage, setActivePage] = useState('Home');
+  
 
   const renderPage = () => {
     switch (activePage) {
@@ -57,8 +59,8 @@ export default function Dashboard(props) {
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
-        <SideMenu activePage={activePage} setActivePage={setActivePage} />
-        <AppNavbar activePage={activePage} setActivePage={setActivePage} />
+        <SideMenu activePage={activePage} setActivePage={setActivePage} user={props.user} />
+        <AppNavbar activePage={activePage} setActivePage={setActivePage} user={props.user} />
         {/* Main content */}
         <Box
           component="main"

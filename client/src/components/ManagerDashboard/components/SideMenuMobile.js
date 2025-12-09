@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import MenuButton from './MenuButton';
 import MenuContent from './MenuContent';
 
-function SideMenuMobile({ open, toggleDrawer, activePage, setActivePage, menuItems }) {
+function SideMenuMobile({ open, toggleDrawer, activePage, setActivePage, menuItems, user }) {
   const navigate = useNavigate();
   return (
     <Drawer
@@ -39,12 +39,14 @@ function SideMenuMobile({ open, toggleDrawer, activePage, setActivePage, menuIte
           >
             <Avatar
               sizes="small"
-              alt="Administrator"
-              src="/static/images/avatar/7.jpg"
+              alt={user?.displayName || user?.email || 'Administrator'}
+              src={user?.photo || undefined}
               sx={{ width: 24, height: 24 }}
-            />
+            >
+               {!user?.photo && (user?.displayName || user?.email || 'A').charAt(0).toUpperCase()}
+            </Avatar>
             <Typography component="p" variant="h6">
-              Administrator
+              {user?.displayName || 'Administrator'}
             </Typography>
           </Stack>
           <MenuButton showBadge>
