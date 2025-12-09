@@ -88,7 +88,15 @@ function App() {
           />
           <Route
             path="/manager"
-            element={ <SignIn onLogin={handleLocalLogin} /> }
+            element={ 
+              !authChecked ? (
+                <div />
+              ) : isAuthenticated ? (
+                <Dashboard user={user} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
           />
           <Route
             path="/cashier"
