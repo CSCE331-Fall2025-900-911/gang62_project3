@@ -31,7 +31,9 @@ const ALLOWED_ORIGINS = [CLIENT_URL, ...EXTRA_ORIGINS];
 // Treat both standard NODE_ENV=production and Vercel's serverless environment
 // as "production" for purposes of cookie security settings.
 const IS_PRODUCTION =
-    process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+    process.env.NODE_ENV === 'production' || 
+    process.env.VERCEL === '1' ||
+    (process.env.SERVER_BASE_URL && process.env.SERVER_BASE_URL.includes('vercel.app'));
 
 // so that secure cookies and protocol detection work correctly.
 app.set('trust proxy', 1);
@@ -90,6 +92,7 @@ app.use(
         secret: process.env.SESSION_SECRET || 'dev-session-secret',
         resave: false,
         saveUninitialized: false,
+        proxy: true, // Required for Vercel/Heroku (behind proxies)
         cookie: {
             httpOnly: true,
             // When sameSite is 'none', secure MUST be true (required by browsers)
