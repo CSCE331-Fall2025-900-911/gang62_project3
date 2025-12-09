@@ -12,48 +12,11 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 function AppContent() {
   const location = useLocation();
-  const [authChecked, setAuthChecked] = useState(false);
   const [user, setUser] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [orderTotal, setOrderTotal] = useState(0);
   const [ttsEnabled, setTtsEnabled] = useState(false);
 
-  const checkSession = useCallback(async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user || null);
-      } else {
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('Failed to verify session', error);
-      setUser(null);
-    } finally {
-      setAuthChecked(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    checkSession();
-  }, [checkSession]);
-
-  // Re-check session when location changes (e.g., after OAuth redirect)
-  useEffect(() => {
-    // Only re-check if we've already done the initial check
-    if (authChecked && (location.pathname === '/kiosk' || location.pathname === '/manager')) {
-      checkSession();
-    }
-  }, [location.pathname, authChecked, checkSession]);
-
-  const handleLocalLogin = (localUser = null) => {
-    setAuthChecked(true);
-    setUser(localUser);
-  };
 
   return (
     <div className="App">
@@ -96,13 +59,14 @@ function AppContent() {
         <Route
           path="/manager"
           element={
-            !authChecked ? (
-              <div />
-            ) : user && (user.isAdmin || user.role === 'admin') ? (
-              <Dashboard user={user} />
-            ) : (
-              <Navigate to="/" />
-            )
+            <Dashboard user={user} />
+            // !authChecked ? (
+            //   <div />
+            // ) : user && (user.isAdmin || user.role === 'admin') ? (
+            //   <Dashboard user={user} />
+            // ) : (
+            //   <Navigate to="/" />
+            // )
           }
         />
         <Route
