@@ -93,7 +93,7 @@ app.use(
         cookie: {
             httpOnly: true,
             // When sameSite is 'none', secure MUST be true (required by browsers)
-            secure: IS_PRODUCTION ? true : false, // in production, requires HTTPS
+            secure: IS_PRODUCTION, // in production, requires HTTPS
             sameSite: IS_PRODUCTION ? 'none' : 'lax', // allow cross site cookies in production
             maxAge: 24 * 60 * 60 * 1000, // 24 hours
             // Don't set domain - allows cookies to work across different domains
@@ -866,9 +866,6 @@ app.get(
         keepSessionInfo: true,
     }),
     (req, res) => {
-        // Debug: log user info
-        console.log("OAuth callback - User:", JSON.stringify(req.user, null, 2));
-        
         // Ensure session is saved before redirecting
         req.session.save((err) => {
             if (err) {
