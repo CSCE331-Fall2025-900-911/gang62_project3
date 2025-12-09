@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Card, CardContent, Alert } from '@mui/material';
+import { Box, Typography, Card, CardContent, Alert, CircularProgress } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import SummarizeRoundedIcon from '@mui/icons-material/SummarizeRounded';
+
+const API_URL =  'http://localhost:3001';
 
 // Global variable to track Z-Report status across component mounts (simulating daily session)
 if (window.isZReportGenerated === undefined) {
@@ -10,15 +12,8 @@ if (window.isZReportGenerated === undefined) {
 
 export default function ZReportPage() {
   const [message, setMessage] = useState("");
-  const [reportData, setReportData] = useState({
-    revenue: 5430.25,
-    taxes: 447.99,
-    profit: 3801.15,
-    orderCount: 215,
-    topEmployee: "Sarah Jenkins",
-    mostPopularItem: "Double Cheeseburger",
-    lowStockItem: "Napkins (Pack)"
-  });
+  const [reportData, setReportData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const zeroData = {
@@ -30,10 +25,28 @@ export default function ZReportPage() {
       mostPopularItem: "N/A",
       lowStockItem: "N/A"
     };
+
+    const fetchReport = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/reports/z-report`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch Z Report');
+        }
+        const data = await response.json();
+        setReportData(data);
+      } catch (error) {
+        console.error('Error fetching Z Report:', error);
+        setReportData(zeroData);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (window.isZReportGenerated) {
       // Already generated
       setReportData(zeroData);
       setMessage("The Z-report has already been generated today.");
+      setLoading(false);
     } else {
       const now = Date.now();
       const lastView = window.lastZReportViewTime;
@@ -43,11 +56,13 @@ export default function ZReportPage() {
         window.isZReportGenerated = true;
         setReportData(zeroData);
         setMessage("The Z-report has been generated for today. All daily totals have been reset to 0.");
+        setLoading(false);
       } else {
         // First visit (or rapid re-mount)
         window.lastZReportViewTime = now;
         window.isXReportReset = true;
-        // Show default data
+        // Fetch real data
+        fetchReport();
       }
     }
   }, []);
@@ -70,6 +85,24 @@ export default function ZReportPage() {
     </Card>
   );
 
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  const data = reportData || {
+    revenue: 0,
+    taxes: 0,
+    profit: 0,
+    orderCount: 0,
+    topEmployee: "N/A",
+    mostPopularItem: "N/A",
+    lowStockItem: "N/A"
+  };
+
   return (
     <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' }, p: 3 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
@@ -80,7 +113,7 @@ export default function ZReportPage() {
               Z Report
             </Typography>
             <Typography variant="subtitle1" color="text.secondary">
-              Daily Closing Report
+              Daily Closing Report (Since Midnight)
             </Typography>
           </Box>
         </Box>
@@ -94,26 +127,26 @@ export default function ZReportPage() {
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard title="Total Revenue" value={`$${reportData.revenue.toFixed(2)}`} />
+          <StatCard title="Total Revenue" value={`$${data.revenue.toFixed(2)}`} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard title="Total Taxes" value={`$${reportData.taxes.toFixed(2)}`} />
+          <StatCard title="Total Taxes" value={`$${data.taxes.toFixed(2)}`} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard title="Total Profit" value={`$${reportData.profit.toFixed(2)}`} />
+          <StatCard title="Total Profit (Est.)" value={`$${data.profit.toFixed(2)}`} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard title="Total Orders" value={reportData.orderCount} />
+          <StatCard title="Total Orders" value={data.orderCount} />
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
-          <StatCard title="Top Employee" value={reportData.topEmployee} subtext={window.isZReportGenerated ? "" : "Based on orders handled"} />
+          <StatCard title="Top Employee" value={data.topEmployee} subtext="Based on orders handled" />
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <StatCard title="Most Popular Item" value={reportData.mostPopularItem} subtext={window.isZReportGenerated ? "" : "Highest quantity sold"} />
+          <StatCard title="Most Popular Item" value={data.mostPopularItem} subtext="Highest quantity sold" />
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <StatCard title="Low Stock Item" value={reportData.lowStockItem} subtext={window.isZReportGenerated ? "" : "Needs restocking soon"} />
+          <StatCard title="Low Stock Item" value={data.lowStockItem} subtext="Needs restocking soon" />
         </Grid>
       </Grid>
     </Box>

@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import ForgotPassword from './ForgotPassword';
 import AppTheme from '../../shared-theme/AppTheme';
 import ColorModeSelect from '../../shared-theme/ColorModeSelect';
-import { GoogleIcon, FacebookIcon } from './CustomIcons';
+import { GoogleIcon } from './CustomIcons';
 import OnScreenKeyboard from './OnScreenKeyboard';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';

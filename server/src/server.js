@@ -268,6 +268,174 @@ app.get('/api/dashboard/summary', async (req, res) => {
     }
 });
 
+app.get('/api/reports/x-report', async (req, res) => {
+    try {
+        const db = new DatabaseConnection();
+        
+        // X Report: Sales since midnight today
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        
+        // 1. Revenue, Tax, Order Count
+        const salesQuery = {
+            text: `
+                SELECT 
+                    SUM(subtotal_cents) as revenue_cents,
+                    SUM(tax_cents) as tax_cents,
+                    COUNT(*) as order_count
+                FROM orders
+                WHERE created_at >= $1
+            `,
+            values: [todayStart]
+        };
+        const salesResult = await db.runQuery(salesQuery);
+        const revenue = (Number(salesResult[0].revenue_cents) || 0) / 100;
+        const taxes = (Number(salesResult[0].tax_cents) || 0) / 100;
+        const orderCount = Number(salesResult[0].order_count) || 0;
+
+        // 2. Top Employee
+        const employeeQuery = {
+            text: `
+                SELECT e.name, COUNT(o.id) as order_count
+                FROM orders o
+                JOIN employees e ON o.employee_id = e.id
+                WHERE o.created_at >= $1
+                GROUP BY e.name
+                ORDER BY order_count DESC
+                LIMIT 1
+            `,
+            values: [todayStart]
+        };
+        const employeeResult = await db.runQuery(employeeQuery);
+        const topEmployee = employeeResult.length > 0 ? employeeResult[0].name : "N/A";
+
+        // 3. Most Popular Item
+        const popularItemQuery = {
+            text: `
+                SELECT m.name, COUNT(t.id) as usage_count
+                FROM tickets t
+                JOIN orders o ON t.order_id = o.id
+                JOIN menu_items m ON t.menu_item_id = m.id
+                WHERE o.created_at >= $1
+                GROUP BY m.name
+                ORDER BY usage_count DESC
+                LIMIT 1
+            `,
+            values: [todayStart]
+        };
+        const popularItemResult = await db.runQuery(popularItemQuery);
+        const mostPopularItem = popularItemResult.length > 0 ? popularItemResult[0].name : "N/A";
+
+        // 4. Low Stock Item
+        const lowStockQuery = {
+            text: `
+                SELECT i.name, inv.stock
+                FROM ingredients i
+                JOIN inventory inv ON i.id = inv.ingredient_id
+                ORDER BY inv.stock ASC
+                LIMIT 1
+            `
+        };
+        const lowStockResult = await db.runQuery(lowStockQuery);
+        const lowStockItem = lowStockResult.length > 0 ? lowStockResult[0].name : "N/A";
+
+        res.json({
+            revenue,
+            taxes,
+            profit: revenue * 0.2, // Estimated profit margin
+            orderCount,
+            topEmployee,
+            mostPopularItem,
+            lowStockItem
+        });
+
+    } catch (error) {
+        console.error('Error generating X Report:', error);
+        res.status(500).json({ error: 'Failed to generate X Report' });
+    }
+});
+
+app.get('/api/reports/z-report', async (req, res) => {
+    try {
+        const db = new DatabaseConnection();
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        
+        const salesQuery = {
+            text: `
+                SELECT 
+                    SUM(subtotal_cents) as revenue_cents,
+                    SUM(tax_cents) as tax_cents,
+                    COUNT(*) as order_count
+                FROM orders
+                WHERE created_at >= $1
+            `,
+            values: [todayStart]
+        };
+        const salesResult = await db.runQuery(salesQuery);
+        const revenue = (Number(salesResult[0].revenue_cents) || 0) / 100;
+        const taxes = (Number(salesResult[0].tax_cents) || 0) / 100;
+        const orderCount = Number(salesResult[0].order_count) || 0;
+
+        const employeeQuery = {
+            text: `
+                SELECT e.name, COUNT(o.id) as order_count
+                FROM orders o
+                JOIN employees e ON o.employee_id = e.id
+                WHERE o.created_at >= $1
+                GROUP BY e.name
+                ORDER BY order_count DESC
+                LIMIT 1
+            `,
+            values: [todayStart]
+        };
+        const employeeResult = await db.runQuery(employeeQuery);
+        const topEmployee = employeeResult.length > 0 ? employeeResult[0].name : "N/A";
+
+        const popularItemQuery = {
+            text: `
+                SELECT m.name, COUNT(t.id) as usage_count
+                FROM tickets t
+                JOIN orders o ON t.order_id = o.id
+                JOIN menu_items m ON t.menu_item_id = m.id
+                WHERE o.created_at >= $1
+                GROUP BY m.name
+                ORDER BY usage_count DESC
+                LIMIT 1
+            `,
+            values: [todayStart]
+        };
+        const popularItemResult = await db.runQuery(popularItemQuery);
+        const mostPopularItem = popularItemResult.length > 0 ? popularItemResult[0].name : "N/A";
+
+        const lowStockQuery = {
+            text: `
+                SELECT i.name, inv.stock
+                FROM ingredients i
+                JOIN inventory inv ON i.id = inv.ingredient_id
+                ORDER BY inv.stock ASC
+                LIMIT 1
+            `
+        };
+        const lowStockResult = await db.runQuery(lowStockQuery);
+        const lowStockItem = lowStockResult.length > 0 ? lowStockResult[0].name : "N/A";
+
+        res.json({
+            revenue,
+            taxes,
+            profit: revenue * 0.2,
+            orderCount,
+            topEmployee,
+            mostPopularItem,
+            lowStockItem
+        });
+
+    } catch (error) {
+        console.error('Error generating Z Report:', error);
+        res.status(500).json({ error: 'Failed to generate Z Report' });
+    }
+});
+
 app.get('/api/inventory/:id', async (req, res) => {
     try {
         const { id } = req.params;
