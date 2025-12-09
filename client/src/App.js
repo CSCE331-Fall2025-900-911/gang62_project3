@@ -89,13 +89,7 @@ function App() {
           <Route
             path="/manager"
             element={ 
-              !authChecked ? (
-                <div />
-              ) : isAuthenticated ? (
-                <Dashboard user={user} />
-              ) : (
-                <Navigate to="/" />
-              )
+              <Dashboard user={user} />
             }
           />
           <Route
