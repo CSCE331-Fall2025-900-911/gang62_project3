@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -7,6 +7,7 @@ import Kiosk from './components/Kiosk/Kiosk';
 import Checkout from './components/CheckoutPage/Checkout';
 import Dashboard from './components/ManagerDashboard/Dashboard';
 import CashierDashboard from './components/ManagerDashboard/CashierDashboard';
+import OAuthCallback from './components/OAuthCallback';
 import { useNavigate } from 'react-router-dom';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -22,8 +23,23 @@ function AppContent() {
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
+        let token = null;
+        try {
+            token = localStorage.getItem('token');
+        } catch (e) {
+            console.warn('LocalStorage access denied:', e);
+        }
+
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
           credentials: 'include',
+          headers: headers
         });
 
         if (response.ok) {
@@ -54,14 +70,14 @@ function AppContent() {
     checkAdminAccess();
   }, [navigate]);
 
-  const handleLocalLogin = (localUser = null) => {
+  const handleLocalLogin = useCallback((localUser = null) => {
     setUser(localUser);
     if (localUser && (localUser.isAdmin || localUser.role === 'admin')) {
       setIsAuthorized(true);
     } else {
       setIsAuthorized(false);
     }
-  };
+  }, []);
 
   return (
     <div className="App">
@@ -73,6 +89,10 @@ function AppContent() {
         <Route 
           path="/signin"
           element={<Navigate to="/" replace />}
+        />
+        <Route 
+          path="/oauth/callback"
+          element={<OAuthCallback onLogin={handleLocalLogin} />}
         />
         <Route 
           path="/kiosk"
