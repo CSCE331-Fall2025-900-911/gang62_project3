@@ -850,7 +850,7 @@ app.get(
 app.get(
     '/api/auth/google/callback',
     passport.authenticate('google', {
-        failureRedirect: `${CLIENT_URL}/signin?error=google`,
+        failureRedirect: `${CLIENT_URL}/?error=google`,
         keepSessionInfo: true,
     }),
     (req, res) => {
