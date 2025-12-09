@@ -1,13 +1,10 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
 import CssBaseline from '@mui/material/CssBaseline';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Divider from '@mui/material/Divider';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
-import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -74,9 +71,6 @@ export default function SignIn({ onLogin, ...props }) {
   const [open, setOpen] = React.useState(false);
   const [showKeyboard, setShowKeyboard] = React.useState(false);
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
 
   const handleClose = () => {
     setOpen(false);
@@ -108,11 +102,16 @@ export default function SignIn({ onLogin, ...props }) {
       navigate('/kiosk');
     } else if (username === 'admin' && password === 'admin') {
       console.log('Login successful');
+      try {
+        localStorage.setItem('token', 'local-admin-token');
+      } catch (e) {
+        console.warn('Failed to set local token', e);
+      }
       if (onLogin) {
         onLogin({
           displayName: 'Admin Account',
           email: 'admin@example.com',
-          photo: null,
+          photo: '/static/images/avatar/7.jpg',
           role: 'admin',
           isAdmin: true,
         });
@@ -203,9 +202,6 @@ export default function SignIn({ onLogin, ...props }) {
               gap: 2,
             }}
           >
-            <Button variant={showKeyboard ? 'contained' : 'outlined'} size="small" onClick={() => setShowKeyboard((v) => !v)} aria-pressed={showKeyboard} aria-label="Toggle on-screen keyboard">
-              {showKeyboard ? 'Hide on-screen keyboard' : 'Show on-screen keyboard'}
-            </Button>
             <FormControl>
               <FormLabel htmlFor="username">Username</FormLabel>
               <TextField
@@ -240,10 +236,6 @@ export default function SignIn({ onLogin, ...props }) {
                 color={passwordError ? 'error' : 'primary'}
               />
             </FormControl>
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
             <ForgotPassword open={open} handleClose={handleClose} />
             <Button
               type="submit"
@@ -253,16 +245,10 @@ export default function SignIn({ onLogin, ...props }) {
             >
               Sign in
             </Button>
-            <Link
-              component="button"
-              type="button"
-              onClick={handleClickOpen}
-              variant="body2"
-              sx={{ alignSelf: 'center' }}
-            >
-              Forgot your password?
-            </Link>
-          </Box>
+            <Button variant={showKeyboard ? 'contained' : 'outlined'} size="small" onClick={() => setShowKeyboard((v) => !v)} aria-pressed={showKeyboard} aria-label="Toggle on-screen keyboard">
+              {showKeyboard ? 'Hide on-screen keyboard' : 'Show on-screen keyboard'}
+            </Button>
+            </Box>
           {showKeyboard && (
             <Box sx={{ mt: 2, width: '100%' }}>
               <OnScreenKeyboard sx={{ width: '100%' }} />
@@ -286,16 +272,6 @@ export default function SignIn({ onLogin, ...props }) {
             >
               Continue as guest
             </Button>
-            <Typography sx={{ textAlign: 'center' }}>
-              Don&apos;t have an account?{' '}
-              <Link
-                href="/signup"
-                variant="body2"
-                sx={{ alignSelf: 'center' }}
-              >
-                Sign up
-              </Link>
-            </Typography>
           </Box>
         </Card>
       </SignInContainer>

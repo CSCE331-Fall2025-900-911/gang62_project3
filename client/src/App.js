@@ -1,59 +1,96 @@
 import React, { useEffect, useState, useCallback } from 'react';
-
 import './App.css';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
 import SignIn from './components/SignIn/SignIn';
 import Kiosk from './components/Kiosk/Kiosk';
 import Checkout from './components/CheckoutPage/Checkout';
 import Dashboard from './components/ManagerDashboard/Dashboard';
 import CashierDashboard from './components/ManagerDashboard/CashierDashboard';
-
+import OAuthCallback from './components/OAuthCallback';
+import { useNavigate } from 'react-router-dom';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 function AppContent() {
-  const location = useLocation();
-  const [authChecked, setAuthChecked] = useState(false);
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [orderTotal, setOrderTotal] = useState(0);
   const [ttsEnabled, setTtsEnabled] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  const checkSession = useCallback(async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
-        credentials: 'include',
-      });
+  useEffect(() => {
+    const checkAdminAccess = async () => {
+      try {
+        let token = null;
+        try {
+            token = localStorage.getItem('token');
+        } catch (e) {
+            console.warn('LocalStorage access denied:', e);
+        }
 
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user || null);
-      } else {
-        setUser(null);
+        if (token === 'local-admin-token') {
+            setUser({
+                displayName: 'Admin Account',
+                email: 'admin@example.com',
+                photo: '/static/images/avatar/7.jpg',
+                role: 'admin',
+                isAdmin: true,
+            });
+            setIsAuthorized(true);
+            setIsCheckingAuth(false);
+            return;
+        }
+
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
+          credentials: 'include',
+          headers: headers
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const userData = data.user;
+          setUser(userData);
+          
+          // Check if user is authenticated and is an admin
+          if (!userData || (!userData.isAdmin && userData.role !== 'admin')) {
+            // Not an admin
+            setIsAuthorized(false);
+          } else {
+            // User is admin, allow access
+            setIsAuthorized(true);
+          }
+        } else {
+          // Not authenticated
+          setIsAuthorized(false);
+        }
+      } catch (error) {
+        console.error('Failed to verify admin access:', error);
+        setIsAuthorized(false);
+      } finally {
+        setIsCheckingAuth(false);
       }
-    } catch (error) {
-      console.error('Failed to verify session', error);
-      setUser(null);
-    } finally {
-      setAuthChecked(true);
+    };
+
+    checkAdminAccess();
+  }, [navigate]);
+
+  const handleLocalLogin = useCallback((localUser = null) => {
+    setUser(localUser);
+    if (localUser && (localUser.isAdmin || localUser.role === 'admin')) {
+      setIsAuthorized(true);
+    } else {
+      setIsAuthorized(false);
     }
   }, []);
-
-  useEffect(() => {
-    checkSession();
-  }, [checkSession]);
-
-  // Re-check session when location changes (e.g., after OAuth redirect)
-  useEffect(() => {
-    // Only re-check if we've already done the initial check
-    if (authChecked && (location.pathname === '/kiosk' || location.pathname === '/manager')) {
-      checkSession();
-    }
-  }, [location.pathname, authChecked, checkSession]);
-
-  const handleLocalLogin = (localUser = null) => {
-    setAuthChecked(true);
-    setUser(localUser);
-  };
 
   return (
     <div className="App">
@@ -65,6 +102,10 @@ function AppContent() {
         <Route 
           path="/signin"
           element={<Navigate to="/" replace />}
+        />
+        <Route 
+          path="/oauth/callback"
+          element={<OAuthCallback onLogin={handleLocalLogin} />}
         />
         <Route 
           path="/kiosk"
@@ -96,12 +137,12 @@ function AppContent() {
         <Route
           path="/manager"
           element={
-            !authChecked ? (
-              <div />
-            ) : user && (user.isAdmin || user.role === 'admin') ? (
+            isCheckingAuth ? (
+              <div>Loading...</div>
+            ) : isAuthorized ? (
               <Dashboard user={user} />
             ) : (
-              <Navigate to="/" />
+              <Navigate to="/" replace />
             )
           }
         />
