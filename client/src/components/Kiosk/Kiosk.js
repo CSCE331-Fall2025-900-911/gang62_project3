@@ -164,17 +164,17 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   if (temp < 60) {
     carouselItems[1] = {
       id: 2,
-      title: 'Hot Boba Bubble Tea',
+      title: 'Hot Classic Black Tea',
       image: 'https://www.hungryhuy.com/wp-content/uploads/adding-boba-to-milk-tea.jpg',
-      description: 'Warm up with our hot boba special'
+      description: 'Warm up with our hot classic black tea'
     };  
   }
   else {
     carouselItems[1] = {
       id: 2,
-      title: 'Boba Fruit Smoothie',
+      title: 'Fruit Slushies',
       image: 'https://foodsocial.io/wp-content/uploads/2022/07/Bubble-Tea-2-1080x720.jpg',
-      description: 'Cool off with our special Boba Fruit Smoothie'
+      description: 'Cool off with our fruit slushies'
     }
   }
 
