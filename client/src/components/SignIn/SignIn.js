@@ -102,6 +102,11 @@ export default function SignIn({ onLogin, ...props }) {
       navigate('/kiosk');
     } else if (username === 'admin' && password === 'admin') {
       console.log('Login successful');
+      try {
+        localStorage.setItem('token', 'local-admin-token');
+      } catch (e) {
+        console.warn('Failed to set local token', e);
+      }
       if (onLogin) {
         onLogin({
           displayName: 'Admin Account',
