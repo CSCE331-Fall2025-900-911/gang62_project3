@@ -28,7 +28,10 @@ const EXTRA_ORIGINS = process.env.EXTRA_ORIGINS
     ? process.env.EXTRA_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
     : [];
 const ALLOWED_ORIGINS = [CLIENT_URL, ...EXTRA_ORIGINS];
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+// Treat both standard NODE_ENV=production and Vercel's serverless environment
+// as "production" for purposes of cookie security settings.
+const IS_PRODUCTION =
+    process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
 
 // so that secure cookies and protocol detection work correctly.
 app.set('trust proxy', 1);
