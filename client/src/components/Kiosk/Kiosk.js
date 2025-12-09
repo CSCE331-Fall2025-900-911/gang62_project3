@@ -72,6 +72,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   const [currentSlide, setCurrentSlide] = useState(0);
   const carouselRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [sortBy, setSortBy] = useState('default'); // 'default', 'price-low', 'price-high'
 
   const speak = useCallback((text) => {
     if (ttsEnabled && 'speechSynthesis' in window) {
@@ -225,12 +226,19 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   };
 
   const filteredMenuItems = menuItems
-    .filter((item) => !ACCESSORY_ITEM_IDS.has(item.id))
-    .filter((item) => {
-      if (selectedCategory === 'all') return true;
-      const drinkType = item.drink_type || '';
-      console.log(`Item: ${item.drink_type}"`);
-      return drinkType === selectedCategory;
+  .filter((item) => !ACCESSORY_ITEM_IDS.has(item.id))
+  .filter((item) => {
+    if (selectedCategory === 'all') return true;
+    const drinkType = item.drink_type || '';
+    return drinkType === selectedCategory;
+  })
+  .sort((a, b) => {
+    if (sortBy === 'price-low') {
+      return a.price - b.price;
+    } else if (sortBy === 'price-high') {
+      return b.price - a.price;
+    }
+    return 0; // default order
   });
 
   if (loading) {
@@ -275,11 +283,9 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             </Typography>
           ) : temp === null ? (
             <Typography variant="body2" color="text.secondary">
-              Loading weather...
             </Typography>
           ) : (
             <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-              🌤 {temp.toFixed(0)}°F
             </Typography>
           )}
         </Box>
@@ -493,6 +499,19 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             />
           ))}
         </Tabs>
+
+        <FormControl size="small" sx={{ minWidth: 150, mr: 2, mt: 2 }}>
+          <InputLabel>Sort By</InputLabel>
+          <Select
+            value={sortBy}
+            label="Sort By"
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <MuiMenuItem value="default">Default</MuiMenuItem>
+            <MuiMenuItem value="price-low">Price: Low to High</MuiMenuItem>
+            <MuiMenuItem value="price-high">Price: High to Low</MuiMenuItem>
+          </Select>
+        </FormControl>
       </Box>
       
       <Box sx={{ minHeight: '600px' }}>
