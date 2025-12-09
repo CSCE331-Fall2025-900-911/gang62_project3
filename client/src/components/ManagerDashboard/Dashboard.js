@@ -35,6 +35,7 @@ export default function Dashboard(props) {
   const navigate = useNavigate();
   const [activePage, setActivePage] = useState('Home');
   const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
     const checkAdminAccess = async () => {
@@ -50,17 +51,26 @@ export default function Dashboard(props) {
           // Check if user is authenticated and is an admin
           if (!user || (!user.isAdmin && user.role !== 'admin')) {
             // Not an admin, redirect to login
-            navigate('/');
+            setIsAuthorized(false);
+            setAuthChecked(true);
+            navigate('/', { replace: true });
             return;
           }
+          
+          // User is admin, allow access
+          setIsAuthorized(true);
         } else {
           // Not authenticated, redirect to login
-          navigate('/');
+          setIsAuthorized(false);
+          setAuthChecked(true);
+          navigate('/', { replace: true });
           return;
         }
       } catch (error) {
         console.error('Failed to verify admin access:', error);
-        navigate('/');
+        setIsAuthorized(false);
+        setAuthChecked(true);
+        navigate('/', { replace: true });
         return;
       } finally {
         setAuthChecked(true);
@@ -94,6 +104,11 @@ export default function Dashboard(props) {
 
   // Don't render dashboard until auth check is complete
   if (!authChecked) {
+    return null;
+  }
+
+  // If not authorized, don't render anything (redirect is in progress)
+  if (!isAuthorized) {
     return null;
   }
 
