@@ -71,7 +71,7 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit }) {
         Total
       </Typography>
       <Typography variant="h4" gutterBottom>
-        {totalPrice}
+        {typeof totalPrice === 'number' ? "$" + totalPrice.toFixed(2) : totalPrice}
       </Typography>
       <List disablePadding>
         {orderItems.length > 0 ? (

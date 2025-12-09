@@ -57,7 +57,15 @@ function App() {
         <Routes>
           <Route 
             path="/"
-            element={<SignIn onLogin={handleLocalLogin} />}
+            element={
+              !authChecked ? (
+                <div />
+              ) : isAuthenticated ? (
+                user && (user.role === 'admin' || user.isAdmin) ? <Navigate to="/manager" /> : <Navigate to="/kiosk" />
+              ) : (
+                <SignIn onLogin={handleLocalLogin} />
+              )
+            }
           />
           <Route 
             path="/kiosk"
