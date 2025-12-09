@@ -283,11 +283,9 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             </Typography>
           ) : temp === null ? (
             <Typography variant="body2" color="text.secondary">
-              Loading weather...
             </Typography>
           ) : (
             <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-              🌤 {temp.toFixed(0)}°F
             </Typography>
           )}
         </Box>
