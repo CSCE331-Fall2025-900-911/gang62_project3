@@ -13,7 +13,7 @@ import { useWeather } from "./weather";
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 // Menu item IDs for accessories/packaging that should not appear as main drink tiles
-const ACCESSORY_ITEM_IDS = new Set([28, 29, 30, 31, 32, 33, 34]);
+const ACCESSORY_ITEM_IDS = new Set([]);
 
 const languages = [
   { code: 'EN', name: 'English' },
@@ -229,8 +229,9 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   .filter((item) => !ACCESSORY_ITEM_IDS.has(item.id))
   .filter((item) => {
     if (selectedCategory === 'all') return true;
-    const drinkType = item.drink_type || '';
-    return drinkType === selectedCategory;
+    const drinkType = (item.drink_type || '').toLowerCase().trim();
+    const category = selectedCategory.toLowerCase().trim();
+    return drinkType === category;
   })
   .sort((a, b) => {
     if (sortBy === 'price-low') {

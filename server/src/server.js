@@ -161,7 +161,7 @@ app.get('/api/menu-items', async (req, res) => {
         const menu = new Menu();
         await menu.load();
         const menuItems = menu.getMenuItems();
-        
+
         // Convert MenuItem objects to plain JSON
         const items = menuItems.map(item => ({
             id: item.getID(),
