@@ -57,15 +57,7 @@ function App() {
         <Routes>
           <Route 
             path="/"
-            element={
-              !authChecked ? (
-                <div />
-              ) : isAuthenticated ? (
-                user && (user.role === 'admin' || user.isAdmin) ? <Navigate to="/manager" /> : <Navigate to="/kiosk" />
-              ) : (
-                <SignIn onLogin={handleLocalLogin} />
-              )
-            }
+            element={<SignIn onLogin={handleLocalLogin} />}
           />
           <Route 
             path="/kiosk"
@@ -96,15 +88,7 @@ function App() {
           />
           <Route
             path="/manager"
-            element={
-              !authChecked ? (
-                <div />
-              ) : isAuthenticated && user && (user.role === 'admin' || user.isAdmin) ? (
-                <Dashboard user={user} />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
+            element={ <SignIn onLogin={handleLocalLogin} /> }
           />
           <Route
             path="/cashier"

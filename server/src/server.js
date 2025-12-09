@@ -851,13 +851,18 @@ app.get(
 app.get(
     '/api/auth/google/callback',
     passport.authenticate('google', {
-        failureRedirect: `${CLIENT_URL}/?error=google`,
+        failureRedirect: `${CLIENT_URL}/signin?error=google`,
         keepSessionInfo: true,
     }),
     (req, res) => {
         // afer successful oauth, redirect to the client root.
         // The client will handle navigation based on the user role using React Router.
-        return res.redirect(`${CLIENT_URL}`);
+        const user = req.user;
+
+        if (user && (user.role === 'admin' || user.isAdmin)) { // if user is an admin, redirect to manager dashboard
+            return res.redirect(`${CLIENT_URL}/manager`);
+        }
+        return res.redirect(`${CLIENT_URL}/kiosk`);
     }
 );
 
