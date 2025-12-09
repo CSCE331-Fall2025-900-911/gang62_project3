@@ -2,8 +2,7 @@ import { alpha } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import AppNavbar from './components/AppNavbar';
 import Header from './components/Header';
 import MainGrid from './components/MainGrid';
@@ -22,7 +21,6 @@ import {
   treeViewCustomizations,
 } from './theme/customizations';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -32,53 +30,8 @@ const xThemeComponents = {
 };
 
 export default function Dashboard(props) {
-  const navigate = useNavigate();
   const [activePage, setActivePage] = useState('Home');
-  const [authChecked, setAuthChecked] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(false);
-
-  useEffect(() => {
-    const checkAdminAccess = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
-          credentials: 'include',
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const user = data.user;
-          
-          // Check if user is authenticated and is an admin
-          if (!user || (!user.isAdmin && user.role !== 'admin')) {
-            // Not an admin, redirect to login
-            setIsAuthorized(false);
-            setAuthChecked(true);
-            navigate('/', { replace: true });
-            return;
-          }
-          
-          // User is admin, allow access
-          setIsAuthorized(true);
-        } else {
-          // Not authenticated, redirect to login
-          setIsAuthorized(false);
-          setAuthChecked(true);
-          navigate('/', { replace: true });
-          return;
-        }
-      } catch (error) {
-        console.error('Failed to verify admin access:', error);
-        setIsAuthorized(false);
-        setAuthChecked(true);
-        navigate('/', { replace: true });
-        return;
-      } finally {
-        setAuthChecked(true);
-      }
-    };
-
-    checkAdminAccess();
-  }, [navigate]);
+  
 
   const renderPage = () => {
     switch (activePage) {
@@ -101,16 +54,6 @@ export default function Dashboard(props) {
         return <MainGrid />;
     }
   };
-
-  // Don't render dashboard until auth check is complete
-  if (!authChecked) {
-    return null;
-  }
-
-  // If not authorized, don't render anything (redirect is in progress)
-  if (!isAuthorized) {
-    return null;
-  }
 
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
