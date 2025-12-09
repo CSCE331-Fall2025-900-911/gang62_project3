@@ -777,19 +777,13 @@ app.get(
 app.get(
     '/api/auth/google/callback',
     passport.authenticate('google', {
-        failureRedirect: `${CLIENT_URL}/signin?error=google`,
+        failureRedirect: `${CLIENT_URL}/?error=google`,
         keepSessionInfo: true,
     }),
     (req, res) => {
-        // afer successful oauth, redirect based on the authenticated users role.
-        // admin emails go directly to the manager dashboard and all others go to the kiosk.
-        const user = req.user;
-
-        if (user && (user.role === 'admin' || user.isAdmin)) { // if user is an admin, redirect to manager dashboard
-            return res.redirect(`${CLIENT_URL}/manager`);
-        }
-
-        return res.redirect(`${CLIENT_URL}/kiosk`);
+        // afer successful oauth, redirect to the client root.
+        // The client will handle navigation based on the user role using React Router.
+        return res.redirect(`${CLIENT_URL}`);
     }
 );
 
