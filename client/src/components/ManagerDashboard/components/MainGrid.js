@@ -14,8 +14,7 @@ import SessionsChart from './SessionsChart';
 import StatCard from './StatCard';
 import { rows as initialRows } from '../internals/data/gridData';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-console.log('API_BASE_URL:', API_BASE_URL);
+const API_BASE_URL =  process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
 /**
  * Manager dashboard home grid component.
@@ -67,11 +66,6 @@ export default function MainGrid() {
         setTopItems(topItemsData.items || []);
 
         const rowsFromApi = (topItemsData.items || []).map((item) => {
-          let category = 'Other';
-          if (item.name.includes('Milk Tea')) category = 'Milk Tea';
-          else if (item.name.includes('Fruit Tea')) category = 'Fruit Tea';
-          else if (item.name.includes('Smoothie')) category = 'Smoothie';
-
           return {
             id: item.id,
             itemName: item.name,
@@ -79,7 +73,7 @@ export default function MainGrid() {
             sales: item.totalRevenue,
             stockCount: item.quantitySold,
             price: item.basePrice,
-            category,
+            category: item.drinkType ? item.drinkType.trim() : 'Other',
           };
         });
 
@@ -180,12 +174,16 @@ export default function MainGrid() {
     }
 
     // Map tree labels to data categories
-    // Tree: "Milk Teas", "Fruit Teas", "Smoothies"
-    // Data: "Milk Tea", "Fruit Tea", "Smoothie"
     const categoryMap = {
-      'Milk Teas': 'Milk Tea',
-      'Fruit Teas': 'Fruit Tea',
-      'Smoothies': 'Smoothie',
+      'Milk Tea': 'milk tea',
+      'Coffee': 'coffee',
+      'Blended': 'blended',
+      'Matcha': 'matcha',
+      'Fruit': 'fruit',
+      'Toppings': 'extras',
+      'Boba': 'extras',
+      'Jelly': 'extras',
+      'Pudding': 'extras',
       'Tea Leaves': 'Tea Leaves',
       'Syrups': 'Syrups',
       'Milk': 'Milk',
@@ -195,11 +193,14 @@ export default function MainGrid() {
     const mappedCategory = categoryMap[selectedLabel];
 
     if (mappedCategory) {
-      const newRows = allRows.filter((row) => row.category === mappedCategory);
+      const newRows = allRows.filter((row) => {
+        const match = row.category?.toLowerCase().trim() === mappedCategory.toLowerCase().trim();
+        return match;
+      });
       setFilteredRows(newRows);
     } else if (selectedLabel === 'Menu') {
-      const menuCategories = ['Milk Tea', 'Fruit Tea', 'Smoothie'];
-      const newRows = allRows.filter((row) => menuCategories.includes(row.category));
+      const menuCategories = ['flavored tea', 'milk tea', 'coffee', 'blended', 'matcha', 'fruit', 'extras'];
+      const newRows = allRows.filter((row) => menuCategories.includes(row.category?.toLowerCase().trim()));
       setFilteredRows(newRows);
     } else if (selectedLabel === 'Inventory') {
       const inventoryCategories = ['Tea Leaves', 'Syrups', 'Milk', 'Cups & Lids'];

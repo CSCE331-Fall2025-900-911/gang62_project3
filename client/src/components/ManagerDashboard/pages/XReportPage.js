@@ -3,7 +3,7 @@ import { Box, Typography, Card, CardContent, CircularProgress } from '@mui/mater
 import Grid from '@mui/material/Grid';
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 
-const API_URL =  'http://localhost:3001';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 export default function XReportPage() {
   const [reportData, setReportData] = useState(null);
