@@ -80,6 +80,8 @@ const EN_TRANSLATIONS = {
   signInTitle: 'Sign in',
   usernameLabel: 'Username',
   passwordLabel: 'Password',
+  usernamePlaceholder: 'username',
+  passwordPlaceholder: 'password',
   signInButton: 'Sign in',
   toggleKeyboardShow: 'Show on-screen keyboard',
   toggleKeyboardHide: 'Hide on-screen keyboard',
@@ -312,7 +314,7 @@ export default function SignIn({ onLogin, ...props }) {
                 id="username"
                 type="text"
                 name="username"
-                placeholder="username"
+                placeholder={translatedTexts.usernamePlaceholder}
                 autoComplete="username"
                 autoFocus
                 required
@@ -327,7 +329,7 @@ export default function SignIn({ onLogin, ...props }) {
                 error={passwordError}
                 helperText={passwordErrorMessage}
                 name="password"
-                placeholder="••••••"
+                placeholder={translatedTexts.passwordPlaceholder}
                 type="password"
                 id="password"
                 autoComplete="current-password"
