@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -87,9 +87,36 @@ function getStepContent(step, orderItems, orderTotal, formData, extrasState, tts
       throw new Error('Unknown step');
   }
 }
-export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 0, setOrderTotal, ttsEnabled, ...props }) {
+export default function Checkout({ orderItems: orderItemsProp = [], setOrderItems: setOrderItemsProp, orderTotal: orderTotalProp = 0, setOrderTotal: setOrderTotalProp, ttsEnabled, ...props }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeStep, setActiveStep] = React.useState(0);
+  
+  // Get navigation context from location state
+  const navigationContext = location.state || { fromDashboard: false };
+  const { fromDashboard, dashboardType, orderItems: stateOrderItems, orderTotal: stateOrderTotal } = navigationContext;
+  
+  // Use order items from navigation state if in dashboard mode, otherwise use props
+  const orderItems = fromDashboard && stateOrderItems ? stateOrderItems : orderItemsProp;
+  const orderTotal = fromDashboard && stateOrderTotal !== undefined ? stateOrderTotal : orderTotalProp;
+  
+  // For dashboard mode, we need to handle state updates differently
+  // Since we can't directly update dashboard state from here, we'll use local state
+  // and sync back when navigating
+  const [localOrderItems, setLocalOrderItems] = React.useState(orderItems);
+  const [localOrderTotal, setLocalOrderTotal] = React.useState(orderTotal);
+  
+  // Update local state when orderItems from props/state change
+  React.useEffect(() => {
+    setLocalOrderItems(orderItems);
+    setLocalOrderTotal(orderTotal);
+  }, [orderItems, orderTotal]);
+  
+  // Use local state for dashboard mode, props for standalone mode
+  const effectiveOrderItems = fromDashboard ? localOrderItems : orderItems;
+  const effectiveSetOrderItems = fromDashboard ? setLocalOrderItems : setOrderItemsProp;
+  const effectiveOrderTotal = fromDashboard ? localOrderTotal : orderTotal;
+  const effectiveSetOrderTotal = fromDashboard ? setLocalOrderTotal : setOrderTotalProp;
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [receiptItems, setReceiptItems] = React.useState([]);
   const [receiptSubtotal, setReceiptSubtotal] = React.useState(0);
@@ -138,7 +165,7 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
     }
 
     // On the final step, submit the order to the backend
-    if (!orderItems || orderItems.length === 0) {
+    if (!effectiveOrderItems || effectiveOrderItems.length === 0) {
       alert('Your cart is empty. Please add items before placing an order.');
       return;
     }
@@ -156,7 +183,7 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
       };
 
       // Drinks from the kiosk
-      orderItems.forEach((item) => {
+      effectiveOrderItems.forEach((item) => {
         if (!item || typeof item.id === 'undefined') return;
         // Base drink
         incrementQuantity(item.id);
@@ -220,12 +247,12 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
       }
 
       // Order submitted successfully: advance to confirmation screen and clear cart
-      setReceiptItems(orderItems);
-      setReceiptSubtotal(orderTotal);
+      setReceiptItems(effectiveOrderItems);
+      setReceiptSubtotal(effectiveOrderTotal);
       setReceiptExtras(extras);
       setActiveStep((prev) => prev + 1);
-      setOrderItems([]);
-      setOrderTotal(0);
+      effectiveSetOrderItems([]);
+      effectiveSetOrderTotal(0);
       setExtras({
         bag: 0,
         cupHolder: 0,
@@ -245,23 +272,23 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
   };
   
   const handleDeleteItem = (index) => {
-    const newOrderItems = orderItems.filter((_, i) => i !== index);
-    setOrderItems(newOrderItems);
+    const newOrderItems = effectiveOrderItems.filter((_, i) => i !== index);
+    effectiveSetOrderItems(newOrderItems);
   };
 
   const handleEditItem = (index, updatedItem) => {
-    const newOrderItems = [...orderItems];
+    const newOrderItems = [...effectiveOrderItems];
     newOrderItems[index] = updatedItem;
-    setOrderItems(newOrderItems);
+    effectiveSetOrderItems(newOrderItems);
   };
 
   React.useEffect(() => {
     // Recalculate total when orderItems changes
-    const total = orderItems.reduce((sum, item) => sum + item.price, 0);
-    setOrderTotal(total);
-  }, [orderItems, setOrderTotal]);
+    const total = effectiveOrderItems.reduce((sum, item) => sum + (item.price || 0), 0);
+    effectiveSetOrderTotal(total);
+  }, [effectiveOrderItems, effectiveSetOrderTotal]);
 
-  const formattedTotal = `$${orderTotal.toFixed(2)}`;
+  const formattedTotal = `$${effectiveOrderTotal.toFixed(2)}`;
   const receiptTax = receiptSubtotal * TAX_RATE;
   const receiptTotal = receiptSubtotal + receiptTax;
   
@@ -275,10 +302,26 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
         <Button
           variant="outlined"
           startIcon={<ArrowBackRoundedIcon />}
-          onClick={() => navigate('/kiosk')}
+          onClick={() => {
+            if (fromDashboard && dashboardType) {
+              // Navigate back to dashboard with Kiosk page active, side menu shown (cart closed)
+              const dashboardPath = dashboardType === 'cashier' ? '/cashier' : '/manager';
+              navigate(dashboardPath, { 
+                state: { 
+                  activePage: 'Kiosk', 
+                  cartOpen: false,
+                  orderItems: effectiveOrderItems,
+                  orderTotal: effectiveOrderTotal
+                } 
+              });
+            } else {
+              // Navigate back to standalone kiosk
+              navigate('/kiosk');
+            }
+          }}
           sx={{ fontWeight: 'medium' }}
         >
-          Back to Kiosk
+          {fromDashboard ? 'Back to Dashboard' : 'Back to Kiosk'}
         </Button>
       </Box>
 
@@ -320,7 +363,7 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
           >
             <Info 
               totalPrice={formattedTotal} 
-              orderItems={orderItems}
+              orderItems={effectiveOrderItems}
               onDelete={handleDeleteItem}
               onEdit={handleEditItem}
             />
@@ -393,7 +436,7 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
               </div>
               <InfoMobile 
                 totalPrice={formattedTotal} 
-                orderItems={orderItems}
+                orderItems={effectiveOrderItems}
                 onDelete={handleDeleteItem}
                 onEdit={handleEditItem}
               />
@@ -571,14 +614,27 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                 <Button
                   variant="contained"
                   sx={{ alignSelf: 'start', width: { xs: '100%', sm: 'auto' } }}
-                  onClick={() => navigate('/kiosk')}
+                  onClick={() => {
+                    if (fromDashboard && dashboardType) {
+                      // Navigate back to dashboard with Kiosk page active
+                      const dashboardPath = dashboardType === 'cashier' ? '/cashier' : '/manager';
+                      navigate(dashboardPath, { 
+                        state: { 
+                          activePage: 'Kiosk', 
+                          cartOpen: false 
+                        } 
+                      });
+                    } else {
+                      navigate('/kiosk');
+                    }
+                  }}
                 >
                   Start a new order
                 </Button>
               </Stack>
             ) : (
               <React.Fragment>
-                {getStepContent(activeStep, orderItems, orderTotal, {
+                {getStepContent(activeStep, effectiveOrderItems, effectiveOrderTotal, {
                   firstName, setFirstName,
                   lastName, setLastName,
                   phoneNumber, setPhoneNumber,

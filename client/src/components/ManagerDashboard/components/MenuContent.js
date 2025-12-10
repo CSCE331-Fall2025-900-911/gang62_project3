@@ -11,6 +11,7 @@ import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
 import SummarizeRoundedIcon from '@mui/icons-material/SummarizeRounded';
 import ListAltRoundedIcon from '@mui/icons-material/ListAltRounded';
+import StoreRoundedIcon from '@mui/icons-material/StoreRounded';
 
 const mainListItems = [
   { text: 'Home', icon: <HomeRoundedIcon /> },
@@ -20,6 +21,7 @@ const mainListItems = [
   { text: 'Orders', icon: <ListAltRoundedIcon /> },
   { text: 'X Report', icon: <DescriptionRoundedIcon /> },
   { text: 'Z Report', icon: <SummarizeRoundedIcon /> },
+  { text: 'Kiosk', icon: <StoreRoundedIcon /> },
 ];
 
 export default function MenuContent({ activePage, setActivePage, menuItems }) {
