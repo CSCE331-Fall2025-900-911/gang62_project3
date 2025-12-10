@@ -400,9 +400,14 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                   value={language}
                   label="Language"
                   onChange={(e) => setLanguage(e.target.value)}
+                  onFocus={() => speak("Language")}
                 >
                   {languages.map((lang) => (
-                    <MuiMenuItem key={lang.code} value={lang.code}>
+                    <MuiMenuItem 
+                      key={lang.code} 
+                      value={lang.code}
+                      onFocus={() => speak(lang.name)}
+                    >
                       {lang.name}
                     </MuiMenuItem>
                   ))}
@@ -624,6 +629,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                   key={category.id} 
                   label={category.label} 
                   value={category.id}
+                  onFocus={() => speak(category.label)}
                   sx={{ 
                     fontWeight: 'medium',
                     textTransform: 'capitalize'
@@ -638,10 +644,11 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                 value={sortBy}
                 label="Sort By"
                 onChange={(e) => setSortBy(e.target.value)}
+                onFocus={() => speak("Sort by")}
               >
-                <MuiMenuItem value="default">Default</MuiMenuItem>
-                <MuiMenuItem value="price-low">Price: Low to High</MuiMenuItem>
-                <MuiMenuItem value="price-high">Price: High to Low</MuiMenuItem>
+                <MuiMenuItem value="default" onFocus={() => speak("Default")}>Default</MuiMenuItem>
+                <MuiMenuItem value="price-low" onFocus={() => speak("Price: Low to High")}>Price: Low to High</MuiMenuItem>
+                <MuiMenuItem value="price-high" onFocus={() => speak("Price: High to Low")}>Price: High to Low</MuiMenuItem>
               </Select>
             </FormControl>
           </Box>
