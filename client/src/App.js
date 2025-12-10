@@ -8,6 +8,7 @@ import Checkout from './components/CheckoutPage/Checkout';
 import Dashboard from './components/ManagerDashboard/Dashboard';
 import CashierDashboard from './components/ManagerDashboard/CashierDashboard';
 import OAuthCallback from './components/OAuthCallback';
+import ScreenMagnifier from './components/Accessibility/ScreenMagnifier';
 import { useNavigate } from 'react-router-dom';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -153,6 +154,7 @@ function AppContent() {
           }
         />
       </Routes>
+      <ScreenMagnifier />
     </div>
   );
 }
