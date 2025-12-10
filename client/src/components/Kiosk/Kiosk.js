@@ -440,8 +440,15 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                 onFocus={() => speak(translatedTexts.checkout)}
                 onClick={() => {
                   if (inDashboard) {
-                    // In dashboard mode, pass context via state
-                    navigate('/checkout', { state: { fromDashboard: true, dashboardType: dashboardType || 'cashier' } });
+                    // In dashboard mode, pass context and current order items via state
+                    navigate('/checkout', { 
+                      state: { 
+                        fromDashboard: true, 
+                        dashboardType: dashboardType || 'cashier',
+                        orderItems: orderItems,
+                        orderTotal: orderTotal
+                      } 
+                    });
                   } else {
                     navigate('/checkout', { state: { fromDashboard: false } });
                   }
