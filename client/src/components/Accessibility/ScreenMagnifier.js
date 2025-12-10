@@ -57,10 +57,13 @@ function ScreenMagnifier() {
   const resetScale = () => setScaleIndex(0);
 
   const handleFabClick = () => {
-    setPanelOpen((prev) => !prev);
-    if (scaleIndex === 0) {
-      setScaleIndex(DEFAULT_ACTIVE_INDEX);
-    }
+    setPanelOpen((prev) => {
+      const nextState = !prev;
+      if (nextState && scaleIndex === 0) {
+        setScaleIndex(DEFAULT_ACTIVE_INDEX);
+      }
+      return nextState;
+    });
   };
   const magnifierUi = (
     <Box
@@ -129,7 +132,7 @@ function ScreenMagnifier() {
                   Magnifier {isEnabled ? 'on' : 'off'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Applies scaled view across the kiosk
+                  Applies scaled view across the selected interface
                 </Typography>
               </Box>
               <Switch
