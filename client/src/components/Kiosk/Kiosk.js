@@ -24,85 +24,9 @@ const languages = [
   { code: 'DE', name: 'Deutsch' },
   { code: 'IT', name: 'Italiano' },
   { code: 'PT', name: 'Português' },
-  { code: 'JA', name: 'Japanese' },
-  { code: 'ZH', name: 'Chinese' }
+  { code: 'JA', name: '日本語' },
+  { code: 'ZH', name: '中文' }
 ];
-
-// Category definitions
-const CATEGORIES = [
-  { id: 'all', label: 'All Drinks' },
-  { id: 'flavored tea', label: 'Flavored Tea' },
-  { id: 'milk tea', label: 'Milk Tea' },
-  { id: 'coffee', label: 'Coffee' },
-  { id: 'blended', label: 'Blended' },
-  { id: 'matcha', label: 'Matcha' },
-  { id: 'fruit', label: 'Fruit' },
-  { id: 'special', label: 'Specials' }
-];
-
-const CATEGORY_TRANSLATIONS = {
-  EN: {
-    all: 'All Drinks',
-    'flavored tea': 'Flavored Tea',
-    'milk tea': 'Milk Tea',
-    coffee: 'Coffee',
-    blended: 'Blended',
-    matcha: 'Matcha',
-    fruit: 'Fruit',
-    special: 'Specials',
-  },
-  ES: {
-    all: 'Todas las bebidas',
-    'flavored tea': 'Té saborizado',
-    'milk tea': 'Té con leche',
-    coffee: 'Café',
-    blended: 'Bebidas frías',
-    matcha: 'Matcha',
-    fruit: 'Fruta',
-    special: 'Especiales',
-  },
-  FR: {
-    all: 'Toutes les boissons',
-    'flavored tea': 'Thé aromatisé',
-    'milk tea': 'Thé au lait',
-    coffee: 'Café',
-    blended: 'Boissons glacées',
-    matcha: 'Matcha',
-    fruit: 'Fruits',
-    special: 'Spéciaux',
-  },
-  DE: {
-    all: 'Alle Getränke',
-    'flavored tea': 'Aromatisierter Tee',
-    'milk tea': 'Milchtee',
-    coffee: 'Kaffee',
-    blended: 'Gemixt',
-    matcha: 'Matcha',
-    fruit: 'Frucht',
-    special: 'Spezialitäten',
-  },
-  IT: {
-    all: 'Tutte le bevande',
-    'flavored tea': 'Tè aromatizzato',
-    'milk tea': 'Tè al latte',
-    coffee: 'Caffè',
-    blended: 'Bevande frullate',
-    matcha: 'Matcha',
-    fruit: 'Frutta',
-    special: 'Speciali',
-  },
-  PT: {
-    all: 'Todas as bebidas',
-    'flavored tea': 'Chá aromatizado',
-    'milk tea': 'Chá com leite',
-    coffee: 'Café',
-    blended: 'Bebidas geladas',
-    matcha: 'Matcha',
-    fruit: 'Fruta',
-    special: 'Especiais',
-  },
-};
-
 
 // Carousel promotional items
 let carouselItems = [
@@ -138,12 +62,14 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  // const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [language, setLanguage] = useState('EN');
   const translationsRef = useRef({});
+  const [categories, setCategories] = useState([{ id: 'all', label: 'All Drinks' }]);
+  const [translatedCategories, setTranslatedCategories] = useState({});
   const [currentSlide, setCurrentSlide] = useState(0);
   const carouselRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -192,7 +118,12 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
     items: 'items',
     checkout: 'Checkout',
     loading: 'Loading menu...',
-    error: 'Error:'
+    error: 'Error:',
+    sortBy: 'Sort By',
+    sortDefault: 'Default',
+    sortPriceLow: 'Price: Low to High',
+    sortPriceHigh: 'Price: High to Low',
+    noItemsFound: 'No items found in this category'
   });
 
   useEffect(() => {
@@ -205,7 +136,12 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
           items: 'items',
           checkout: 'Checkout',
           loading: 'Loading menu...',
-          error: 'Error:'
+          error: 'Error:',
+          sortBy: 'Sort By',
+          sortDefault: 'Default',
+          sortPriceLow: 'Price: Low to High',
+          sortPriceHigh: 'Price: High to Low',
+          noItemsFound: 'No items found in this category'
         });
         return;
       }
@@ -217,7 +153,12 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
         items: 'items',
         checkout: 'Checkout',
         loading: 'Loading menu...',
-        error: 'Error:'
+        error: 'Error:',
+        sortBy: 'Sort By',
+        sortDefault: 'Default',
+        sortPriceLow: 'Price: Low to High',
+        sortPriceHigh: 'Price: High to Low',
+        noItemsFound: 'No items found in this category'
       };
       
       const translated = {};
@@ -230,6 +171,33 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   }, [language, translate]);
   
   const { temp, weather_error } = useWeather();
+
+  // Update translated category labels whenever language or categories change
+  useEffect(() => {
+    const updateCategoryTranslations = async () => {
+      if (!categories || categories.length === 0) {
+        setTranslatedCategories({});
+        return;
+      }
+
+      if (language === 'EN') {
+        const map = {};
+        categories.forEach((cat) => {
+          map[cat.id] = cat.label;
+        });
+        setTranslatedCategories(map);
+        return;
+      }
+
+      const map = {};
+      for (const cat of categories) {
+        map[cat.id] = await translate(cat.label);
+      }
+      setTranslatedCategories(map);
+    };
+
+    updateCategoryTranslations();
+  }, [language, categories, translate]);
 
   if (temp < 60) {
     carouselItems[1] = {
@@ -275,6 +243,22 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
       }
       const data = await response.json();
       setMenuItems(data);
+      // Derive drink categories dynamically from menu items
+      const categorySet = new Set();
+      data.forEach((item) => {
+        const drinkType = (item.drink_type || '').trim();
+        if (drinkType) {
+          categorySet.add(drinkType);
+        }
+      });
+      const dynamicCategories = [
+        { id: 'all', label: 'All Drinks' },
+        ...Array.from(categorySet).map((cat) => ({
+          id: cat,
+          label: cat,
+        })),
+      ];
+      setCategories(dynamicCategories);
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -723,12 +707,12 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                 }
               }}
             >
-              {CATEGORIES.map((category) => (
+              {categories.map((category) => (
                 <Tab 
                   key={category.id} 
-                  label={CATEGORY_TRANSLATIONS[language]?.[category.id] || category.label} 
+                  label={translatedCategories[category.id] || category.label} 
                   value={category.id}
-                  onFocus={() => speak(CATEGORY_TRANSLATIONS[language]?.[category.id] || category.label)}
+                  onFocus={() => speak(translatedCategories[category.id] || category.label)}
                   sx={{ 
                     fontWeight: 'medium',
                     textTransform: 'capitalize'
@@ -738,19 +722,25 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             </Tabs>
 
             <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 150 }, mr: { xs: 0, sm: 2 }, mt: 2 }}>
-              <InputLabel id="sort-by-select-label">Sort By</InputLabel>
+              <InputLabel id="sort-by-select-label">{translatedTexts.sortBy}</InputLabel>
               <Select
                 id="sort-by-select"
                 labelId="sort-by-select-label"
                 value={sortBy}
-                label="Sort By"
+                label={translatedTexts.sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                onFocus={() => speak("Sort by")}
+                onFocus={() => speak(translatedTexts.sortBy)}
                 aria-label="Sort By"
               >
-                <MuiMenuItem value="default" onFocus={() => speak("Default")}>Default</MuiMenuItem>
-                <MuiMenuItem value="price-low" onFocus={() => speak("Price: Low to High")}>Price: Low to High</MuiMenuItem>
-                <MuiMenuItem value="price-high" onFocus={() => speak("Price: High to Low")}>Price: High to Low</MuiMenuItem>
+                <MuiMenuItem value="default" onFocus={() => speak(translatedTexts.sortDefault)}>
+                  {translatedTexts.sortDefault}
+                </MuiMenuItem>
+                <MuiMenuItem value="price-low" onFocus={() => speak(translatedTexts.sortPriceLow)}>
+                  {translatedTexts.sortPriceLow}
+                </MuiMenuItem>
+                <MuiMenuItem value="price-high" onFocus={() => speak(translatedTexts.sortPriceHigh)}>
+                  {translatedTexts.sortPriceHigh}
+                </MuiMenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -792,7 +782,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             {filteredMenuItems.length === 0 && (
               <Box sx={{ textAlign: 'center', py: 8 }}>
                 <Typography variant="h5" component="p" color="text.secondary">
-                  No items found in this category
+                  {translatedTexts.noItemsFound}
                 </Typography>
               </Box>
             )}

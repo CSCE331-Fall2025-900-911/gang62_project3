@@ -14,6 +14,9 @@ const Inventory = require('./models/Inventory');
 const Ingredient = require('./models/Ingredient');
 const DatabaseConnection = require('./config/db');
 
+// Load environment variables from the root .env file
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
+
 /**
  * Express server for the Point of Sale system.
  * Provides API endpoints for the kiosk interface and other client applications.
@@ -147,8 +150,42 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
-const DEEPL_API_KEY = 'ca69df7b-643d-475c-9b81-4a71e5078261:fx';
-const DEEPL_API_URL = 'https://api-free.deepl.com/v2/translate';
+const GOOGLE_TRANSLATE_API_KEY = process.env.GOOGLE_TRANSLATE_API;
+const GOOGLE_TRANSLATE_URL = 'https://translation.googleapis.com/language/translate/v2';
+
+/**
+ * Normalize client language codes to Google Translate API codes.
+ * Accepts values like 'EN', 'ES', 'FR', 'DE', 'IT', 'PT', 'JA', 'ZH'.
+ *
+ * @param {string} code - Language code from client
+ * @returns {string} Google-compatible language code
+ */
+function normalizeLanguageCode(code) {
+    if (!code) return 'en';
+    const upper = String(code).toUpperCase();
+    switch (upper) {
+        case 'EN':
+            return 'en';
+        case 'ES':
+            return 'es';
+        case 'FR':
+            return 'fr';
+        case 'DE':
+            return 'de';
+        case 'IT':
+            return 'it';
+        case 'PT':
+            return 'pt';
+        case 'JA':
+            return 'ja';
+        case 'ZH':
+            // Default to Simplified Chinese; adjust if you later support zh-TW, etc.
+            return 'zh-CN';
+        default:
+            // Fallback: use lowercased input; Google is fairly permissive
+            return upper.toLowerCase();
+    }
+}
 
 /**
  * Root endpoint - health check
@@ -820,32 +857,60 @@ app.put('/api/inventory/:id', async (req, res) => {
 
 
 /**
- * API endpoint to translate text using DeepL API.
- * 
+ * API endpoint to translate text using Google Translate API.
+ *
  * @route POST /api/translate
  * @param {string} text - Text to translate
- * @param {string} targetLang - Target language code (e.g., 'ES', 'FR', 'DE')
+ * @param {string} targetLang - Target language code from client (e.g., 'ES', 'FR', 'DE')
  * @returns {Promise<void>} Sends JSON response with translated text
  * @author Michael Nguyen
  */
 app.post('/api/translate', async (req, res) => {
     try {
-        const { text, targetLang } = req.body;
+        const { text, targetLang } = req.body || {};
         if (!text || !targetLang) {
             return res.status(400).json({ error: 'Text and targetLang are required' });
         }
 
-        const formData = `auth_key=${encodeURIComponent(DEEPL_API_KEY)}&text=${encodeURIComponent(text)}&target_lang=${encodeURIComponent(targetLang)}`;
+        if (!GOOGLE_TRANSLATE_API_KEY) {
+            console.error('Google Translate API key is not configured');
+            return res.status(500).json({ error: 'Translation service is not configured' });
+        }
 
-        const response = await axios.post(DEEPL_API_URL, formData, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+        const normalizedTarget = normalizeLanguageCode(targetLang);
+
+        const response = await axios.post(
+            `${GOOGLE_TRANSLATE_URL}?key=${GOOGLE_TRANSLATE_API_KEY}`,
+            {
+                q: text,
+                target: normalizedTarget,
+                format: 'text',
+            },
+            {
+                // Some Google API keys are restricted to specific HTTP referrers.
+                // Because this call originates from the server (no browser referrer),
+                // we explicitly send the frontend's URL as the Referer so the key
+                // continues to work with "HTTP referrer" restrictions.
+                headers: {
+                    Referer: CLIENT_URL,
+                },
             }
-        });
+        );
 
-        res.json({ translatedText: response.data.translations[0].text });
+        const translations = response.data && response.data.data && response.data.data.translations;
+        const translatedText =
+            Array.isArray(translations) && translations[0] && translations[0].translatedText
+                ? translations[0].translatedText
+                : text;
+
+        res.json({ translatedText });
     } catch (error) {
-        console.error('Error translating text:', error);
+        // Avoid logging the API key; only log high-level error information
+        const message =
+            (error.response && error.response.data && error.response.data.error && error.response.data.error.message) ||
+            error.message ||
+            'Unknown translation error';
+        console.error('Error translating text with Google Translate:', message);
         res.status(500).json({ error: 'Failed to translate text' });
     }
 });
