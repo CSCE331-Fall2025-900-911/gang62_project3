@@ -77,14 +77,14 @@ class Order extends DatabaseConnection {
         // Calculate tax
         let tax = subtotal * TAX;
 
-        // Get current timestamp
+        // Get current timestamp in UTC
         const now = new Date();
-        const timestamp = now.getFullYear() + '-' +
-        String(now.getMonth() + 1).padStart(2, '0') + '-' +
-        String(now.getDate()).padStart(2, '0') + ' ' +
-        String(now.getHours()).padStart(2, '0') + ':' +
-        String(now.getMinutes()).padStart(2, '0') + ':' +
-        String(now.getSeconds()).padStart(2, '0');
+        const timestamp = now.getUTCFullYear() + '-' +
+        String(now.getUTCMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getUTCDate()).padStart(2, '0') + ' ' +
+        String(now.getUTCHours()).padStart(2, '0') + ':' +
+        String(now.getUTCMinutes()).padStart(2, '0') + ':' +
+        String(now.getUTCSeconds()).padStart(2, '0');
 
         // Get the id for the order
         const getOrderIdQuery = 'SELECT MAX(id) as max_id FROM orders;';
