@@ -70,6 +70,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   const translationsRef = useRef({});
   const [categories, setCategories] = useState([{ id: 'all', label: 'All Drinks' }]);
   const [translatedCategories, setTranslatedCategories] = useState({});
+  const [translatedCarouselItems, setTranslatedCarouselItems] = useState(carouselItems);
   const [currentSlide, setCurrentSlide] = useState(0);
   const carouselRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -198,6 +199,35 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
 
     updateCategoryTranslations();
   }, [language, categories, translate]);
+
+  // Update translated carousel items whenever language or weather-driven content changes
+  useEffect(() => {
+    const updateCarouselTranslations = async () => {
+      // Ensure we work with the latest carouselItems (which may be adjusted by weather)
+      const baseItems = carouselItems;
+
+      if (language === 'EN') {
+        setTranslatedCarouselItems([...baseItems]);
+        return;
+      }
+
+      const mapped = [];
+      for (const item of baseItems) {
+        const translatedTitle = await translate(item.title);
+        const translatedDescription = item.description
+          ? await translate(item.description)
+          : '';
+        mapped.push({
+          ...item,
+          title: translatedTitle,
+          description: translatedDescription,
+        });
+      }
+      setTranslatedCarouselItems(mapped);
+    };
+
+    updateCarouselTranslations();
+  }, [language, translate, temp]);
 
   if (temp < 60) {
     carouselItems[1] = {
@@ -571,7 +601,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                 aspectRatio: { xs: '2/1', sm: '7/2' },
               }}
             >
-              {carouselItems.map((item, index) => (
+              {translatedCarouselItems.map((item, index) => (
                 <Box
                   key={item.id}
                   sx={{
@@ -584,8 +614,8 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                   <Card sx={{ height: '100%', position: 'relative', p: 0, overflow: 'hidden' }}>
                     <CardMedia
                       component="img"
-                      image={item.image}
-                      alt={item.title}
+                            image={item.image}
+                            alt={item.title}
                       sx={{ objectFit: 'cover', display: 'block', height: '100%', width: '100%' }}
                     />
                     <Box
@@ -667,7 +697,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                 zIndex: 10,
               }}
             >
-              {carouselItems.map((_, index) => (
+              {translatedCarouselItems.map((_, index) => (
                 <Box
                   key={index}
                   onClick={() => setCurrentSlide(index)}
