@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel, IconButton, Card, CardMedia, Avatar, Tabs, Tab, Collapse, Fade } from '@mui/material';
+import { Box, Grid, Typography, CssBaseline, Button, Select, MenuItem as MuiMenuItem, FormControl, InputLabel, IconButton, Card, CardMedia, Avatar, Tabs, Tab, Collapse, Fade, Drawer, useMediaQuery, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -71,8 +71,11 @@ let carouselItems = [
  * @component
  * @author Michael Nguyen
  */
-function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, ttsEnabled, setTtsEnabled }) {
+function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, ttsEnabled, setTtsEnabled, showCart: showCartProp, setShowCart: setShowCartProp, inDashboard = false, dashboardType }) {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -82,7 +85,11 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   const carouselRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('default'); // 'default', 'price-low', 'price-high'
-  const [showCart, setShowCart] = useState(false);
+  const [internalShowCart, setInternalShowCart] = useState(false);
+  
+  // Use prop if provided (dashboard mode), otherwise use internal state (standalone mode)
+  const showCart = showCartProp !== undefined ? showCartProp : internalShowCart;
+  const setShowCart = setShowCartProp || setInternalShowCart;
 
   const speak = useCallback((text) => {
     if (ttsEnabled && 'speechSynthesis' in window) {
@@ -298,23 +305,55 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   return (
     <AppTheme>
       <CssBaseline />
-      <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: 'background.default' }}>
-        <Collapse in={showCart} orientation="horizontal" timeout={300}>
-          <Box sx={{ width: '350px', p: 2, borderRight: 1, borderColor: 'divider', backgroundColor: 'background.paper', height: '100%' }}>
-            <Info totalPrice={orderTotal} orderItems={orderItems} onDelete={handleDeleteItem} onEdit={handleEditItem} />
-          </Box>
-        </Collapse>
-        <Box sx={{ flex: 1, p: 4 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: 'background.default', width: '100%' }}>
+        {/* Cart Sidebar - Only render if NOT in dashboard mode (standalone mode) */}
+        {!inDashboard && (
+          <>
+            {isMobile ? (
+              <Drawer
+                anchor="right"
+                open={showCart}
+                onClose={() => {
+                  if (typeof setShowCart === 'function') {
+                    setShowCart(false);
+                  }
+                }}
+                sx={{
+                  '& .MuiDrawer-paper': {
+                    width: { xs: '100%', sm: '350px' },
+                    p: 2,
+                  },
+                }}
+              >
+                <Info totalPrice={orderTotal} orderItems={orderItems} onDelete={handleDeleteItem} onEdit={handleEditItem} />
+              </Drawer>
+            ) : (
+              <Collapse in={showCart} orientation="horizontal" timeout={300}>
+                <Box sx={{ width: '350px', p: 2, borderRight: 1, borderColor: 'divider', backgroundColor: 'background.paper', height: '100%' }}>
+                  <Info totalPrice={orderTotal} orderItems={orderItems} onDelete={handleDeleteItem} onEdit={handleEditItem} />
+                </Box>
+              </Collapse>
+            )}
+          </>
+        )}
+        <Box sx={{ flex: 1, p: { xs: 2, sm: 3, md: 4 }, width: '100%' }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', md: 'row' },
+            justifyContent: 'space-between', 
+            alignItems: { xs: 'flex-start', md: 'center' }, 
+            mb: 4,
+            gap: 2
+          }}>
             <Typography 
               variant="h3" 
               component="h1" 
-              sx={{ fontWeight: 'bold' }}
+              sx={{ fontWeight: 'bold', fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' } }}
             >
               {translatedTexts.menu}
             </Typography>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 2 }}>
               {weather_error ? (
                 <Typography variant="body2" color="error">
                   Weather unavailable
@@ -328,7 +367,14 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
               )}
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: { xs: 'flex-start', sm: 'center' }, 
+              gap: { xs: 1.5, sm: 2, md: 3 },
+              width: { xs: '100%', md: 'auto' },
+              flexWrap: 'wrap'
+            }}>
               <IconButton 
                 onClick={() => {
                   const newEnabled = !ttsEnabled;
@@ -348,7 +394,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                 {ttsEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
               </IconButton>
               <ColorModeIconDropdown />
-              <FormControl size="small" sx={{ minWidth: 120 }}>
+              <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 120 } }}>
                 <InputLabel>Language</InputLabel>
                 <Select
                   value={language}
@@ -362,11 +408,11 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                   ))}
                 </Select>
               </FormControl>
-              <Box sx={{ textAlign: 'right' }}>
+              <Box sx={{ textAlign: { xs: 'left', sm: 'right' }, width: { xs: '100%', sm: 'auto' } }}>
                 <Typography variant="body2" color="text.secondary">
                   {translatedTexts.orderTotal}
                 </Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main', fontSize: { xs: '1.5rem', sm: '2rem' } }}>
                   ${orderTotal.toFixed(2)}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
@@ -374,29 +420,43 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                 </Typography>
               </Box>
               <IconButton
-                onClick={() => setShowCart(!showCart)}
+                onClick={() => {
+                  const newState = !showCart;
+                  if (typeof setShowCart === 'function') {
+                    setShowCart(newState);
+                  }
+                }}
                 onFocus={() => speak(showCart ? "Hide shopping cart" : "Show shopping cart")}
                 color="primary"
                 aria-label={showCart ? "Hide shopping cart" : "Show shopping cart"}
+                size={isMobile ? "small" : "medium"}
               >
                 <ShoppingCartIcon />
               </IconButton>
               <Button
                 variant="contained" 
                 color="primary" 
-                size={showCart ? "medium" : "large"}
+                size={isMobile ? "small" : (inDashboard ? "large" : (showCart ? "medium" : "large"))}
                 onFocus={() => speak(translatedTexts.checkout)}
-                onClick={() => navigate('/checkout')}
-                sx={{ px: showCart ? 2 : 4 }}
+                onClick={() => {
+                  if (inDashboard) {
+                    // In dashboard mode, pass context via state
+                    navigate('/checkout', { state: { fromDashboard: true, dashboardType: dashboardType || 'cashier' } });
+                  } else {
+                    navigate('/checkout', { state: { fromDashboard: false } });
+                  }
+                }}
+                sx={{ px: { xs: 2, sm: (inDashboard ? 4 : (showCart ? 2 : 4)) }, width: { xs: '100%', sm: 'auto' } }}
+                fullWidth={isMobile}
               >
                 {translatedTexts.checkout}
               </Button>
               {user && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: { xs: '100%', sm: 'auto' } }}>
                   <Avatar
                     alt={user.displayName || user.email || 'Account'}
                     src={user.photo || undefined}
-                    sx={{ width: 48, height: 48 }}
+                    sx={{ width: { xs: 36, sm: 48 }, height: { xs: 36, sm: 48 } }}
                   >
                     {(user.displayName || user.email || 'A')
                       .split(' ')
@@ -405,7 +465,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                       .slice(0, 2)
                       .toUpperCase()}
                   </Avatar>
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, display: { xs: 'none', sm: 'block' } }}>
                     {user.displayName || user.email || 'Signed in'}
                   </Typography>
                 </Box>
@@ -414,7 +474,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
           </Box>
 
           {/* Carousel Section */}
-          <Box sx={{ position: 'relative', mb: 4, width: '100%'}}>
+          <Box sx={{ position: 'relative', mb: { xs: 2, sm: 4 }, width: '100%'}}>
             <Box
               ref={carouselRef}
               sx={{
@@ -423,7 +483,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                 borderRadius: 2,
                 position: 'relative',
                 width: '100%',
-                aspectRatio: '7/2',
+                aspectRatio: { xs: '2/1', sm: '7/2' },
               }}
             >
               {carouselItems.map((item, index) => (
@@ -451,13 +511,13 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                         right: 0,
                         background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
                         color: 'white',
-                        p: 2,
+                        p: { xs: 1.5, sm: 2 },
                       }}
                     >
-                      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+                      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1, fontSize: { xs: '1.25rem', sm: '2rem' } }}>
                         {item.title}
                       </Typography>
-                      <Typography variant="body1">
+                      <Typography variant="body1" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
                         {item.description}
                       </Typography>
                     </Box>
@@ -469,46 +529,46 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             {/* Navigation Buttons */}
             <IconButton
               onClick={handlePrevSlide}
-              size={showCart ? "small" : "medium"}
+              size={isMobile ? "small" : (inDashboard ? "medium" : (showCart ? "small" : "medium"))}
               sx={{
                 position: 'absolute',
-                left: 16,
+                left: { xs: 8, sm: 16 },
                 top: '50%',
                 transform: 'translateY(-50%)',
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 1)',
                 },
-                width: showCart ? 24 : 48,
-                height: showCart ? 24 : 48,
+                width: { xs: 32, sm: (inDashboard ? 48 : (showCart ? 40 : 48)) },
+                height: { xs: 32, sm: (inDashboard ? 48 : (showCart ? 40 : 48)) },
               }}
             >
-              <ChevronLeftIcon fontSize={showCart ? "small" : "medium"} />
+              <ChevronLeftIcon fontSize={isMobile ? "small" : (inDashboard ? "medium" : (showCart ? "small" : "medium"))} />
             </IconButton>
             <IconButton
               onClick={handleNextSlide}
-              size={showCart ? "small" : "medium"}
+              size={isMobile ? "small" : (inDashboard ? "medium" : (showCart ? "small" : "medium"))}
               sx={{
                 position: 'absolute',
-                right: 16,
+                right: { xs: 8, sm: 16 },
                 top: '50%',
                 transform: 'translateY(-50%)',
                 backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 '&:hover': {
                   backgroundColor: 'rgba(255, 255, 255, 1)',
                 },
-                width: showCart ? 24 : 48,
-                height: showCart ? 24 : 48,
+                width: { xs: 32, sm: (inDashboard ? 48 : (showCart ? 40 : 48)) },
+                height: { xs: 32, sm: (inDashboard ? 48 : (showCart ? 40 : 48)) },
               }}
             >
-              <ChevronRightIcon fontSize={showCart ? "small" : "medium"} />
+              <ChevronRightIcon fontSize={isMobile ? "small" : (inDashboard ? "medium" : (showCart ? "small" : "medium"))} />
             </IconButton>
 
             {/* Indicator Dots */}
             <Box
               sx={{
                 position: 'absolute',
-                bottom: 16,
+                bottom: { xs: 8, sm: 16 },
                 left: '50%',
                 transform: 'translateX(-50%)',
                 display: 'flex',
@@ -521,8 +581,8 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                   key={index}
                   onClick={() => setCurrentSlide(index)}
                   sx={{
-                    width: 12,
-                    height: 12,
+                    width: { xs: 8, sm: 12 },
+                    height: { xs: 8, sm: 12 },
                     borderRadius: '50%',
                     backgroundColor: currentSlide === index ? 'white' : 'rgba(255, 255, 255, 0.5)',
                     cursor: 'pointer',
@@ -537,13 +597,20 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
           </Box>
 
           {/* Category Tabs */}
-          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: { xs: 2, sm: 3 } }}>
             <Tabs 
               value={selectedCategory} 
               onChange={(e, newValue) => setSelectedCategory(newValue)}
               variant="scrollable"
               scrollButtons="auto"
               aria-label="drink categories"
+              sx={{
+                '& .MuiTab-root': {
+                  fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+                  minWidth: { xs: 80, sm: 100 },
+                  px: { xs: 1, sm: 2 },
+                }
+              }}
             >
               {CATEGORIES.map((category) => (
                 <Tab 
@@ -551,7 +618,6 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                   label={category.label} 
                   value={category.id}
                   sx={{ 
-                    fontSize: '1rem',
                     fontWeight: 'medium',
                     textTransform: 'capitalize'
                   }}
@@ -559,7 +625,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
               ))}
             </Tabs>
 
-            <FormControl size="small" sx={{ minWidth: 150, mr: 2, mt: 2 }}>
+            <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 150 }, mr: { xs: 0, sm: 2 }, mt: 2 }}>
               <InputLabel>Sort By</InputLabel>
               <Select
                 value={sortBy}
@@ -573,12 +639,24 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             </FormControl>
           </Box>
           
-          <Box sx={{ minHeight: '600px' }}>
-            <Grid container spacing={3}>
+          <Box sx={{ minHeight: { xs: '400px', sm: '600px' } }}>
+            <Grid container spacing={{ xs: 2, sm: 3 }}>
               {filteredMenuItems.map((item, index) => (
-                <Grid item key={item.id} sx={{ width: 'calc(20% - 24px)', minWidth: '200px' }}>
+                <Grid 
+                  item 
+                  key={item.id} 
+                  xs={6}
+                  sm={4}
+                  md={3}
+                  lg={2}
+                  xl={2}
+                  sx={{ 
+                    display: 'flex',
+                    justifyContent: 'center'
+                  }}
+                >
                   <Fade in={true} timeout={(index % 10) * 100 + 300}>
-                    <Box sx={{ height: '100%' }}>
+                    <Box sx={{ height: '100%', width: '100%', maxWidth: { xs: '200px', sm: 'none' } }}>
                       <MenuItem 
                         item={item} 
                         imageUrl={item.image_url}

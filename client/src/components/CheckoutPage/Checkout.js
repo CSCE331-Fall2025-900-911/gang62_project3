@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -89,7 +89,12 @@ function getStepContent(step, orderItems, orderTotal, formData, extrasState, tts
 }
 export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 0, setOrderTotal, ttsEnabled, ...props }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeStep, setActiveStep] = React.useState(0);
+  
+  // Get navigation context from location state
+  const navigationContext = location.state || { fromDashboard: false };
+  const { fromDashboard, dashboardType } = navigationContext;
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [receiptItems, setReceiptItems] = React.useState([]);
   const [receiptSubtotal, setReceiptSubtotal] = React.useState(0);
@@ -275,10 +280,26 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
         <Button
           variant="outlined"
           startIcon={<ArrowBackRoundedIcon />}
-          onClick={() => navigate('/kiosk')}
+          onClick={() => {
+            if (fromDashboard && dashboardType) {
+              // Navigate back to dashboard with Kiosk page active, side menu shown (cart closed)
+              const dashboardPath = dashboardType === 'cashier' ? '/cashier' : '/manager';
+              navigate(dashboardPath, { 
+                state: { 
+                  activePage: 'Kiosk', 
+                  cartOpen: false,
+                  orderItems: orderItems,
+                  orderTotal: orderTotal
+                } 
+              });
+            } else {
+              // Navigate back to standalone kiosk
+              navigate('/kiosk');
+            }
+          }}
           sx={{ fontWeight: 'medium' }}
         >
-          Back to Kiosk
+          {fromDashboard ? 'Back to Dashboard' : 'Back to Kiosk'}
         </Button>
       </Box>
 
@@ -571,7 +592,20 @@ export default function Checkout({ orderItems = [], setOrderItems, orderTotal = 
                 <Button
                   variant="contained"
                   sx={{ alignSelf: 'start', width: { xs: '100%', sm: 'auto' } }}
-                  onClick={() => navigate('/kiosk')}
+                  onClick={() => {
+                    if (fromDashboard && dashboardType) {
+                      // Navigate back to dashboard with Kiosk page active
+                      const dashboardPath = dashboardType === 'cashier' ? '/cashier' : '/manager';
+                      navigate(dashboardPath, { 
+                        state: { 
+                          activePage: 'Kiosk', 
+                          cartOpen: false 
+                        } 
+                      });
+                    } else {
+                      navigate('/kiosk');
+                    }
+                  }}
                 >
                   Start a new order
                 </Button>
