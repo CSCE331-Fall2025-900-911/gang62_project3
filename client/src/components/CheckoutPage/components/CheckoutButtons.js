@@ -23,10 +23,12 @@ export default function CheckoutButtons({
           display: 'flex',
           flexDirection: { xs: 'column-reverse', sm: 'row' },
           alignItems: 'end',
-          gap: 1,
-          pb: { xs: 12, sm: 4 },
-          mt: { xs: 2, sm: 2 },
+          gap: 2,
+          pb: { xs: 12, sm: 8 },
+          mt: { xs: 4, sm: 4 },
           flexShrink: 0,
+          position: 'relative',
+          zIndex: 1000,
         },
         activeStep !== 0
           ? { justifyContent: 'space-between' }
