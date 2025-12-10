@@ -347,8 +347,15 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
     return (
       <AppTheme>
         <CssBaseline />
-        <Box sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h4">{translatedTexts.loading}</Typography>
+        <Box
+          component="main"
+          role="main"
+          aria-label="Drink ordering kiosk"
+          sx={{ p: 4, textAlign: 'center' }}
+        >
+          <Typography variant="h4" component="h1">
+            {translatedTexts.loading}
+          </Typography>
         </Box>
       </AppTheme>
     );
@@ -358,8 +365,15 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
     return (
       <AppTheme>
         <CssBaseline />
-        <Box sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="h4" color="error">{translatedTexts.error} {error}</Typography>
+        <Box
+          component="main"
+          role="main"
+          aria-label="Drink ordering kiosk"
+          sx={{ p: 4, textAlign: 'center' }}
+        >
+          <Typography variant="h4" component="h1" color="error">
+            {translatedTexts.error} {error}
+          </Typography>
         </Box>
       </AppTheme>
     );
@@ -368,7 +382,12 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   return (
     <AppTheme>
       <CssBaseline />
-      <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: 'background.default', width: '100%' }}>
+      <Box
+        component="main"
+        role="main"
+        aria-label="Drink ordering kiosk"
+        sx={{ display: 'flex', minHeight: '100vh', backgroundColor: 'background.default', width: '100%' }}
+      >
         {/* Cart Sidebar - Only render if NOT in dashboard mode (standalone mode) */}
         {!inDashboard && (
           <>
@@ -458,12 +477,15 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
               </IconButton>
               <ColorModeIconDropdown />
               <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 120 } }}>
-                <InputLabel>Language</InputLabel>
+                <InputLabel id="language-select-label">Language</InputLabel>
                 <Select
+                  id="language-select"
+                  labelId="language-select-label"
                   value={language}
                   label="Language"
                   onChange={(e) => setLanguage(e.target.value)}
                   onFocus={() => speak("Language")}
+                  aria-label="Language"
                 >
                   {languages.map((lang) => (
                     <MuiMenuItem 
@@ -480,7 +502,11 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                 <Typography variant="body2" color="text.secondary">
                   {translatedTexts.orderTotal}
                 </Typography>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main', fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+                <Typography
+                  variant="h4"
+                  component="p"
+                  sx={{ fontWeight: 'bold', color: 'primary.main', fontSize: { xs: '1.5rem', sm: '2rem' } }}
+                >
                   ${orderTotal.toFixed(2)}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
@@ -589,7 +615,11 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                         p: { xs: 1.5, sm: 2 },
                       }}
                     >
-                      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1, fontSize: { xs: '1.25rem', sm: '2rem' } }}>
+                      <Typography
+                        variant="h4"
+                        component="h2"
+                        sx={{ fontWeight: 'bold', mb: 1, fontSize: { xs: '1.25rem', sm: '2rem' } }}
+                      >
                         {item.title}
                       </Typography>
                       <Typography variant="body1" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
@@ -604,6 +634,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             {/* Navigation Buttons */}
             <IconButton
               onClick={handlePrevSlide}
+              aria-label="Previous promotion"
               size={isMobile ? "small" : (inDashboard ? "medium" : (showCart ? "small" : "medium"))}
               sx={{
                 position: 'absolute',
@@ -622,6 +653,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             </IconButton>
             <IconButton
               onClick={handleNextSlide}
+              aria-label="Next promotion"
               size={isMobile ? "small" : (inDashboard ? "medium" : (showCart ? "small" : "medium"))}
               sx={{
                 position: 'absolute',
@@ -655,6 +687,10 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                 <Box
                   key={index}
                   onClick={() => setCurrentSlide(index)}
+                  component="button"
+                  type="button"
+                  aria-label={`Go to slide ${index + 1}`}
+                  aria-pressed={currentSlide === index}
                   sx={{
                     width: { xs: 8, sm: 12 },
                     height: { xs: 8, sm: 12 },
@@ -702,12 +738,15 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             </Tabs>
 
             <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 150 }, mr: { xs: 0, sm: 2 }, mt: 2 }}>
-              <InputLabel>Sort By</InputLabel>
+              <InputLabel id="sort-by-select-label">Sort By</InputLabel>
               <Select
+                id="sort-by-select"
+                labelId="sort-by-select-label"
                 value={sortBy}
                 label="Sort By"
                 onChange={(e) => setSortBy(e.target.value)}
                 onFocus={() => speak("Sort by")}
+                aria-label="Sort By"
               >
                 <MuiMenuItem value="default" onFocus={() => speak("Default")}>Default</MuiMenuItem>
                 <MuiMenuItem value="price-low" onFocus={() => speak("Price: Low to High")}>Price: Low to High</MuiMenuItem>
@@ -752,7 +791,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
             {/* Empty State */}
             {filteredMenuItems.length === 0 && (
               <Box sx={{ textAlign: 'center', py: 8 }}>
-                <Typography variant="h5" color="text.secondary">
+                <Typography variant="h5" component="p" color="text.secondary">
                   No items found in this category
                 </Typography>
               </Box>
