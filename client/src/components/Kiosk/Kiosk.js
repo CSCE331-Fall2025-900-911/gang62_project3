@@ -40,6 +40,69 @@ const CATEGORIES = [
   { id: 'special', label: 'Specials' }
 ];
 
+const CATEGORY_TRANSLATIONS = {
+  EN: {
+    all: 'All Drinks',
+    'flavored tea': 'Flavored Tea',
+    'milk tea': 'Milk Tea',
+    coffee: 'Coffee',
+    blended: 'Blended',
+    matcha: 'Matcha',
+    fruit: 'Fruit',
+    special: 'Specials',
+  },
+  ES: {
+    all: 'Todas las bebidas',
+    'flavored tea': 'Té saborizado',
+    'milk tea': 'Té con leche',
+    coffee: 'Café',
+    blended: 'Bebidas frías',
+    matcha: 'Matcha',
+    fruit: 'Fruta',
+    special: 'Especiales',
+  },
+  FR: {
+    all: 'Toutes les boissons',
+    'flavored tea': 'Thé aromatisé',
+    'milk tea': 'Thé au lait',
+    coffee: 'Café',
+    blended: 'Boissons glacées',
+    matcha: 'Matcha',
+    fruit: 'Fruits',
+    special: 'Spéciaux',
+  },
+  DE: {
+    all: 'Alle Getränke',
+    'flavored tea': 'Aromatisierter Tee',
+    'milk tea': 'Milchtee',
+    coffee: 'Kaffee',
+    blended: 'Gemixt',
+    matcha: 'Matcha',
+    fruit: 'Frucht',
+    special: 'Spezialitäten',
+  },
+  IT: {
+    all: 'Tutte le bevande',
+    'flavored tea': 'Tè aromatizzato',
+    'milk tea': 'Tè al latte',
+    coffee: 'Caffè',
+    blended: 'Bevande frullate',
+    matcha: 'Matcha',
+    fruit: 'Frutta',
+    special: 'Speciali',
+  },
+  PT: {
+    all: 'Todas as bebidas',
+    'flavored tea': 'Chá aromatizado',
+    'milk tea': 'Chá com leite',
+    coffee: 'Café',
+    blended: 'Bebidas geladas',
+    matcha: 'Matcha',
+    fruit: 'Fruta',
+    special: 'Especiais',
+  },
+};
+
 
 // Carousel promotional items
 let carouselItems = [
@@ -627,9 +690,9 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
               {CATEGORIES.map((category) => (
                 <Tab 
                   key={category.id} 
-                  label={category.label} 
+                  label={CATEGORY_TRANSLATIONS[language]?.[category.id] || category.label} 
                   value={category.id}
-                  onFocus={() => speak(category.label)}
+                  onFocus={() => speak(CATEGORY_TRANSLATIONS[language]?.[category.id] || category.label)}
                   sx={{ 
                     fontWeight: 'medium',
                     textTransform: 'capitalize'
