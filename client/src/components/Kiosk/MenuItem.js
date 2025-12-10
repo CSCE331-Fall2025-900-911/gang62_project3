@@ -209,58 +209,68 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
         role="button"
         aria-label={`${translatedName}, price $${item.price}`}
         sx={{ 
-          height: '100%',
           display: 'flex',
           flexDirection: 'column',
           cursor: 'pointer',
-          transition: 'transform 0.2s, box-shadow 0.2s',
-          bgcolor: 'background.paper',
-          borderWidth: 2,
-          borderStyle: 'solid',
-          borderColor: 'transparent',
-          '&:hover': {
-            transform: 'scale(1.02)',
-            boxShadow: 4,
-            borderColor: 'primary.main',
-          },
-          '&:active': {
-            transform: 'scale(0.98)'
-          },
-          '&:focus': {
-            outline: 'none',
-            borderColor: 'primary.main',
-            boxShadow: (theme) => `0 0 0 4px ${theme.palette.action.focus || 'rgba(25,118,210,0.16)'}`,
-            transform: 'scale(1.02)'
-          },
-          '&:focus-visible': {
-            outline: 'none'
-          }
+          height: '300px',
+          width: '100%'
         }}
       >
-        {/* Image Section */}
-        {imageUrl && (
-          <Box
-            component="img"
-            src={imageUrl}
-            alt={translatedName}
-            sx={{
-              width: '100%',
-              height: 200,
-              objectFit: 'cover',
-              bgcolor: 'grey.200'
-            }}
-            onError={(e) => {
-              // Hide image if it fails to load
-              e.target.style.display = 'none';
-            }}
-          />
-        )}
+        {/* Image Section - Always reserve space */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            height: '180px',
+            width: '100%',
+            bgcolor: 'grey.100'
+          }}
+        >
+          {imageUrl ? (
+            <Box
+              component="img"
+              src={imageUrl}
+              alt={translatedName}
+              sx={{
+                objectFit: 'cover',
+                width: '100%',
+                height: '100%'
+              }}
+              onError={(e) => {
+                // Hide image if it fails to load, but keep the container
+                e.target.style.display = 'none';
+              }}
+            />
+          ) : null}
+        </Box>
         
-        <CardContent sx={{ flexGrow: 1, p: 3 }}>
-          <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+        <CardContent sx={{ 
+          flex: '1 1 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between'
+        }}>
+          <Typography 
+            variant="h6" 
+            component="h2" 
+            gutterBottom
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              lineHeight: 1.2
+            }}
+          >
             {translatedName}
           </Typography>
-          <Typography variant="h6" color="text.secondary" sx={{ mt: 2 }}>
+          <Typography 
+            variant="body1" 
+            color="text.secondary" 
+          >
             ${item.price.toFixed(2)}
           </Typography>
         </CardContent>
@@ -271,26 +281,19 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
         onClose={handleClose}
         maxWidth="sm"
         fullWidth
-        PaperProps={{
-          sx: {
-            bgcolor: 'background.paper',
-            backgroundImage: 'none',
-          }
-        }}
       >
-        <DialogTitle sx={{ fontWeight: 'bold', fontSize: '1.5rem', color: 'text.primary' }}>
+        <DialogTitle>
           {translatedTexts.customize} {translatedName}
         </DialogTitle>
         <DialogContent>
-          <Box sx={{ py: 2 }}>
+          <Box>
             {/* Size Selection */}
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+            <Typography variant="h6" gutterBottom>
               {translatedTexts.size}
             </Typography>
             <ButtonGroup 
               fullWidth 
               variant="outlined" 
-              sx={{ mb: 4 }}
             >
               {CustomizationData.sizes.map((option) => (
                 <Button
@@ -299,11 +302,6 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
                   color="primary"
                   onClick={() => setSize(option.value)}
                   onFocus={() => speakOption(translatedTexts.size, translatedTexts[`${option.value}Size`] || option.label)}
-                  sx={{ 
-                    py: 2,
-                    fontSize: '1rem',
-                    fontWeight: 600
-                  }}
                 >
                   {translatedTexts[`${option.value}Size`] || option.label}
                 </Button>
@@ -311,13 +309,12 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
             </ButtonGroup>
 
             {/* Temperature Selection */}
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+            <Typography variant="h6" gutterBottom>
               {translatedTexts.temperature}
             </Typography>
             <ButtonGroup 
               fullWidth 
               variant="outlined" 
-              sx={{ mb: 4 }}
             >
               {CustomizationData.temperatures.map((option) => (
                 <Button
@@ -326,11 +323,6 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
                   color="primary"
                   onClick={() => setTemperature(option.value)}
                   onFocus={() => speakOption(translatedTexts.temperature, translatedTexts[option.value] || option.label)}
-                  sx={{ 
-                    py: 2,
-                    fontSize: '1rem',
-                    fontWeight: 600
-                  }}
                 >
                   {translatedTexts[option.value] || option.label}
                 </Button>
@@ -338,13 +330,12 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
             </ButtonGroup>
 
             {/* Sugar Level Selection */}
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+            <Typography variant="h6" gutterBottom>
               {translatedTexts.sugarLevel}
             </Typography>
             <ButtonGroup 
               fullWidth 
               variant="outlined" 
-              sx={{ mb: 4 }}
             >
               {CustomizationData.sugarLevels.map((option) => (
                 <Button
@@ -353,11 +344,6 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
                   color="primary"
                   onClick={() => setSugarLevel(option.value)}
                   onFocus={() => speakOption(translatedTexts.sugarLevel, translatedTexts[option.value] || option.label)}
-                  sx={{ 
-                    py: 2,
-                    fontSize: '1rem',
-                    fontWeight: 600
-                  }}
                 >
                   {translatedTexts[option.value] || option.label}
                 </Button>
@@ -367,13 +353,12 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
             {/* Ice Level Selection - Only show if cold */}
             {temperature === 'cold' && (
               <>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+                <Typography variant="h6" gutterBottom>
                   {translatedTexts.iceLevel}
                 </Typography>
                 <ButtonGroup 
                   fullWidth 
                   variant="outlined"
-                  sx={{ mb: 4 }}
                 >
                   {CustomizationData.iceLevels.map((option) => (
                     <Button
@@ -382,11 +367,6 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
                       color="primary"
                       onClick={() => setIceLevel(option.value)}
                       onFocus={() => speakOption(translatedTexts.iceLevel, translatedTexts[option.value] || option.label)}
-                      sx={{ 
-                        py: 2,
-                        fontSize: '1rem',
-                        fontWeight: 600
-                      }}
                     >
                       {translatedTexts[option.value] || option.label}
                     </Button>
@@ -396,10 +376,10 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
             )}
 
             {/* Toppings Selection */}
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+            <Typography variant="h6" gutterBottom>
               {translatedTexts.toppings}
             </Typography>
-            <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               {CustomizationData.toppings.map((topping) => {
                 const state = toppingState[topping.key];
                 if (!state) return null; // Safety check
@@ -411,11 +391,6 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
                     onClick={() => state.setter(!state.value)}
                     onFocus={() => speakOption(translatedTexts.toppings, translatedTexts[topping.key] || topping.label)}
                     fullWidth
-                    sx={{ 
-                      py: 2,
-                      fontSize: '1rem',
-                      fontWeight: 600
-                    }}
                   >
                     {translatedTexts[topping.key] || topping.label} {state.value ? '✓' : ''}
                   </Button>
@@ -424,40 +399,37 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
             </Box>
 
             {/* Quantity Selection */}
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+            <Typography variant="h6" gutterBottom>
               {translatedTexts.quantity}
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
               <Button
                 variant="outlined"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 onFocus={() => speakOption(translatedTexts.quantity, "decrease")}
-                sx={{ minWidth: '50px', fontSize: '1.5rem' }}
               >
                 -
               </Button>
-              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+              <Typography variant="h5">
                 {quantity}
               </Typography>
               <Button
                 variant="outlined"
                 onClick={() => setQuantity(quantity + 1)}
                 onFocus={() => speakOption(translatedTexts.quantity, "increase")}
-                sx={{ minWidth: '50px', fontSize: '1.5rem' }}
               >
                 +
               </Button>
             </Box>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 3, gap: 2 }}>
+        <DialogActions>
           <Button 
             onClick={handleClose}
             onFocus={() => ttsEnabled && speak && speak(translatedTexts.cancel)}
             variant="outlined"
             color="primary"
             size="large"
-            sx={{ minWidth: 120 }}
           >
             {translatedTexts.cancel}
           </Button>
@@ -467,7 +439,6 @@ function MenuItem({ item, imageUrl, onItemClick, language = 'EN', translate, tts
             variant="contained"
             color="primary"
             size="large"
-            sx={{ minWidth: 120 }}
           >
             {translatedTexts.addToOrder}
           </Button>

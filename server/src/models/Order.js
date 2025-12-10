@@ -77,14 +77,29 @@ class Order extends DatabaseConnection {
         // Calculate tax
         let tax = subtotal * TAX;
 
-        // Get current timestamp
+        // Get current timestamp in Central Time (America/Chicago)
         const now = new Date();
-        const timestamp = now.getFullYear() + '-' +
-        String(now.getMonth() + 1).padStart(2, '0') + '-' +
-        String(now.getDate()).padStart(2, '0') + ' ' +
-        String(now.getHours()).padStart(2, '0') + ':' +
-        String(now.getMinutes()).padStart(2, '0') + ':' +
-        String(now.getSeconds()).padStart(2, '0');
+        // Format date in Central Time using Intl.DateTimeFormat
+        const centralTimeFormatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/Chicago',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+        
+        const parts = centralTimeFormatter.formatToParts(now);
+        const year = parts.find(p => p.type === 'year').value;
+        const month = parts.find(p => p.type === 'month').value;
+        const day = parts.find(p => p.type === 'day').value;
+        const hour = parts.find(p => p.type === 'hour').value;
+        const minute = parts.find(p => p.type === 'minute').value;
+        const second = parts.find(p => p.type === 'second').value;
+        
+        const timestamp = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 
         // Get the id for the order
         const getOrderIdQuery = 'SELECT MAX(id) as max_id FROM orders;';

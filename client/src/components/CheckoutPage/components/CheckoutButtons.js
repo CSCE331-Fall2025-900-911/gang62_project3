@@ -24,7 +24,7 @@ export default function CheckoutButtons({
           flexDirection: { xs: 'column-reverse', sm: 'row' },
           alignItems: 'end',
           gap: 1,
-          pb: { xs: 12, sm: 0 },
+          pb: { xs: 12, sm: 4 },
           mt: { xs: 2, sm: 2 },
           flexShrink: 0,
         },

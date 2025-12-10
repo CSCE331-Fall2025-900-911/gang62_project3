@@ -11,3 +11,22 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+:root {
+  --screen-magnifier-scale: 1;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+body.screen-magnifier-active {
+  overflow-x: auto;
+}
+
+body.screen-magnifier-active #root {
+  transform-origin: top left;
+  transform: scale(var(--screen-magnifier-scale));
+  width: calc(100% / var(--screen-magnifier-scale));
+  min-height: calc(100vh / var(--screen-magnifier-scale));
+}
