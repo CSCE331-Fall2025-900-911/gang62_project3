@@ -53,6 +53,7 @@ const ADMIN_EMAILS = new Set([
     'michaelmn@tamu.edu',
     'zhangdavid275@tamu.edu',
     'coffelt.jonah@tamu.edu',
+    'reveille.bubbletea@gmail.com'
 ]);
 
 // Enable CORS for client requests (allow credentials for session cookies).
