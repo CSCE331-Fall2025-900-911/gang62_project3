@@ -370,9 +370,27 @@ app.get('/api/reports/x-report', async (req, res) => {
     try {
         const db = new DatabaseConnection();
         
-        // X Report: Sales since midnight today
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
+        // X Report: Sales since midnight today in Central Time
+        const now = new Date();
+        // Get today's date in Central Time
+        const centralTimeFormatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'America/Chicago',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+        
+        const parts = centralTimeFormatter.formatToParts(now);
+        const year = parts.find(p => p.type === 'year').value;
+        const month = parts.find(p => p.type === 'month').value;
+        const day = parts.find(p => p.type === 'day').value;
+        
+        // Create timestamp string for midnight today in Central Time
+        const todayStart = `${year}-${month}-${day} 00:00:00`;
         
         // 1. Revenue, Tax, Order Count
         const salesQuery = {
