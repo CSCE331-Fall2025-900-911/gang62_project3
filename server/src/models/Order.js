@@ -154,12 +154,32 @@ class Order extends DatabaseConnection {
             ticketID++;
         }
 
-        // Reduce inventory item id 11 by the number of items in the order
-        const inventoryUpdateQuery = {
-            text: `UPDATE inventory SET stock = stock - $1 WHERE id = 11;`,
-            values: [this.orderItems.length]
-        };
-        await this.runQuery(inventoryUpdateQuery);
+        // // Reduce inventory item id 11 by the number of items in the order
+        // const cupUpdateQuery = {
+        //     text: `UPDATE inventory SET stock = stock - $1 WHERE id = 11;`,
+        //     values: [this.orderItems.length]
+        // };
+        // await this.runQuery(cupUpdateQuery);
+
+        // Decrease inventory for all ingredients used in the order
+        // For each menu item in the order, get its ingredients and decrease inventory
+        for (const item of this.orderItems) {
+            // Get all ingredients for this menu item
+            const ingredientsQuery = {
+                text: `SELECT ingredient_id FROM ingredient_menu_item WHERE menu_item_id = $1;`,
+                values: [item.getID()]
+            };
+            const ingredients = await this.runQuery(ingredientsQuery);
+
+            // Decrease inventory stock by 1 for each ingredient used
+            for (const ingredient of ingredients) {
+                const inventoryUpdateQuery = {
+                    text: `UPDATE inventory SET stock = stock - 1 WHERE ingredient_id = $1;`,
+                    values: [ingredient.ingredient_id]
+                };
+                await this.runQuery(inventoryUpdateQuery);
+            }
+        }
     }
 }
 
