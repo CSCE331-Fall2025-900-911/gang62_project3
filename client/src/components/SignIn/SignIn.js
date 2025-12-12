@@ -10,6 +10,9 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
 import { useNavigate } from 'react-router-dom';
 import ForgotPassword from './ForgotPassword';
 import AppTheme from '../../shared-theme/AppTheme';
@@ -62,6 +65,43 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
+const languages = [
+  { code: 'EN', name: 'English' },
+  { code: 'ES', name: 'Español' },
+  { code: 'FR', name: 'Français' },
+  { code: 'DE', name: 'Deutsch' },
+  { code: 'IT', name: 'Italiano' },
+  { code: 'PT', name: 'Português' },
+  { code: 'JA', name: '日本語' },
+  { code: 'ZH', name: '中文' },
+];
+
+function getInitialLanguage() {
+  try {
+    return localStorage.getItem('language') || 'EN';
+  } catch (e) {
+    return 'EN';
+  }
+}
+
+const EN_TRANSLATIONS = {
+  signInTitle: 'Sign in',
+  usernameLabel: 'Username',
+  passwordLabel: 'Password',
+  usernamePlaceholder: 'username',
+  passwordPlaceholder: 'password',
+  signInButton: 'Sign in',
+  languageLabel: 'Language',
+  toggleKeyboardShow: 'Show on-screen keyboard',
+  toggleKeyboardHide: 'Hide on-screen keyboard',
+  or: 'or',
+  signInWithGoogle: 'Sign in with Google',
+  continueAsGuest: 'Continue as guest',
+  usernameRequired: 'Please enter a username.',
+  passwordTooShort: 'Password must be at least 5 characters long.',
+  invalidCredentials: 'Invalid username or password',
+};
+
 export default function SignIn({ onLogin, ...props }) {
   const navigate = useNavigate();
   const [usernameError, setUsernameError] = React.useState(false);
@@ -70,6 +110,53 @@ export default function SignIn({ onLogin, ...props }) {
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
   const [showKeyboard, setShowKeyboard] = React.useState(false);
+  const [language, setLanguage] = React.useState(getInitialLanguage);
+  const translationsRef = React.useRef({});
+  const [translatedTexts, setTranslatedTexts] = React.useState(EN_TRANSLATIONS);
+
+  React.useEffect(() => {
+    translationsRef.current = {};
+  }, [language]);
+
+  const translate = React.useCallback(
+    async (text) => {
+      if (language === 'EN' || !text) return text;
+      if (translationsRef.current[text]) return translationsRef.current[text];
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/translate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, targetLang: language }),
+        });
+        const data = await response.json();
+        const translated = data.translatedText || text;
+        translationsRef.current[text] = translated;
+        return translated;
+      } catch (err) {
+        return text;
+      }
+    },
+    [language]
+  );
+
+  React.useEffect(() => {
+    const updateTranslations = async () => {
+      if (language === 'EN') {
+        setTranslatedTexts(EN_TRANSLATIONS);
+        return;
+      }
+
+      const texts = { ...EN_TRANSLATIONS };
+      const translated = {};
+      for (const [key, value] of Object.entries(texts)) {
+        translated[key] = await translate(value);
+      }
+      setTranslatedTexts(translated);
+    };
+
+    updateTranslations();
+  }, [language, translate]);
 
 
   const handleClose = () => {
@@ -131,14 +218,45 @@ export default function SignIn({ onLogin, ...props }) {
       navigate('/cashier');
     } else {
       setUsernameError(true);
-      setUsernameErrorMessage('Invalid username or password');
+      setUsernameErrorMessage(translatedTexts.invalidCredentials);
       setPasswordError(true);
-      setPasswordErrorMessage('Invalid username or password');
+      setPasswordErrorMessage(translatedTexts.invalidCredentials);
     }
   };
 
   const handleGoogleSignIn = () => {
     window.location.href = `${API_BASE_URL}/api/auth/google`;
+  };
+
+  const handleContinueAsGuest = async () => {
+    // clear any prior auth state so a previous admin login doesn't stick for guests.
+    try {
+      localStorage.removeItem('token');
+    } catch (e) {
+      // lol nah
+    }
+
+    // clear server session if present.
+    try {
+      await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (e) {
+      // lol nah
+    }
+
+    if (onLogin) {
+      onLogin({
+        displayName: 'Guest',
+        email: null,
+        photo: null,
+        role: 'guest',
+        isAdmin: false,
+      });
+    }
+
+    navigate('/kiosk');
   };
 
   const validateInputs = () => {
@@ -149,7 +267,7 @@ export default function SignIn({ onLogin, ...props }) {
 
     if (!username.value) {
       setUsernameError(true);
-      setUsernameErrorMessage('Please enter a username.');
+      setUsernameErrorMessage(translatedTexts.usernameRequired);
       isValid = false;
     } else {
       setUsernameError(false);
@@ -158,7 +276,7 @@ export default function SignIn({ onLogin, ...props }) {
 
     if (!password.value || password.value.length < 5) {
       setPasswordError(true);
-      setPasswordErrorMessage('Password must be at least 5 characters long.');
+      setPasswordErrorMessage(translatedTexts.passwordTooShort);
       isValid = false;
     } else {
       setPasswordError(false);
@@ -181,6 +299,7 @@ export default function SignIn({ onLogin, ...props }) {
         <ColorModeSelect
           sx={{ position: 'fixed', top: '1rem', right: '1rem' }}
           aria-label="Color mode"
+          translate={translate}
         />
         <Card variant="outlined">
           <Typography
@@ -189,8 +308,43 @@ export default function SignIn({ onLogin, ...props }) {
             id="sign-in-heading"
             sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
           >
-            Sign in
+            {translatedTexts.signInTitle}
           </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              mt: 1,
+              mb: 1,
+            }}
+          >
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel id="language-select-label">{translatedTexts.languageLabel}</InputLabel>
+              <Select
+                id="language-select"
+                labelId="language-select-label"
+                value={language}
+                label={translatedTexts.languageLabel}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setLanguage(value);
+                  try {
+                    localStorage.setItem('language', value);
+                    window.dispatchEvent(new CustomEvent('app-language-changed', { detail: value }));
+                  } catch (err) {
+                    // ignore storage errors
+                  }
+                }}
+                aria-label={translatedTexts.languageLabel}
+              >
+                {languages.map((lang) => (
+                  <MenuItem key={lang.code} value={lang.code}>
+                    {lang.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
           <Box
             component="form"
             onSubmit={handleSubmit}
@@ -203,14 +357,14 @@ export default function SignIn({ onLogin, ...props }) {
             }}
           >
             <FormControl>
-              <FormLabel htmlFor="username">Username</FormLabel>
+              <FormLabel htmlFor="username">{translatedTexts.usernameLabel}</FormLabel>
               <TextField
                 error={usernameError}
                 helperText={usernameErrorMessage}
                 id="username"
                 type="text"
                 name="username"
-                placeholder="username"
+                placeholder={translatedTexts.usernamePlaceholder}
                 autoComplete="username"
                 autoFocus
                 required
@@ -220,12 +374,12 @@ export default function SignIn({ onLogin, ...props }) {
               />
             </FormControl>
             <FormControl>
-              <FormLabel htmlFor="password">Password</FormLabel>
+              <FormLabel htmlFor="password">{translatedTexts.passwordLabel}</FormLabel>
               <TextField
                 error={passwordError}
                 helperText={passwordErrorMessage}
                 name="password"
-                placeholder="••••••"
+                placeholder={translatedTexts.passwordPlaceholder}
                 type="password"
                 id="password"
                 autoComplete="current-password"
@@ -243,10 +397,18 @@ export default function SignIn({ onLogin, ...props }) {
               variant="contained"
               onClick={validateInputs}
             >
-              Sign in
+              {translatedTexts.signInButton}
             </Button>
-            <Button variant={showKeyboard ? 'contained' : 'outlined'} size="small" onClick={() => setShowKeyboard((v) => !v)} aria-pressed={showKeyboard} aria-label="Toggle on-screen keyboard">
-              {showKeyboard ? 'Hide on-screen keyboard' : 'Show on-screen keyboard'}
+            <Button
+              variant={showKeyboard ? 'contained' : 'outlined'}
+              size="small"
+              onClick={() => setShowKeyboard((v) => !v)}
+              aria-pressed={showKeyboard}
+              aria-label="Toggle on-screen keyboard"
+            >
+              {showKeyboard
+                ? translatedTexts.toggleKeyboardHide
+                : translatedTexts.toggleKeyboardShow}
             </Button>
             </Box>
           {showKeyboard && (
@@ -254,7 +416,7 @@ export default function SignIn({ onLogin, ...props }) {
               <OnScreenKeyboard sx={{ width: '100%' }} />
             </Box>
           )}
-          <Divider>or</Divider>
+          <Divider>{translatedTexts.or}</Divider>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Button
               fullWidth
@@ -262,15 +424,15 @@ export default function SignIn({ onLogin, ...props }) {
               onClick={handleGoogleSignIn}
               startIcon={<GoogleIcon />}
             >
-              Sign in with Google
+              {translatedTexts.signInWithGoogle}
             </Button>
       
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => navigate('/kiosk')}
+              onClick={handleContinueAsGuest}
             >
-              Continue as guest
+              {translatedTexts.continueAsGuest}
             </Button>
           </Box>
         </Card>

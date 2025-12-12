@@ -2,7 +2,16 @@ import AddressForm from '../AddressForm';
 import PaymentForm from '../PaymentForm';
 import Review from '../Review';
 
-export function getStepContent(step, orderItems, orderTotal, formData, extrasState, ttsEnabled) {
+export function getStepContent(
+  step,
+  orderItems,
+  orderTotal,
+  formData,
+  extrasState,
+  ttsEnabled,
+  language,
+  translate
+) {
   switch (step) {
     case 0:
       return (
@@ -14,6 +23,8 @@ export function getStepContent(step, orderItems, orderTotal, formData, extrasSta
           phoneNumber={formData.phoneNumber}
           setPhoneNumber={formData.setPhoneNumber}
           ttsEnabled={ttsEnabled}
+          language={language}
+          translate={translate}
         />
       );
     case 1:
@@ -30,6 +41,8 @@ export function getStepContent(step, orderItems, orderTotal, formData, extrasSta
           cardName={formData.cardName}
           setCardName={formData.setCardName}
           ttsEnabled={ttsEnabled}
+          language={language}
+          translate={translate}
         />
       );
     case 2:
@@ -47,6 +60,8 @@ export function getStepContent(step, orderItems, orderTotal, formData, extrasSta
           extras={extrasState.extras}
           setExtras={extrasState.setExtras}
           ttsEnabled={ttsEnabled}
+          language={language}
+          translate={translate}
         />
       );
     default:
