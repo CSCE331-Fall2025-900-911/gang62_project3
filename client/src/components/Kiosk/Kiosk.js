@@ -41,7 +41,7 @@ let carouselItems = [
   {
     id: 1,
     title: 'Pokemon Legends Drinks',
-    image: 'https://i.imgur.com/m5NSorh.jpeg',
+    image: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.etsystatic.com%2F14976313%2Fr%2Fil%2Fb7b645%2F3277681600%2Fil_fullxfull.3277681600_fble.jpg&f=1&nofb=1&ipt=c9bea5f1d26b64857bba79794a7027696279dedf105ab9c2f724e660c2a01d61',
     description: ''
   },
   {
