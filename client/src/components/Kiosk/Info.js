@@ -63,7 +63,14 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit, language = 'EN', 
 
       const translated = {};
       for (const [key, value] of Object.entries(EN_TEXTS)) {
-        translated[key] = await translate(value);
+        // "Total" often comes back unchanged from translation services (e.g., ES -> "Total"),
+        // which looks like it didn't translate. Use a more explicit seed text while
+        // keeping the English UI label as "Total".
+        if (key === 'totalLabel') {
+          translated[key] = await translate('Order total');
+        } else {
+          translated[key] = await translate(value);
+        }
       }
       if (!cancelled) setTexts(translated);
     };
