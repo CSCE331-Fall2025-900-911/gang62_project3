@@ -13,9 +13,7 @@ export default function CheckoutButtons({
   speak,
   translate,
 }) {
-  if (activeStep === STEPS.length) {
-    return null;
-  }
+  const isComplete = activeStep === STEPS.length;
 
   const [backText, setBackText] = React.useState('Previous');
   const [nextText, setNextText] = React.useState('Next');
@@ -46,6 +44,10 @@ export default function CheckoutButtons({
 
     updateTexts();
   }, [translate]);
+
+  if (isComplete) {
+    return null;
+  }
 
   return (
     <Box
