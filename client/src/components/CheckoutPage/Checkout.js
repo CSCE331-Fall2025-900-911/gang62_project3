@@ -235,6 +235,7 @@ export default function Checkout({
     setLanguage(value);
     try {
       localStorage.setItem('language', value);
+      window.dispatchEvent(new CustomEvent('app-language-changed', { detail: value }));
     } catch (e) {
       // ignore storage errors
     }

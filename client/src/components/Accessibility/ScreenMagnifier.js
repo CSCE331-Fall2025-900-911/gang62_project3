@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -15,15 +15,110 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
 const SCALE_LEVELS = [1, 1.25, 1.5, 1.75, 2];
 const DEFAULT_ACTIVE_INDEX = 1; // 125%
+
+const EN_TEXTS = {
+  title: 'Screen magnifier',
+  tooltipTitle: 'Screen magnifier',
+  magnifierOn: 'Magnifier on',
+  magnifierOff: 'Magnifier off',
+  description: 'Applies scaled view across the selected interface',
+  ariaDecreaseZoom: 'Decrease zoom',
+  ariaResetZoom: 'Reset zoom',
+  ariaIncreaseZoom: 'Increase zoom',
+  ariaToggleMagnifier: 'Toggle screen magnifier',
+  ariaOpenControls: 'Open screen magnifier controls',
+};
+
+function getInitialLanguage() {
+  try {
+    return localStorage.getItem('language') || 'EN';
+  } catch (e) {
+    return 'EN';
+  }
+}
 
 function ScreenMagnifier() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [scaleIndex, setScaleIndex] = useState(0);
+  const [language, setLanguage] = useState(getInitialLanguage);
+  const translationsRef = useRef({});
+  const [texts, setTexts] = useState(EN_TEXTS);
 
   const isEnabled = scaleIndex > 0;
   const currentScale = useMemo(() => SCALE_LEVELS[scaleIndex], [scaleIndex]);
+
+  useEffect(() => {
+    translationsRef.current = {};
+  }, [language]);
+
+  const translate = useCallback(
+    async (text) => {
+      if (language === 'EN' || !text) return text;
+      if (translationsRef.current[text]) return translationsRef.current[text];
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/translate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, targetLang: language }),
+        });
+        const data = await response.json();
+        const translated = data.translatedText || text;
+        translationsRef.current[text] = translated;
+        return translated;
+      } catch (err) {
+        return text;
+      }
+    },
+    [language],
+  );
+
+  // Keep in sync with language selector (same-tab + cross-tab)
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e?.key !== 'language') return;
+      setLanguage(e.newValue || 'EN');
+    };
+    const handleAppLanguageChanged = (e) => {
+      const next = e?.detail;
+      if (!next) return;
+      setLanguage(String(next));
+    };
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('app-language-changed', handleAppLanguageChanged);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('app-language-changed', handleAppLanguageChanged);
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const updateTexts = async () => {
+      if (language === 'EN') {
+        if (!cancelled) setTexts(EN_TEXTS);
+        return;
+      }
+
+      const translated = {};
+      for (const [key, value] of Object.entries(EN_TEXTS)) {
+        translated[key] = await translate(value);
+      }
+      if (!cancelled) setTexts(translated);
+    };
+
+    updateTexts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [language, translate]);
 
   useEffect(() => {
     const appliedScale = isEnabled ? currentScale : 1;
@@ -91,7 +186,7 @@ function ScreenMagnifier() {
           <Stack spacing={1.5}>
             <Box>
               <Typography variant="subtitle2" color="text.secondary">
-                Screen magnifier
+                {texts.title}
               </Typography>
               <Typography variant="h5" sx={{ fontWeight: 600 }}>
                 {Math.round(currentScale * 100)}%
@@ -100,7 +195,7 @@ function ScreenMagnifier() {
 
             <Stack direction="row" alignItems="center" spacing={1} justifyContent="center">
               <IconButton
-                aria-label="Decrease zoom"
+                aria-label={texts.ariaDecreaseZoom}
                 onClick={decreaseScale}
                 disabled={!isEnabled}
                 size="small"
@@ -108,7 +203,7 @@ function ScreenMagnifier() {
                 <RemoveIcon />
               </IconButton>
               <IconButton
-                aria-label="Reset zoom"
+                aria-label={texts.ariaResetZoom}
                 onClick={resetScale}
                 disabled={!isEnabled}
                 size="small"
@@ -116,7 +211,7 @@ function ScreenMagnifier() {
                 <RestartAltIcon />
               </IconButton>
               <IconButton
-                aria-label="Increase zoom"
+                aria-label={texts.ariaIncreaseZoom}
                 onClick={increaseScale}
                 size="small"
               >
@@ -129,16 +224,16 @@ function ScreenMagnifier() {
             <Stack direction="row" alignItems="center" justifyContent="space-between">
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  Magnifier {isEnabled ? 'on' : 'off'}
+                  {isEnabled ? texts.magnifierOn : texts.magnifierOff}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Applies scaled view across the selected interface
+                  {texts.description}
                 </Typography>
               </Box>
               <Switch
                 checked={isEnabled}
                 onChange={toggleEnable}
-                inputProps={{ 'aria-label': 'Toggle screen magnifier' }}
+                inputProps={{ 'aria-label': texts.ariaToggleMagnifier }}
                 color="primary"
               />
             </Stack>
@@ -146,9 +241,9 @@ function ScreenMagnifier() {
         </Paper>
       </Collapse>
 
-      <Tooltip title="Screen magnifier" placement="left">
+      <Tooltip title={texts.tooltipTitle} placement="left">
         <Fab
-          aria-label="Open screen magnifier controls"
+          aria-label={texts.ariaOpenControls}
           onClick={handleFabClick}
           sx={{
             bgcolor: '#1976d2',

@@ -330,6 +330,7 @@ export default function SignIn({ onLogin, ...props }) {
                   setLanguage(value);
                   try {
                     localStorage.setItem('language', value);
+                    window.dispatchEvent(new CustomEvent('app-language-changed', { detail: value }));
                   } catch (err) {
                     // ignore storage errors
                   }
