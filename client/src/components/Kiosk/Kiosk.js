@@ -128,6 +128,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
     checkout: 'Checkout',
     loading: 'Loading menu...',
     error: 'Error:',
+    languageLabel: 'Language',
     sortBy: 'Sort By',
     sortDefault: 'Default',
     sortPriceLow: 'Price: Low to High',
@@ -146,6 +147,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
           checkout: 'Checkout',
           loading: 'Loading menu...',
           error: 'Error:',
+          languageLabel: 'Language',
           sortBy: 'Sort By',
           sortDefault: 'Default',
           sortPriceLow: 'Price: Low to High',
@@ -163,6 +165,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
         checkout: 'Checkout',
         loading: 'Loading menu...',
         error: 'Error:',
+        languageLabel: 'Language',
         sortBy: 'Sort By',
         sortDefault: 'Default',
         sortPriceLow: 'Price: Low to High',
@@ -512,14 +515,14 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
               >
                 {ttsEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
               </IconButton>
-              <ColorModeIconDropdown />
+              <ColorModeIconDropdown translate={translate} />
               <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 120 } }}>
-                <InputLabel id="language-select-label">Language</InputLabel>
+                <InputLabel id="language-select-label">{translatedTexts.languageLabel}</InputLabel>
                 <Select
                   id="language-select"
                   labelId="language-select-label"
                   value={language}
-                  label="Language"
+                  label={translatedTexts.languageLabel}
                   onChange={(e) => {
                     const value = e.target.value;
                     setLanguage(value);
@@ -529,8 +532,8 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                       // ignore storage errors
                     }
                   }}
-                  onFocus={() => speak("Language")}
-                  aria-label="Language"
+                  onFocus={() => speak(translatedTexts.languageLabel)}
+                  aria-label={translatedTexts.languageLabel}
                 >
                   {languages.map((lang) => (
                     <MuiMenuItem

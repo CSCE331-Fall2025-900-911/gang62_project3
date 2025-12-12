@@ -91,6 +91,7 @@ const EN_TRANSLATIONS = {
   usernamePlaceholder: 'username',
   passwordPlaceholder: 'password',
   signInButton: 'Sign in',
+  languageLabel: 'Language',
   toggleKeyboardShow: 'Show on-screen keyboard',
   toggleKeyboardHide: 'Hide on-screen keyboard',
   or: 'or',
@@ -267,6 +268,7 @@ export default function SignIn({ onLogin, ...props }) {
         <ColorModeSelect
           sx={{ position: 'fixed', top: '1rem', right: '1rem' }}
           aria-label="Color mode"
+          translate={translate}
         />
         <Card variant="outlined">
           <Typography
@@ -286,12 +288,12 @@ export default function SignIn({ onLogin, ...props }) {
             }}
           >
             <FormControl size="small" sx={{ minWidth: 140 }}>
-              <InputLabel id="language-select-label">Language</InputLabel>
+              <InputLabel id="language-select-label">{translatedTexts.languageLabel}</InputLabel>
               <Select
                 id="language-select"
                 labelId="language-select-label"
                 value={language}
-                label="Language"
+                label={translatedTexts.languageLabel}
                 onChange={(e) => {
                   const value = e.target.value;
                   setLanguage(value);
@@ -301,7 +303,7 @@ export default function SignIn({ onLogin, ...props }) {
                     // ignore storage errors
                   }
                 }}
-                aria-label="Language"
+                aria-label={translatedTexts.languageLabel}
               >
                 {languages.map((lang) => (
                   <MenuItem key={lang.code} value={lang.code}>

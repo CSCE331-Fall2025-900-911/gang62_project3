@@ -8,9 +8,17 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useColorScheme } from '@mui/material/styles';
 
-export default function ColorModeIconDropdown(props) {
+const BASE_MODE_LABELS = {
+  system: 'System',
+  light: 'Light',
+  dark: 'Dark',
+  highContrast: 'High Contrast',
+};
+
+export default function ColorModeIconDropdown({ translate, ...props }) {
   const { mode, systemMode, setMode } = useColorScheme();
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [modeLabels, setModeLabels] = React.useState(BASE_MODE_LABELS);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -22,6 +30,26 @@ export default function ColorModeIconDropdown(props) {
     setMode(targetMode);
     handleClose();
   };
+
+  React.useEffect(() => {
+    let cancelled = false;
+    const updateLabels = async () => {
+      if (!translate) {
+        setModeLabels(BASE_MODE_LABELS);
+        return;
+      }
+      const next = {};
+      for (const [key, value] of Object.entries(BASE_MODE_LABELS)) {
+        next[key] = await translate(value);
+      }
+      if (!cancelled) setModeLabels(next);
+    };
+    updateLabels();
+    return () => {
+      cancelled = true;
+    };
+  }, [translate]);
+
   if (!mode) {
     return (
       <Box
@@ -38,6 +66,7 @@ export default function ColorModeIconDropdown(props) {
       />
     );
   }
+
   const resolvedMode = systemMode || mode;
   const icon = {
     light: <LightModeIcon />,
@@ -78,16 +107,16 @@ export default function ColorModeIconDropdown(props) {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         <MenuItem selected={mode === 'system'} onClick={handleMode('system')}>
-          System
+          {modeLabels.system}
         </MenuItem>
         <MenuItem selected={mode === 'light'} onClick={handleMode('light')}>
-          Light
+          {modeLabels.light}
         </MenuItem>
         <MenuItem selected={mode === 'dark'} onClick={handleMode('dark')}>
-          Dark
+          {modeLabels.dark}
         </MenuItem>
         <MenuItem selected={mode === 'highContrast'} onClick={handleMode('highContrast')}>
-          High Contrast
+          {modeLabels.highContrast}
         </MenuItem>
       </Menu>
     </React.Fragment>

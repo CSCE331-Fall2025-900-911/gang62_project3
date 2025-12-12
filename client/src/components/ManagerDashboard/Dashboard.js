@@ -50,7 +50,7 @@ export default function Dashboard(props) {
   // Handle navigation state from Checkout page
   useEffect(() => {
     if (location.state) {
-      const { activePage: targetPage, cartOpen, orderItems, orderTotal } = location.state;
+      const { activePage: targetPage, orderItems, orderTotal } = location.state;
       if (targetPage === 'Kiosk') {
         setActivePage('Kiosk');
         // Always show side menu by default (cart closed) when returning from checkout

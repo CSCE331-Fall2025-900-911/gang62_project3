@@ -34,6 +34,7 @@ export default function CheckoutHeader({
   const [backText, setBackText] = React.useState(
     fromDashboard ? 'Back to Dashboard' : 'Back to Kiosk'
   );
+  const [languageLabel, setLanguageLabel] = React.useState('Language');
 
   React.useEffect(() => {
     const updateBackText = async () => {
@@ -47,6 +48,18 @@ export default function CheckoutHeader({
 
     updateBackText();
   }, [fromDashboard, translate]);
+
+  React.useEffect(() => {
+    const updateLanguageLabel = async () => {
+      const base = 'Language';
+      if (!translate) {
+        setLanguageLabel(base);
+        return;
+      }
+      setLanguageLabel(await translate(base));
+    };
+    updateLanguageLabel();
+  }, [translate]);
 
   const handleBack = () => {
     if (fromDashboard && dashboardType) {
@@ -67,14 +80,14 @@ export default function CheckoutHeader({
   return (
     <>
       <Box sx={{ position: 'fixed', top: '1rem', right: '1rem', display: 'flex', gap: 2 }}>
-        <ColorModeIconDropdown />
+        <ColorModeIconDropdown translate={translate} />
         <FormControl size="small" sx={{ minWidth: 140 }}>
-          <InputLabel id="checkout-language-label">Language</InputLabel>
+          <InputLabel id="checkout-language-label">{languageLabel}</InputLabel>
           <Select
             labelId="checkout-language-label"
             id="checkout-language-select"
             value={language}
-            label="Language"
+            label={languageLabel}
             onChange={(e) => setLanguage(e.target.value)}
           >
             {languages.map((lang) => (
