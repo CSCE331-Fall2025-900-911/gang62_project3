@@ -25,7 +25,6 @@ const EN_TEXTS = {
   sugarPrefix: 'Sugar:',
   icePrefix: 'Ice:',
   toppingsPrefix: 'Toppings:',
-  tempCold: 'Cold',
   sugarNA: 'N/A',
   iceNA: 'N/A',
   dialogTitle: 'Edit Item',
@@ -50,6 +49,8 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit, language = 'EN', 
   const [texts, setTexts] = React.useState(EN_TEXTS);
   const [translatedNames, setTranslatedNames] = React.useState({});
   const nameTranslationsRef = React.useRef({});
+  const [translatedOptionLabels, setTranslatedOptionLabels] = React.useState({});
+  const optionTranslationsRef = React.useRef({});
 
   React.useEffect(() => {
     let cancelled = false;
@@ -107,6 +108,57 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit, language = 'EN', 
     };
   }, [orderItems, language, translate]);
 
+  // Translate option labels (size/sugar/ice/temp/toppings) shown in the cart when language changes
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const updateOptionLabels = async () => {
+      if (!translate || language === 'EN') {
+        optionTranslationsRef.current = {};
+        setTranslatedOptionLabels({});
+        return;
+      }
+
+      const labelSet = new Set();
+
+      // Ensure the common option labels are translated even if not currently selected.
+      [
+        ...CustomizationData.sizes.map((o) => o.label),
+        ...CustomizationData.sugarLevels.map((o) => o.label),
+        ...CustomizationData.iceLevels.map((o) => o.label),
+        ...CustomizationData.temperatures.map((o) => o.label),
+        ...CustomizationData.toppings.map((o) => o.label),
+        'No ice',
+      ].forEach((label) => labelSet.add(label));
+
+      // Also translate any toppings strings already present in existing items.
+      orderItems.forEach((item) => {
+        if (Array.isArray(item.toppings)) {
+          item.toppings.forEach((t) => t && labelSet.add(String(t)));
+        }
+      });
+
+      const currentMap = { ...optionTranslationsRef.current };
+      const labels = Array.from(labelSet);
+      await Promise.all(
+        labels.map(async (label) => {
+          if (!label) return;
+          if (!currentMap[label]) currentMap[label] = await translate(label);
+        }),
+      );
+
+      if (cancelled) return;
+      optionTranslationsRef.current = currentMap;
+      setTranslatedOptionLabels(currentMap);
+    };
+
+    updateOptionLabels();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [orderItems, language, translate]);
+
   const handleEditClick = (index, item) => {
     setEditingIndex(index);
     setEditingSize(item.size || 'medium');
@@ -138,13 +190,37 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit, language = 'EN', 
     setEditingIndex(null);
   };
 
-  const formatSize = (size) => {
-    if (!size) return 'Medium';
-    const lower = String(size).toLowerCase();
-    if (lower === 'small') return 'Small';
-    if (lower === 'large') return 'Large';
-    return 'Medium';
-  };
+  const getLabelForValue = React.useCallback((category, value) => {
+    if (!value) return '';
+    const v = String(value).toLowerCase();
+
+    if (category === 'size') {
+      const match = CustomizationData.sizes.find((o) => o.value === v);
+      return match?.label || value;
+    }
+    if (category === 'temperature') {
+      const match = CustomizationData.temperatures.find((o) => o.value === v);
+      return match?.label || value;
+    }
+    if (category === 'sugar') {
+      const match = CustomizationData.sugarLevels.find((o) => o.value === v);
+      return match?.label || value;
+    }
+    if (category === 'ice') {
+      if (v === 'no ice') return 'No ice';
+      const match = CustomizationData.iceLevels.find((o) => o.value === v);
+      return match?.label || value;
+    }
+    return value;
+  }, []);
+
+  const tLabel = React.useCallback(
+    (englishLabel) => {
+      if (!translate || language === 'EN') return englishLabel;
+      return translatedOptionLabels[englishLabel] || englishLabel;
+    },
+    [language, translate, translatedOptionLabels],
+  );
 
   return (
     <React.Fragment>
@@ -175,12 +251,22 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit, language = 'EN', 
                     : item.name
                 }
                 secondary={
-                  `${texts.sizePrefix} ${formatSize(item.size)} | ` +
-                  `${texts.tempPrefix} ${item.temperature || texts.tempCold} | ` +
-                  `${texts.sugarPrefix} ${item.sugarLevel || texts.sugarNA} | ` +
-                  `${texts.icePrefix} ${item.iceLevel || texts.iceNA}` +
+                  `${texts.sizePrefix} ${tLabel(getLabelForValue('size', item.size || 'medium'))} | ` +
+                  `${texts.tempPrefix} ${tLabel(getLabelForValue('temperature', item.temperature || 'cold'))} | ` +
+                  `${texts.sugarPrefix} ${
+                    item.sugarLevel
+                      ? tLabel(getLabelForValue('sugar', item.sugarLevel))
+                      : texts.sugarNA
+                  } | ` +
+                  `${texts.icePrefix} ${
+                    (item.temperature || 'cold') === 'hot'
+                      ? texts.iceNA
+                      : item.iceLevel
+                        ? tLabel(getLabelForValue('ice', item.iceLevel))
+                        : texts.iceNA
+                  }` +
                   (item.toppings && item.toppings.length > 0
-                    ? ` | ${texts.toppingsPrefix} ${item.toppings.join(', ')}`
+                    ? ` | ${texts.toppingsPrefix} ${item.toppings.map((t) => tLabel(String(t))).join(', ')}`
                     : '')
                 }
               />
@@ -242,7 +328,7 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit, language = 'EN', 
                   onClick={() => setEditingSize(option.value)}
                   sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
                 >
-                  {option.label}
+                  {tLabel(option.label)}
                 </Button>
               ))}
             </ButtonGroup>
@@ -260,7 +346,7 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit, language = 'EN', 
                   onClick={() => setEditingTemperature(option.value)}
                   sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
                 >
-                  {option.label}
+                  {tLabel(option.label)}
                 </Button>
               ))}
             </ButtonGroup>
@@ -278,7 +364,7 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit, language = 'EN', 
                   onClick={() => setEditingSugarLevel(option.value)}
                   sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
                 >
-                  {option.label}
+                  {tLabel(option.label)}
                 </Button>
               ))}
             </ButtonGroup>
@@ -298,7 +384,7 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit, language = 'EN', 
                       onClick={() => setEditingIceLevel(option.value)}
                       sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
                     >
-                      {option.label}
+                      {tLabel(option.label)}
                     </Button>
                   ))}
                 </ButtonGroup>
@@ -327,7 +413,7 @@ function Info({ totalPrice, orderItems = [], onDelete, onEdit, language = 'EN', 
                     fullWidth
                     sx={{ py: 2, fontSize: '1rem', fontWeight: 600 }}
                   >
-                    {topping.label} {isSelected ? '✓' : ''}
+                    {tLabel(topping.label)} {isSelected ? '✓' : ''}
                   </Button>
                 );
               })}

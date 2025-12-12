@@ -73,6 +73,8 @@ export default function OrderConfirmation({
         receiptItems={receiptItems}
         receiptSubtotal={receiptSubtotal}
         receiptExtras={receiptExtras}
+        language={language}
+        translate={translate}
       />
       <Button
         variant="contained"
