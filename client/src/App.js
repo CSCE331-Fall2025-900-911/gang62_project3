@@ -63,7 +63,10 @@ function AppContent() {
           setUser(userData);
           
           // Check if user is authenticated and is an admin
-          if (!userData || (!userData.isAdmin && userData.role !== 'admin')) {
+          if (!userData) {
+            setIsAuthorized(false);
+            setIsCashierAuthorized(false);
+          } else if (!userData.isAdmin && userData.role !== 'admin') {
             // Not an admin
             setIsAuthorized(false);
             setIsCashierAuthorized(true);
@@ -80,6 +83,7 @@ function AppContent() {
       } catch (error) {
         console.error('Failed to verify admin access:', error);
         setIsAuthorized(false);
+        setIsCashierAuthorized(false);
       } finally {
         setIsCheckingAuth(false);
       }
@@ -92,8 +96,10 @@ function AppContent() {
     setUser(localUser);
     if (localUser && (localUser.isAdmin || localUser.role === 'admin')) {
       setIsAuthorized(true);
+      setIsCashierAuthorized(true);
     } else {
       setIsAuthorized(false);
+      setIsCashierAuthorized(false);
     }
   }, []);
 
