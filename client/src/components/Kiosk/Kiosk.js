@@ -84,7 +84,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('default'); // 'default', 'price-low', 'price-high'
   const [internalShowCart, setInternalShowCart] = useState(false);
-  
+
   // Use prop if provided (dashboard mode), otherwise use internal state (standalone mode)
   const showCart = showCartProp !== undefined ? showCartProp : internalShowCart;
   const setShowCart = setShowCartProp || setInternalShowCart;
@@ -104,7 +104,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   const translate = useCallback(async (text) => {
     if (language === 'EN' || !text) return text;
     if (translationsRef.current[text]) return translationsRef.current[text];
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/translate`, {
         method: 'POST',
@@ -154,7 +154,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
         });
         return;
       }
-      
+
       const texts = {
         menu: 'Menu',
         orderTotal: 'Order Total',
@@ -169,7 +169,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
         sortPriceHigh: 'Price: High to Low',
         noItemsFound: 'No items found in this category'
       };
-      
+
       const translated = {};
       for (const [key, value] of Object.entries(texts)) {
         translated[key] = await translate(value);
@@ -178,7 +178,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
     };
     updateTranslations();
   }, [language, translate]);
-  
+
   const { temp, weather_error } = useWeather();
 
   // Update translated category labels whenever language or categories change
@@ -243,7 +243,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
       title: 'Hot Classic Black Tea',
       image: 'https://www.hungryhuy.com/wp-content/uploads/adding-boba-to-milk-tea.jpg',
       description: 'Warm up with our hot classic black tea'
-    };  
+    };
   }
   else {
     carouselItems[1] = {
@@ -289,6 +289,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
           categorySet.add(drinkType);
         }
       });
+      categorySet.delete("extras");
       const dynamicCategories = [
         { id: 'all', label: 'All Drinks' },
         ...Array.from(categorySet).map((cat) => ({
@@ -350,20 +351,20 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   };
 
   const filteredMenuItems = menuItems
-  .filter((item) => !ACCESSORY_ITEM_IDS.has(item.id))
-  .filter((item) => {
-    if (selectedCategory === 'all') return true;
-    const drinkType = (item.drink_type || '').toLowerCase().trim();
-    return drinkType === selectedCategory.toLowerCase().trim();
-  })
-  .sort((a, b) => {
-    if (sortBy === 'price-low') {
-      return a.price - b.price;
-    } else if (sortBy === 'price-high') {
-      return b.price - a.price;
-    }
-    return 0; // default order
-  });
+    .filter((item) => !ACCESSORY_ITEM_IDS.has(item.id))
+    .filter((item) => {
+      if (selectedCategory === 'all') return true;
+      const drinkType = (item.drink_type || '').toLowerCase().trim();
+      return drinkType === selectedCategory.toLowerCase().trim();
+    })
+    .sort((a, b) => {
+      if (sortBy === 'price-low') {
+        return a.price - b.price;
+      } else if (sortBy === 'price-high') {
+        return b.price - a.price;
+      }
+      return 0; // default order
+    });
 
   if (loading) {
     return (
@@ -413,7 +414,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
         {/* Cart Sidebar - Only render if NOT in dashboard mode (standalone mode) */}
         {!inDashboard && (
           <>
-              {isMobile ? (
+            {isMobile ? (
               <Drawer
                 anchor="right"
                 open={showCart}
@@ -455,17 +456,17 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
           </>
         )}
         <Box sx={{ flex: 1, p: { xs: 2, sm: 3, md: 4 }, width: '100%' }}>
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             flexDirection: { xs: 'column', md: 'row' },
-            justifyContent: 'space-between', 
-            alignItems: { xs: 'flex-start', md: 'center' }, 
+            justifyContent: 'space-between',
+            alignItems: { xs: 'flex-start', md: 'center' },
             mb: 4,
             gap: 2
           }}>
-            <Typography 
-              variant="h3" 
-              component="h1" 
+            <Typography
+              variant="h3"
+              component="h1"
               sx={{ fontWeight: 'bold', fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' } }}
             >
               {translatedTexts.menu}
@@ -485,15 +486,15 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
               )}
             </Box>
 
-            <Box sx={{ 
-              display: 'flex', 
+            <Box sx={{
+              display: 'flex',
               flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: { xs: 'flex-start', sm: 'center' }, 
+              alignItems: { xs: 'flex-start', sm: 'center' },
               gap: { xs: 1.5, sm: 2, md: 3 },
               width: { xs: '100%', md: 'auto' },
               flexWrap: 'wrap'
             }}>
-              <IconButton 
+              <IconButton
                 onClick={() => {
                   const newEnabled = !ttsEnabled;
                   setTtsEnabled(newEnabled);
@@ -502,11 +503,11 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                     const utterance = new SpeechSynthesisUtterance("Text to speech enabled");
                     window.speechSynthesis.speak(utterance);
                   }
-                }} 
+                }}
                 onFocus={() => {
                   if (ttsEnabled) speak("Disable text to speech");
                 }}
-                color="primary" 
+                color="primary"
                 aria-label={ttsEnabled ? "Disable text to speech" : "Enable text to speech"}
               >
                 {ttsEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
@@ -532,8 +533,8 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                   aria-label="Language"
                 >
                   {languages.map((lang) => (
-                    <MuiMenuItem 
-                      key={lang.code} 
+                    <MuiMenuItem
+                      key={lang.code}
                       value={lang.code}
                       onFocus={() => speak(lang.name)}
                     >
@@ -572,20 +573,20 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                 <ShoppingCartIcon />
               </IconButton>
               <Button
-                variant="contained" 
-                color="primary" 
+                variant="contained"
+                color="primary"
                 size={isMobile ? "small" : (inDashboard ? "large" : (showCart ? "medium" : "large"))}
                 onFocus={() => speak(translatedTexts.checkout)}
                 onClick={() => {
                   if (inDashboard) {
                     // In dashboard mode, pass context and current order items via state
-                    navigate('/checkout', { 
-                      state: { 
-                        fromDashboard: true, 
+                    navigate('/checkout', {
+                      state: {
+                        fromDashboard: true,
                         dashboardType: dashboardType || 'cashier',
                         orderItems: orderItems,
                         orderTotal: orderTotal
-                      } 
+                      }
                     });
                   } else {
                     navigate('/checkout', { state: { fromDashboard: false } });
@@ -619,7 +620,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
           </Box>
 
           {/* Carousel Section */}
-          <Box sx={{ position: 'relative', mb: { xs: 2, sm: 4 }, width: '100%'}}>
+          <Box sx={{ position: 'relative', mb: { xs: 2, sm: 4 }, width: '100%' }}>
             <Box
               ref={carouselRef}
               sx={{
@@ -644,8 +645,8 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                   <Card sx={{ height: '100%', position: 'relative', p: 0, overflow: 'hidden' }}>
                     <CardMedia
                       component="img"
-                            image={item.image}
-                            alt={item.title}
+                      image={item.image}
+                      alt={item.title}
                       sx={{ objectFit: 'cover', display: 'block', height: '100%', width: '100%' }}
                     />
                     <Box
@@ -753,8 +754,8 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
 
           {/* Category Tabs */}
           <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: { xs: 2, sm: 3 } }}>
-            <Tabs 
-              value={selectedCategory} 
+            <Tabs
+              value={selectedCategory}
               onChange={(e, newValue) => setSelectedCategory(newValue)}
               variant="scrollable"
               scrollButtons="auto"
@@ -768,12 +769,12 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
               }}
             >
               {categories.map((category) => (
-                <Tab 
-                  key={category.id} 
-                  label={translatedCategories[category.id] || category.label} 
+                <Tab
+                  key={category.id}
+                  label={translatedCategories[category.id] || category.label}
                   value={category.id}
                   onFocus={() => speak(translatedCategories[category.id] || category.label)}
-                  sx={{ 
+                  sx={{
                     fontWeight: 'medium',
                     textTransform: 'capitalize'
                   }}
@@ -804,30 +805,30 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
               </Select>
             </FormControl>
           </Box>
-          
+
           <Box sx={{ minHeight: { xs: '400px', sm: '600px' } }}>
             <Grid container spacing={{ xs: 2, sm: 3 }}>
               {filteredMenuItems.map((item, index) => (
-                <Grid 
-                  item 
-                  key={item.id} 
+                <Grid
+                  item
+                  key={item.id}
                   xs={6}
                   sm={4}
                   md={3}
                   lg={2}
                   xl={2}
-                  sx={{ 
+                  sx={{
                     display: 'flex',
                     justifyContent: 'center'
                   }}
                 >
                   <Fade in={true} timeout={(index % 10) * 100 + 300}>
                     <Box sx={{ height: '100%', width: '100%', maxWidth: { xs: '200px', sm: 'none' } }}>
-                      <MenuItem 
-                        item={item} 
+                      <MenuItem
+                        item={item}
                         imageUrl={item.image_url}
-                        onItemClick={handleAddToOrder} 
-                        language={language} 
+                        onItemClick={handleAddToOrder}
+                        language={language}
                         translate={translate}
                         ttsEnabled={ttsEnabled}
                         speak={speak}
