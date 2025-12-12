@@ -228,6 +228,37 @@ export default function SignIn({ onLogin, ...props }) {
     window.location.href = `${API_BASE_URL}/api/auth/google`;
   };
 
+  const handleContinueAsGuest = async () => {
+    // clear any prior auth state so a previous admin login doesn't stick for guests.
+    try {
+      localStorage.removeItem('token');
+    } catch (e) {
+      // lol nah
+    }
+
+    // clear server session if present.
+    try {
+      await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (e) {
+      // lol nah
+    }
+
+    if (onLogin) {
+      onLogin({
+        displayName: 'Guest',
+        email: null,
+        photo: null,
+        role: 'guest',
+        isAdmin: false,
+      });
+    }
+
+    navigate('/kiosk');
+  };
+
   const validateInputs = () => {
     const username = document.getElementById('username');
     const password = document.getElementById('password');
@@ -398,7 +429,7 @@ export default function SignIn({ onLogin, ...props }) {
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => navigate('/kiosk')}
+              onClick={handleContinueAsGuest}
             >
               {translatedTexts.continueAsGuest}
             </Button>
