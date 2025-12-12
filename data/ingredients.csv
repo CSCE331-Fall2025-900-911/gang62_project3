@@ -10,3 +10,6 @@ id, name, qty_per_unit
 008, honey, 1.25
 009, vanilla, 0.75
 010, green tea power, 1.5
+011, cups, 1.0
+012, straws, 1.0
+013, napkins, 1.0

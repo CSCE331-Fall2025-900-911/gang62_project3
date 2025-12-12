@@ -153,6 +153,13 @@ class Order extends DatabaseConnection {
             await this.runQuery(ticketQuery);
             ticketID++;
         }
+
+        // Reduce inventory item id 11 by the number of items in the order
+        const inventoryUpdateQuery = {
+            text: `UPDATE inventory SET stock = stock - $1 WHERE id = 11;`,
+            values: [this.orderItems.length]
+        };
+        await this.runQuery(inventoryUpdateQuery);
     }
 }
 
