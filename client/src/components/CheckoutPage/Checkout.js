@@ -20,6 +20,16 @@ import { DesktopStepper, MobileStepper } from './components/CheckoutStepper';
 import CheckoutButtons from './components/CheckoutButtons';
 import OrderConfirmation from './components/OrderConfirmation';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
+function getInitialLanguage() {
+  try {
+    return localStorage.getItem('language') || 'EN';
+  } catch (e) {
+    return 'EN';
+  }
+}
+
 export default function Checkout({ 
   orderItems: orderItemsProp = [], 
   setOrderItems: setOrderItemsProp, 
@@ -30,6 +40,96 @@ export default function Checkout({
 }) {
   const location = useLocation();
   const [activeStep, setActiveStep] = React.useState(0);
+  const [language, setLanguage] = React.useState(getInitialLanguage);
+  const translationsRef = React.useRef({});
+  const [stepLabels, setStepLabels] = React.useState(STEPS);
+
+  const translate = React.useCallback(
+    async (text) => {
+      if (language === 'EN' || !text) return text;
+      if (translationsRef.current[text]) return translationsRef.current[text];
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/translate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, targetLang: language }),
+        });
+        const data = await response.json();
+        const translated = data.translatedText || text;
+        translationsRef.current[text] = translated;
+        return translated;
+      } catch (err) {
+        return text;
+      }
+    },
+    [language]
+  );
+
+  const [translatedTexts, setTranslatedTexts] = React.useState({
+    step0Tts: 'Please enter your name and phone number.',
+    step1Tts: 'Please enter your payment details.',
+    step2Tts: 'Please review your order.',
+    emptyCartAlert: 'Your cart is empty. Please add items before placing an order.',
+    orderPlacedAlert: 'Your order has been placed! Thank you.',
+    orderPlaceFailedPrefix: 'Failed to place order:',
+    selectedProducts: 'Selected products',
+  });
+
+  React.useEffect(() => {
+    translationsRef.current = {};
+  }, [language]);
+
+  React.useEffect(() => {
+    const updateTranslations = async () => {
+      if (language === 'EN') {
+        setTranslatedTexts({
+          step0Tts: 'Please enter your name and phone number.',
+          step1Tts: 'Please enter your payment details.',
+          step2Tts: 'Please review your order.',
+          emptyCartAlert: 'Your cart is empty. Please add items before placing an order.',
+          orderPlacedAlert: 'Your order has been placed! Thank you.',
+          orderPlaceFailedPrefix: 'Failed to place order:',
+          selectedProducts: 'Selected products',
+        });
+        return;
+      }
+
+      const base = {
+        step0Tts: 'Please enter your name and phone number.',
+        step1Tts: 'Please enter your payment details.',
+        step2Tts: 'Please review your order.',
+        emptyCartAlert: 'Your cart is empty. Please add items before placing an order.',
+        orderPlacedAlert: 'Your order has been placed! Thank you.',
+        orderPlaceFailedPrefix: 'Failed to place order:',
+        selectedProducts: 'Selected products',
+      };
+
+      const translated = {};
+      for (const [key, value] of Object.entries(base)) {
+        translated[key] = await translate(value);
+      }
+      setTranslatedTexts(translated);
+    };
+
+    updateTranslations();
+  }, [language, translate]);
+
+  React.useEffect(() => {
+    const updateStepLabels = async () => {
+      if (!translate || language === 'EN') {
+        setStepLabels(STEPS);
+        return;
+      }
+      const translated = [];
+      for (const label of STEPS) {
+        translated.push(await translate(label));
+      }
+      setStepLabels(translated);
+    };
+
+    updateStepLabels();
+  }, [language, translate]);
   
   // Get navigation context from location state
   const navigationContext = location.state || { fromDashboard: false };
@@ -62,10 +162,10 @@ export default function Checkout({
 
   // TTS announcements for each step
   React.useEffect(() => {
-    if (activeStep === 0) speak("Please enter your name and phone number.");
-    else if (activeStep === 1) speak("Please enter your payment details.");
-    else if (activeStep === 2) speak("Please review your order.");
-  }, [activeStep, speak]);
+    if (activeStep === 0) speak(translatedTexts.step0Tts);
+    else if (activeStep === 1) speak(translatedTexts.step1Tts);
+    else if (activeStep === 2) speak(translatedTexts.step2Tts);
+  }, [activeStep, speak, translatedTexts]);
 
   const handleNext = async () => {
     const isLastStep = activeStep === STEPS.length - 1;
@@ -78,7 +178,7 @@ export default function Checkout({
 
     // On the final step, submit the order to the backend
     if (!effectiveOrderItems || effectiveOrderItems.length === 0) {
-      alert('Your cart is empty. Please add items before placing an order.');
+      alert(translatedTexts.emptyCartAlert);
       return;
     }
 
@@ -99,10 +199,10 @@ export default function Checkout({
         extraStraws: 0,
         napkins: 0,
       });
-      alert('Your order has been placed! Thank you.');
+      alert(translatedTexts.orderPlacedAlert);
     } catch (error) {
       console.error('Error submitting kiosk order:', error);
-      alert(`Failed to place order: ${error.message}`);
+      alert(`${translatedTexts.orderPlaceFailedPrefix} ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -130,6 +230,15 @@ export default function Checkout({
   }, [effectiveOrderItems, effectiveSetOrderTotal]);
 
   const formattedTotal = `$${effectiveOrderTotal.toFixed(2)}`;
+
+  const handleLanguageChange = (value) => {
+    setLanguage(value);
+    try {
+      localStorage.setItem('language', value);
+    } catch (e) {
+      // ignore storage errors
+    }
+  };
   
   return (
     <AppTheme {...props}>
@@ -139,6 +248,9 @@ export default function Checkout({
         dashboardType={dashboardType}
         effectiveOrderItems={effectiveOrderItems}
         effectiveOrderTotal={effectiveOrderTotal}
+        language={language}
+        setLanguage={handleLanguageChange}
+        translate={translate}
       />
 
       <Grid
@@ -184,6 +296,8 @@ export default function Checkout({
               orderItems={effectiveOrderItems}
               onDelete={handleDeleteItem}
               onEdit={handleEditItem}
+              language={language}
+              translate={translate}
             />
           </Box>
         </Grid>
@@ -219,7 +333,7 @@ export default function Checkout({
                 flexGrow: 1,
               }}
             >
-              <DesktopStepper activeStep={activeStep} />
+              <DesktopStepper activeStep={activeStep} stepLabels={stepLabels} />
             </Box>
           </Box>
           <Card sx={{ display: { xs: 'flex', md: 'none' }, width: '100%' }}>
@@ -233,7 +347,7 @@ export default function Checkout({
             >
               <div>
                 <Typography variant="subtitle2" gutterBottom>
-                  Selected products
+                  {translatedTexts.selectedProducts}
                 </Typography>
                 <Typography variant="body1">
                   {formattedTotal}
@@ -244,6 +358,8 @@ export default function Checkout({
                 orderItems={effectiveOrderItems}
                 onDelete={handleDeleteItem}
                 onEdit={handleEditItem}
+                language={language}
+                translate={translate}
               />
             </CardContent>
           </Card>
@@ -267,7 +383,7 @@ export default function Checkout({
                 minHeight: 0,
               }}
             >
-              <MobileStepper activeStep={activeStep} />
+              <MobileStepper activeStep={activeStep} stepLabels={stepLabels} />
               {activeStep === STEPS.length ? (
                 <OrderConfirmation 
                   receiptItems={receiptItems}
@@ -275,6 +391,8 @@ export default function Checkout({
                   receiptExtras={receiptExtras}
                   fromDashboard={fromDashboard}
                   dashboardType={dashboardType}
+                  language={language}
+                  translate={translate}
                 />
               ) : (
                 getStepContent(
@@ -283,7 +401,9 @@ export default function Checkout({
                   effectiveOrderTotal, 
                   formData, 
                   { extras, setExtras }, 
-                  ttsEnabled
+                  ttsEnabled,
+                  language,
+                  translate
                 )
               )}
             </Box>
@@ -293,6 +413,7 @@ export default function Checkout({
               onNext={handleNext}
               isSubmitting={isSubmitting}
               speak={speak}
+              translate={translate}
             />
           </Box>
         </Grid>

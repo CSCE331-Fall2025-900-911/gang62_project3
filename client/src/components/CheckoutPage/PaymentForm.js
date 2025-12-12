@@ -82,7 +82,75 @@ const FormGrid = styled('div')(() => ({
   flexDirection: 'column',
 }));
 
-export default function PaymentForm({ paymentType, setPaymentType, cardNumber, setCardNumber, cvv, setCvv, expirationDate, setExpirationDate, cardName, setCardName, ttsEnabled }) {
+const EN_TEXTS = {
+  cardOptionLabel: 'Card',
+  cryptoOptionLabel: 'Crypto wallet',
+  creditCardHeading: 'Credit card',
+  cardNumberLabel: 'Card number',
+  cardNumberPlaceholder: '0000 0000 0000 0000',
+  cvvLabel: 'CVV',
+  cvvPlaceholder: '123',
+  cardNameLabel: 'Name',
+  cardNamePlaceholder: 'John Smith',
+  expiryLabel: 'Expiration date',
+  expiryPlaceholder: 'MM/YY',
+  saveCardLabel: 'Remember credit card details for next time',
+  warningText: 'Your order will be processed once we receive the crypto payment.',
+  cryptoWalletHeading: 'Crypto wallet',
+  cryptoDescription: 'Please send the payment to the crypto wallet address shown below.',
+  networkLabel: 'Network:',
+  networkValue: 'Ethereum (ERC-20)',
+  walletAddressLabel: 'Wallet address:',
+  acceptedTokensLabel: 'Accepted tokens:',
+  acceptedTokensValue: 'ETH, USDT, USDC',
+  ttsCreditSelected: 'Credit card selected',
+  ttsCryptoSelected: 'Crypto wallet selected',
+  ttsCardNumber: 'Enter card number',
+  ttsCVV: 'Enter CVV',
+  ttsCardName: 'Enter name on card',
+  ttsExpiry: 'Enter expiration date',
+};
+
+export default function PaymentForm({
+  paymentType,
+  setPaymentType,
+  cardNumber,
+  setCardNumber,
+  cvv,
+  setCvv,
+  expirationDate,
+  setExpirationDate,
+  cardName,
+  setCardName,
+  ttsEnabled,
+  language = 'EN',
+  translate,
+}) {
+  const [texts, setTexts] = React.useState(EN_TEXTS);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const updateTexts = async () => {
+      if (!translate || language === 'EN') {
+        if (!cancelled) setTexts(EN_TEXTS);
+        return;
+      }
+
+      const translated = {};
+      for (const [key, value] of Object.entries(EN_TEXTS)) {
+        translated[key] = await translate(value);
+      }
+      if (!cancelled) setTexts(translated);
+    };
+
+    updateTexts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [language, translate]);
+
   const speak = React.useCallback((text) => {
     if (ttsEnabled && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -93,8 +161,8 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
 
   const handlePaymentTypeChange = (event) => {
     setPaymentType(event.target.value);
-    if (event.target.value === 'creditCard') speak("Credit card selected");
-    else if (event.target.value === 'bankTransfer') speak("Crypto wallet selected");
+    if (event.target.value === 'creditCard') speak(texts.ttsCreditSelected);
+    else if (event.target.value === 'bankTransfer') speak(texts.ttsCryptoSelected);
   };
 
   const handleCardNumberChange = (event) => {
@@ -138,7 +206,7 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
             <CardActionArea
               onClick={() => {
                 setPaymentType('creditCard');
-                speak("Credit card selected");
+                speak(texts.ttsCreditSelected);
               }}
               sx={{
                 '.MuiCardActionArea-focusHighlight': {
@@ -164,7 +232,7 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
                     },
                   ]}
                 />
-                <Typography sx={{ fontWeight: 'medium' }}>Card</Typography>
+                <Typography sx={{ fontWeight: 'medium' }}>{texts.cardOptionLabel}</Typography>
               </CardContent>
             </CardActionArea>
           </Card>
@@ -172,7 +240,7 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
             <CardActionArea
               onClick={() => {
                 setPaymentType('bankTransfer');
-                speak("Crypto wallet selected");
+                speak(texts.ttsCryptoSelected);
               }}
               sx={{
                 '.MuiCardActionArea-focusHighlight': {
@@ -198,7 +266,7 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
                     },
                   ]}
                 />
-                <Typography sx={{ fontWeight: 'medium' }}>Crypto wallet</Typography>
+                <Typography sx={{ fontWeight: 'medium' }}>{texts.cryptoOptionLabel}</Typography>
               </CardContent>
             </CardActionArea>
           </Card>
@@ -208,7 +276,7 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <PaymentContainer>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="subtitle2">Credit card</Typography>
+              <Typography variant="subtitle2">{texts.creditCardHeading}</Typography>
               <CreditCardRoundedIcon sx={{ color: 'text.secondary' }} />
             </Box>
             <SimCardRoundedIcon
@@ -228,96 +296,96 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
             >
               <FormGrid sx={{ flexGrow: 1 }}>
                 <FormLabel htmlFor="card-number" required>
-                  Card number
+                  {texts.cardNumberLabel}
                 </FormLabel>
                 <OutlinedInput
                   id="card-number"
                   autoComplete="card-number"
-                  placeholder="0000 0000 0000 0000"
+                  placeholder={texts.cardNumberPlaceholder}
                   required
                   size="small"
                   value={cardNumber}
                   onChange={handleCardNumberChange}
-                  onFocus={() => speak("Enter card number")}
+                  onFocus={() => speak(texts.ttsCardNumber)}
                 />
               </FormGrid>
               <FormGrid sx={{ maxWidth: '20%' }}>
                 <FormLabel htmlFor="cvv" required>
-                  CVV
+                  {texts.cvvLabel}
                 </FormLabel>
                 <OutlinedInput
                   id="cvv"
                   autoComplete="CVV"
-                  placeholder="123"
+                  placeholder={texts.cvvPlaceholder}
                   required
                   size="small"
                   value={cvv}
                   onChange={handleCvvChange}
-                  onFocus={() => speak("Enter CVV")}
+                  onFocus={() => speak(texts.ttsCVV)}
                 />
               </FormGrid>
             </Box>
             <Box sx={{ display: 'flex', gap: 2 }}>
               <FormGrid sx={{ flexGrow: 1 }}>
                 <FormLabel htmlFor="card-name" required>
-                  Name
+                  {texts.cardNameLabel}
                 </FormLabel>
                 <OutlinedInput
                   id="card-name"
                   autoComplete="card-name"
-                  placeholder="John Smith"
+                  placeholder={texts.cardNamePlaceholder}
                   required
                   size="small"
                   value={cardName}
                   onChange={(e) => setCardName(e.target.value)}
-                  onFocus={() => speak("Enter name on card")}
+                  onFocus={() => speak(texts.ttsCardName)}
                 />
               </FormGrid>
               <FormGrid sx={{ flexGrow: 1 }}>
                 <FormLabel htmlFor="card-expiration" required>
-                  Expiration date
+                  {texts.expiryLabel}
                 </FormLabel>
                 <OutlinedInput
                   id="card-expiration"
                   autoComplete="card-expiration"
-                  placeholder="MM/YY"
+                  placeholder={texts.expiryPlaceholder}
                   required
                   size="small"
                   value={expirationDate}
                   onChange={handleExpirationDateChange}
-                  onFocus={() => speak("Enter expiration date")}
+                  onFocus={() => speak(texts.ttsExpiry)}
                 />
               </FormGrid>
             </Box>
           </PaymentContainer>
           <FormControlLabel
             control={<Checkbox name="saveCard" />}
-            label="Remember credit card details for next time"
+            label={texts.saveCardLabel}
           />
         </Box>
       )}
       {paymentType === 'bankTransfer' && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Alert severity="warning" icon={<WarningRoundedIcon />}>
-            Your order will be processed once we receive the crypto payment.
+            {texts.warningText}
           </Alert>
           <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
-            Crypto wallet
+            {texts.cryptoWalletHeading}
           </Typography>
           <Typography variant="body1" gutterBottom>
-            Please send the payment to the crypto wallet address shown below.
+            {texts.cryptoDescription}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-              Network:
+              {texts.networkLabel}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-              Ethereum (ERC-20)
+              {texts.networkValue}
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
             <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-              Wallet address:
+              {texts.walletAddressLabel}
             </Typography>
             <Typography 
               variant="body2" 
@@ -337,10 +405,10 @@ export default function PaymentForm({ paymentType, setPaymentType, cardNumber, s
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-              Accepted tokens:
+              {texts.acceptedTokensLabel}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-              ETH, USDT, USDC
+              {texts.acceptedTokensValue}
             </Typography>
           </Box>
         </Box>

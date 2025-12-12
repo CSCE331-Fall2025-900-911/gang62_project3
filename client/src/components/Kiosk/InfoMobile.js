@@ -8,8 +8,36 @@ import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import Info from './Info';
 
-function InfoMobile({ totalPrice, orderItems = [], onDelete, onEdit }) {
+const EN_TEXTS = {
+  viewDetailsButton: 'View details',
+};
+
+function InfoMobile({ totalPrice, orderItems = [], onDelete, onEdit, language = 'EN', translate }) {
   const [open, setOpen] = React.useState(false);
+  const [texts, setTexts] = React.useState(EN_TEXTS);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const updateTexts = async () => {
+      if (!translate || language === 'EN') {
+        if (!cancelled) setTexts(EN_TEXTS);
+        return;
+      }
+
+      const translated = {};
+      for (const [key, value] of Object.entries(EN_TEXTS)) {
+        translated[key] = await translate(value);
+      }
+      if (!cancelled) setTexts(translated);
+    };
+
+    updateTexts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [language, translate]);
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -28,6 +56,8 @@ function InfoMobile({ totalPrice, orderItems = [], onDelete, onEdit }) {
         orderItems={orderItems}
         onDelete={onDelete}
         onEdit={onEdit}
+        language={language}
+        translate={translate}
       />
     </Box>
   );
@@ -39,7 +69,7 @@ function InfoMobile({ totalPrice, orderItems = [], onDelete, onEdit }) {
         endIcon={<ExpandMoreRoundedIcon />}
         onClick={toggleDrawer(true)}
       >
-        View details
+        {texts.viewDetailsButton}
       </Button>
       <Drawer
         open={open}

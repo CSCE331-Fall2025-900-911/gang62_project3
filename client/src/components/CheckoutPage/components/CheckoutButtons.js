@@ -10,11 +10,42 @@ export default function CheckoutButtons({
   onBack, 
   onNext, 
   isSubmitting,
-  speak 
+  speak,
+  translate,
 }) {
   if (activeStep === STEPS.length) {
     return null;
   }
+
+  const [backText, setBackText] = React.useState('Previous');
+  const [nextText, setNextText] = React.useState('Next');
+  const [placeOrderText, setPlaceOrderText] = React.useState('Place order');
+  const [ttsPrev, setTtsPrev] = React.useState('Go to the previous step');
+  const [ttsNext, setTtsNext] = React.useState('Go to the next step');
+  const [ttsPlaceOrder, setTtsPlaceOrder] = React.useState('Place your order');
+
+  React.useEffect(() => {
+    const updateTexts = async () => {
+      if (!translate) {
+        setBackText('Previous');
+        setNextText('Next');
+        setPlaceOrderText('Place order');
+        setTtsPrev('Go to the previous step');
+        setTtsNext('Go to the next step');
+        setTtsPlaceOrder('Place your order');
+        return;
+      }
+
+      setBackText(await translate('Previous'));
+      setNextText(await translate('Next'));
+      setPlaceOrderText(await translate('Place order'));
+      setTtsPrev(await translate('Go to the previous step'));
+      setTtsNext(await translate('Go to the next step'));
+      setTtsPlaceOrder(await translate('Place your order'));
+    };
+
+    updateTexts();
+  }, [translate]);
 
   return (
     <Box
@@ -40,10 +71,10 @@ export default function CheckoutButtons({
           startIcon={<ChevronLeftRoundedIcon />}
           onClick={onBack}
           variant="text"
-          onFocus={() => speak('Go to the previous step')}
+          onFocus={() => speak(ttsPrev)}
           sx={{ display: { xs: 'none', sm: 'flex' } }}
         >
-          Previous
+          {backText}
         </Button>
       )}
       {activeStep !== 0 && (
@@ -52,10 +83,10 @@ export default function CheckoutButtons({
           onClick={onBack}
           variant="outlined"
           fullWidth
-          onFocus={() => speak('Go to the previous step')}
+          onFocus={() => speak(ttsPrev)}
           sx={{ display: { xs: 'flex', sm: 'none' } }}
         >
-          Previous
+          {backText}
         </Button>
       )}
       <Button
@@ -64,13 +95,13 @@ export default function CheckoutButtons({
         onClick={onNext}
         onFocus={() => speak(
           activeStep === STEPS.length - 1
-            ? 'Place your order'
-            : 'Go to the next step'
+            ? ttsPlaceOrder
+            : ttsNext
         )}
         sx={{ width: { xs: '100%', sm: 'fit-content' } }}
         disabled={activeStep === STEPS.length - 1 && isSubmitting}
       >
-        {activeStep === STEPS.length - 1 ? 'Place order' : 'Next'}
+        {activeStep === STEPS.length - 1 ? placeOrderText : nextText}
       </Button>
     </Box>
   );

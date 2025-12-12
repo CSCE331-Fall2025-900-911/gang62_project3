@@ -76,6 +76,14 @@ const languages = [
   { code: 'ZH', name: '中文' },
 ];
 
+function getInitialLanguage() {
+  try {
+    return localStorage.getItem('language') || 'EN';
+  } catch (e) {
+    return 'EN';
+  }
+}
+
 const EN_TRANSLATIONS = {
   signInTitle: 'Sign in',
   usernameLabel: 'Username',
@@ -101,7 +109,7 @@ export default function SignIn({ onLogin, ...props }) {
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
   const [showKeyboard, setShowKeyboard] = React.useState(false);
-  const [language, setLanguage] = React.useState('EN');
+  const [language, setLanguage] = React.useState(getInitialLanguage);
   const translationsRef = React.useRef({});
   const [translatedTexts, setTranslatedTexts] = React.useState(EN_TRANSLATIONS);
 
@@ -284,7 +292,15 @@ export default function SignIn({ onLogin, ...props }) {
                 labelId="language-select-label"
                 value={language}
                 label="Language"
-                onChange={(e) => setLanguage(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setLanguage(value);
+                  try {
+                    localStorage.setItem('language', value);
+                  } catch (err) {
+                    // ignore storage errors
+                  }
+                }}
                 aria-label="Language"
               >
                 {languages.map((lang) => (

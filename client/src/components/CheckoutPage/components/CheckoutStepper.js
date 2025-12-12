@@ -4,14 +4,14 @@ import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';
 import { STEPS } from '../constants';
 
-export function DesktopStepper({ activeStep }) {
+export function DesktopStepper({ activeStep, stepLabels = STEPS }) {
   return (
     <Stepper
       id="desktop-stepper"
       activeStep={activeStep}
       sx={{ width: '100%', height: 40 }}
     >
-      {STEPS.map((label) => (
+      {stepLabels.map((label) => (
         <Step
           sx={{ ':first-child': { pl: 0 }, ':last-child': { pr: 0 } }}
           key={label}
@@ -23,7 +23,7 @@ export function DesktopStepper({ activeStep }) {
   );
 }
 
-export function MobileStepper({ activeStep }) {
+export function MobileStepper({ activeStep, stepLabels = STEPS }) {
   return (
     <Stepper
       id="mobile-stepper"
@@ -31,7 +31,7 @@ export function MobileStepper({ activeStep }) {
       alternativeLabel
       sx={{ display: { sm: 'flex', md: 'none' } }}
     >
-      {STEPS.map((label) => (
+      {stepLabels.map((label) => (
         <Step
           sx={{
             ':first-child': { pl: 0 },

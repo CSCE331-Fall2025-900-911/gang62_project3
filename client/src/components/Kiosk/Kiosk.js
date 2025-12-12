@@ -28,6 +28,14 @@ const languages = [
   { code: 'ZH', name: '中文' }
 ];
 
+function getInitialLanguage() {
+  try {
+    return localStorage.getItem('language') || 'EN';
+  } catch (e) {
+    return 'EN';
+  }
+}
+
 // Carousel promotional items
 let carouselItems = [
   {
@@ -66,7 +74,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [language, setLanguage] = useState('EN');
+  const [language, setLanguage] = useState(getInitialLanguage);
   const translationsRef = useRef({});
   const [categories, setCategories] = useState([{ id: 'all', label: 'All Drinks' }]);
   const [translatedCategories, setTranslatedCategories] = useState({});
@@ -405,7 +413,7 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
         {/* Cart Sidebar - Only render if NOT in dashboard mode (standalone mode) */}
         {!inDashboard && (
           <>
-            {isMobile ? (
+              {isMobile ? (
               <Drawer
                 anchor="right"
                 open={showCart}
@@ -421,12 +429,26 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                   },
                 }}
               >
-                <Info totalPrice={orderTotal} orderItems={orderItems} onDelete={handleDeleteItem} onEdit={handleEditItem} />
+                <Info
+                  totalPrice={orderTotal}
+                  orderItems={orderItems}
+                  onDelete={handleDeleteItem}
+                  onEdit={handleEditItem}
+                  language={language}
+                  translate={translate}
+                />
               </Drawer>
             ) : (
               <Collapse in={showCart} orientation="horizontal" timeout={300}>
                 <Box sx={{ width: '350px', p: 2, borderRight: 1, borderColor: 'divider', backgroundColor: 'background.paper', height: '100%' }}>
-                  <Info totalPrice={orderTotal} orderItems={orderItems} onDelete={handleDeleteItem} onEdit={handleEditItem} />
+                  <Info
+                    totalPrice={orderTotal}
+                    orderItems={orderItems}
+                    onDelete={handleDeleteItem}
+                    onEdit={handleEditItem}
+                    language={language}
+                    translate={translate}
+                  />
                 </Box>
               </Collapse>
             )}
@@ -497,7 +519,15 @@ function Kiosk({ orderItems, setOrderItems, orderTotal, setOrderTotal, user, tts
                   labelId="language-select-label"
                   value={language}
                   label="Language"
-                  onChange={(e) => setLanguage(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setLanguage(value);
+                    try {
+                      localStorage.setItem('language', value);
+                    } catch (err) {
+                      // ignore storage errors
+                    }
+                  }}
                   onFocus={() => speak("Language")}
                   aria-label="Language"
                 >
