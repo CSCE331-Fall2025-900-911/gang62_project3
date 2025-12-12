@@ -1,7 +1,7 @@
 const DatabaseConnection = require('../config/db');
 const MenuItem = require('./MenuItem')
 
-const TAX = 0.062;
+const TAX = 0.0825;
 
 /**
  * Class representing a order retrieved from the database.
