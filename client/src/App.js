@@ -19,6 +19,7 @@ function AppContent() {
   const [orderTotal, setOrderTotal] = useState(0);
   const [ttsEnabled, setTtsEnabled] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isCashierAuthorized, setIsCashierAuthorized] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
@@ -65,12 +66,15 @@ function AppContent() {
           if (!userData || (!userData.isAdmin && userData.role !== 'admin')) {
             // Not an admin
             setIsAuthorized(false);
+            setIsCashierAuthorized(true);
           } else {
             // User is admin, allow access
             setIsAuthorized(true);
+            setIsCashierAuthorized(true);
           }
         } else {
           // Not authenticated
+          setIsCashierAuthorized(false);
           setIsAuthorized(false);
         }
       } catch (error) {
@@ -150,7 +154,14 @@ function AppContent() {
         <Route
           path="/cashier"
           element={
-            <CashierDashboard user={user} />
+            isCheckingAuth ? (
+              <div>Loading...</div>
+            ) : isCashierAuthorized ? (
+              <CashierDashboard user={user} />
+            ) :
+            (
+              <Navigate to="/" replace />
+            )
           }
         />
       </Routes>
